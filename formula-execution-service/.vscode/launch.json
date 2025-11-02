@@ -1,0 +1,22 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "aws-lambda",
+            "request": "launch",
+            "name": "Debug FormulaExecution Lambda",
+            "invokeTarget": {
+                "target": "code",
+                "projectRoot": "${workspaceFolder}",
+                "lambdaHandler": "dist/index.handler"
+            },
+            "lambda": {
+                "runtime": "nodejs20.x",
+                "payload": {
+                    "path": "${workspaceFolder}/.vscode/event.json"
+                },
+                "environment": {}
+            }
+        }
+    ]
+}

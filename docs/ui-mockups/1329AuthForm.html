@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organism: AuthForm</title>
+    <style>
+        /* --- DESIGN SYSTEM FOUNDATION (Tokens) --- */
+        :root {
+            /* Color Palette */
+            --color-primary-500: #2196F3;
+            --color-primary-700: #1976D2;
+            --color-primary-800: #1565C0;
+            --color-semantic-error: #D32F2F;
+            --color-neutral-white: #FFFFFF;
+            --color-neutral-gray-50: #F8F9FA;
+            --color-neutral-gray-100: #F1F3F5;
+            --color-neutral-gray-200: #E9ECEF;
+            --color-neutral-gray-400: #CED4DA;
+            --color-neutral-gray-500: #ADB5BD;
+            --color-neutral-gray-700: #495057;
+            --color-neutral-gray-900: #212529;
+            /* Typography */
+            --font-family-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --font-size-body: 16px;
+            --font-size-small: 14px;
+            --font-size-h3: 28px;
+            /* Spacing */
+            --space-xs: 8px;
+            --space-sm: 12px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            /* Borders & Radius */
+            --border-radius: 8px;
+            --border-width: 1px;
+        }
+
+        /* --- BASE & DEMO STYLES --- */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: var(--font-family-primary);
+            background-color: var(--color-neutral-gray-100);
+            color: var(--color-neutral-gray-900);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: var(--space-xl);
+            min-height: 100vh;
+        }
+        .showcase-container {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: var(--space-xl);
+            max-width: 1400px;
+        }
+        .showcase-item {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+        }
+        .showcase-item h2 {
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--color-neutral-gray-700);
+        }
+
+        /* --- DEPENDENT COMPONENT STYLES --- */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: var(--space-xs); font-weight: 600; padding: var(--space-sm) var(--space-md); border-radius: var(--border-radius); border: var(--border-width) solid transparent; cursor: pointer; text-decoration: none; transition: all 0.2s ease-in-out; width: 100%; font-size: var(--font-size-body); min-height: 48px;
+        }
+        .btn:focus-visible { outline: 2px solid var(--color-primary-700); outline-offset: 2px; }
+        .btn--primary { background-color: var(--color-primary-700); color: var(--color-neutral-white); }
+        .btn--primary:hover { background-color: var(--color-primary-800); }
+        .btn:disabled { background-color: var(--color-neutral-gray-200); color: var(--color-neutral-gray-500); cursor: not-allowed; }
+        .btn--loading { cursor: wait; }
+
+        .link { color: var(--color-primary-700); text-decoration: none; font-weight: 500; border-radius: 4px; }
+        .link:hover { text-decoration: underline; }
+        .link:focus-visible { outline: 2px solid var(--color-primary-700); outline-offset: 2px; }
+
+        .form-group { display: flex; flex-direction: column; gap: var(--space-xs); margin-bottom: var(--space-lg); }
+        .form-group__label { font-weight: 500; color: var(--color-neutral-gray-900); cursor: pointer; }
+        .input { width: 100%; padding: 12px 16px; font-size: var(--font-size-body); border: var(--border-width) solid var(--color-neutral-gray-400); border-radius: var(--border-radius); transition: border-color 0.2s, box-shadow 0.2s; min-height: 48px; }
+        .input:focus-visible { outline: none; border-color: var(--color-primary-500); box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2); }
+        .form-group--error .input { border-color: var(--color-semantic-error); }
+        .form-group__error-text { color: var(--color-semantic-error); font-size: var(--font-size-small); margin-top: var(--space-xs); display: none; }
+        .form-group--error .form-group__error-text { display: block; }
+
+        .checkbox-group { display: flex; align-items: flex-start; gap: var(--space-sm); cursor: pointer; }
+        .checkbox__input { position: absolute; opacity: 0; width: 0; height: 0; }
+        .checkbox__control { flex-shrink: 0; margin-top: 2px; width: 20px; height: 20px; border: 2px solid var(--color-neutral-gray-400); border-radius: 4px; display: grid; place-content: center; }
+        .checkbox__control svg { width: 14px; height: 14px; color: var(--color-neutral-white); transform: scale(0); transition: transform 0.1s ease-in; }
+        .checkbox__input:checked + .checkbox__control { background-color: var(--color-primary-500); border-color: var(--color-primary-500); }
+        .checkbox__input:checked + .checkbox__control svg { transform: scale(1); }
+        .checkbox__label { user-select: none; font-size: var(--font-size-small); color: var(--color-neutral-gray-700); }
+
+        .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid var(--color-neutral-white); border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* --- ORGANISM: AuthForm --- */
+        .auth-form {
+            background-color: var(--color-neutral-white);
+            padding: var(--space-xl);
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 450px;
+            border-top: 4px solid var(--color-primary-700);
+        }
+        .auth-form__header { text-align: center; margin-bottom: var(--space-xl); }
+        .auth-form__title { font-size: var(--font-size-h3); color: var(--color-neutral-gray-900); margin: 0; }
+        .auth-form__global-error { background-color: #FDEDED; color: #5F2120; padding: var(--space-md); border-radius: var(--border-radius); margin-bottom: var(--space-lg); font-size: var(--font-size-small); font-weight: 500; text-align: center; }
+        .auth-form__fields { margin-bottom: var(--space-lg); }
+        .auth-form__options { display: flex; justify-content: flex-end; margin-bottom: var(--space-lg); font-size: var(--font-size-small); }
+        .auth-form__footer { margin-top: var(--space-xl); text-align: center; font-size: var(--font-size-small); color: var(--color-neutral-gray-700); }
+        .auth-form.is-loading fieldset { opacity: 0.6; pointer-events: none; }
+
+    </style>
+</head>
+<body>
+    <div class="showcase-container">
+        <!-- LOGIN VARIANT -->
+        <div class="showcase-item">
+            <h2>Login: Default</h2>
+            <form class="auth-form" novalidate>
+                <header class="auth-form__header">
+                    <h1 class="auth-form__title">Log In</h1>
+                </header>
+                <fieldset class="auth-form__fields">
+                    <div class="form-group">
+                        <label for="login-email-1" class="form-group__label">Email Address</label>
+                        <input type="email" id="login-email-1" class="input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-pass-1" class="form-group__label">Password</label>
+                        <input type="password" id="login-pass-1" class="input" required>
+                    </div>
+                </fieldset>
+                <div class="auth-form__options">
+                    <a href="#" class="link">Forgot Password?</a>
+                </div>
+                <button type="submit" class="btn btn--primary">Log In</button>
+                <footer class="auth-form__footer">
+                    Don't have an account? <a href="#" class="link">Register</a>
+                </footer>
+            </form>
+
+            <h2>Login: Loading</h2>
+            <form class="auth-form is-loading" novalidate>
+                <header class="auth-form__header">
+                    <h1 class="auth-form__title">Log In</h1>
+                </header>
+                <fieldset class="auth-form__fields">
+                    <div class="form-group">
+                        <label for="login-email-2" class="form-group__label">Email Address</label>
+                        <input type="email" id="login-email-2" class="input" value="user@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-pass-2" class="form-group__label">Password</label>
+                        <input type="password" id="login-pass-2" class="input" value="********" required>
+                    </div>
+                </fieldset>
+                <div class="auth-form__options">
+                    <a href="#" class="link">Forgot Password?</a>
+                </div>
+                <button type="submit" class="btn btn--primary btn--loading" disabled>
+                    <span class="spinner"></span>
+                    <span>Logging In...</span>
+                </button>
+                <footer class="auth-form__footer">
+                    Don't have an account? <a href="#" class="link">Register</a>
+                </footer>
+            </form>
+
+            <h2>Login: Error</h2>
+            <form class="auth-form has-error" novalidate>
+                <header class="auth-form__header">
+                    <h1 class="auth-form__title">Log In</h1>
+                </header>
+                <div class="auth-form__global-error" role="alert">
+                    Invalid email or password. Please try again.
+                </div>
+                <fieldset class="auth-form__fields">
+                    <div class="form-group form-group--error">
+                        <label for="login-email-3" class="form-group__label">Email Address</label>
+                        <input type="email" id="login-email-3" class="input" value="user@example.com" required aria-invalid="true">
+                    </div>
+                    <div class="form-group form-group--error">
+                        <label for="login-pass-3" class="form-group__label">Password</label>
+                        <input type="password" id="login-pass-3" class="input" required aria-invalid="true">
+                    </div>
+                </fieldset>
+                <div class="auth-form__options">
+                    <a href="#" class="link">Forgot Password?</a>
+                </div>
+                <button type="submit" class="btn btn--primary">Log In</button>
+                <footer class="auth-form__footer">
+                    Don't have an account? <a href="#" class="link">Register</a>
+                </footer>
+            </form>
+        </div>
+
+        <!-- REGISTER VARIANT -->
+        <div class="showcase-item">
+            <h2>Register: Default</h2>
+            <form class="auth-form" novalidate>
+                <header class="auth-form__header">
+                    <h1 class="auth-form__title">Create Account</h1>
+                </header>
+                <fieldset class="auth-form__fields">
+                    <div class="form-group">
+                        <label for="reg-email-1" class="form-group__label">Email Address</label>
+                        <input type="email" id="reg-email-1" class="input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-pass-1" class="form-group__label">Password</label>
+                        <input type="password" id="reg-pass-1" class="input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-pass-confirm-1" class="form-group__label">Confirm Password</label>
+                        <input type="password" id="reg-pass-confirm-1" class="input" required>
+                    </div>
+                    <div class="form-group">
+                         <label class="checkbox-group">
+                            <input type="checkbox" id="terms" class="checkbox__input" required>
+                            <span class="checkbox__control">
+                                <svg viewBox="0 0 24 24"><path fill="none" d="M0 0h24v24H0z"/><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                            </span>
+                            <span class="checkbox__label">I agree to the <a href='#' class='link'>Terms of Service</a> and <a href='#' class='link'>Privacy Policy</a>.</span>
+                        </label>
+                    </div>
+                </fieldset>
+                <button type="submit" class="btn btn--primary">Register</button>
+                <footer class="auth-form__footer">
+                    Already have an account? <a href="#" class="link">Log In</a>
+                </footer>
+            </form>
+
+            <h2>Register: Loading</h2>
+             <form class="auth-form is-loading" novalidate>
+                <header class="auth-form__header">
+                    <h1 class="auth-form__title">Create Account</h1>
+                </header>
+                <fieldset class="auth-form__fields">
+                    <div class="form-group">
+                        <label for="reg-email-2" class="form-group__label">Email Address</label>
+                        <input type="email" id="reg-email-2" class="input" value="newuser@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-pass-2" class="form-group__label">Password</label>
+                        <input type="password" id="reg-pass-2" class="input" value="********" required>
+                    </div>
+                     <div class="form-group">
+                        <label for="reg-pass-confirm-2" class="form-group__label">Confirm Password</label>
+                        <input type="password" id="reg-pass-confirm-2" class="input" value="********" required>
+                    </div>
+                    <div class="form-group">
+                         <label class="checkbox-group">
+                            <input type="checkbox" class="checkbox__input" required checked>
+                            <span class="checkbox__control">
+                                <svg viewBox="0 0 24 24"><path fill="none" d="M0 0h24v24H0z"/><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                            </span>
+                             <span class="checkbox__label">I agree to the <a href='#' class='link'>Terms of Service</a> and <a href='#' class='link'>Privacy Policy</a>.</span>
+                        </label>
+                    </div>
+                </fieldset>
+                <button type="submit" class="btn btn--primary btn--loading" disabled>
+                    <span class="spinner"></span>
+                    <span>Creating Account...</span>
+                </button>
+                <footer class="auth-form__footer">
+                   Already have an account? <a href="#" class="link">Log In</a>
+                </footer>
+            </form>
+
+            <h2>Register: Error</h2>
+             <form class="auth-form has-error" novalidate>
+                <header class="auth-form__header">
+                    <h1 class="auth-form__title">Create Account</h1>
+                </header>
+                <div class="auth-form__global-error" role="alert" style="display: none;"> <!-- Example of a global error -->
+                    An unexpected error occurred.
+                </div>
+                <fieldset class="auth-form__fields">
+                    <div class="form-group form-group--error">
+                        <label for="reg-email-3" class="form-group__label">Email Address</label>
+                        <input type="email" id="reg-email-3" class="input" value="user@example.com" required aria-invalid="true" aria-describedby="reg-email-3-error">
+                        <p id="reg-email-3-error" class="form-group__error-text">This email is already in use.</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-pass-3" class="form-group__label">Password</label>
+                        <input type="password" id="reg-pass-3" class="input" required>
+                    </div>
+                    <div class="form-group form-group--error">
+                        <label for="reg-pass-confirm-3" class="form-group__label">Confirm Password</label>
+                        <input type="password" id="reg-pass-confirm-3" class="input" required aria-invalid="true" aria-describedby="reg-pass-3-error">
+                         <p id="reg-pass-3-error" class="form-group__error-text">Passwords do not match.</p>
+                    </div>
+                    <div class="form-group">
+                         <label class="checkbox-group">
+                            <input type="checkbox" class="checkbox__input" required checked>
+                            <span class="checkbox__control">
+                                <svg viewBox="0 0 24 24"><path fill="none" d="M0 0h24v24H0z"/><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                            </span>
+                             <span class="checkbox__label">I agree to the <a href='#' class='link'>Terms of Service</a> and <a href='#' class='link'>Privacy Policy</a>.</span>
+                        </label>
+                    </div>
+                </fieldset>
+                <button type="submit" class="btn btn--primary">Register</button>
+                <footer class="auth-form__footer">
+                    Already have an account? <a href="#" class="link">Log In</a>
+                </footer>
+            </form>
+        </div>
+    </div>
+	
+	<div> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : "login"<h3>
+		<!--description--><normal> The form used for user login, containing email and password fields. </normal>
+		<!-- vrient 1 html -->
+        <form class="auth-form" novalidate>
+                <header class="auth-form__header">
+                    <h1 class="auth-form__title">Log In</h1>
+                </header>
+                <fieldset class="auth-form__fields">
+                    <div class="form-group">
+                        <label for="login-email-1" class="form-group__label">Email Address</label>
+                        <input type="email" id="login-email-1" class="input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-pass-1" class="form-group__label">Password</label>
+                        <input type="password" id="login-pass-1" class="input" required>
+                    </div>
+                </fieldset>
+                <div class="auth-form__options">
+                    <a href="#" class="link">Forgot Password?</a>
+                </div>
+                <button type="submit" class="btn btn--primary">Log In</button>
+                <footer class="auth-form__footer">
+                    Don't have an account? <a href="#" class="link">Register</a>
+                </footer>
+            </form>"     
+		
+      <div>
+	 </div>
+      <div>
+        <h3>Variant Name : "register"<h3>
+		<!--description--><normal> The form used for new user registration, containing email, password, confirm password, and terms agreement fields. </normal>
+		<!-- vrient 1 html -->
+        <form class="auth-form" novalidate>
+                <header class="auth-form__header">
+                    <h1 class="auth-form__title">Create Account</h1>
+                </header>
+                <fieldset class="auth-form__fields">
+                    <div class="form-group">
+                        <label for="reg-email-1" class="form-group__label">Email Address</label>
+                        <input type="email" id="reg-email-1" class="input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-pass-1" class="form-group__label">Password</label>
+                        <input type="password" id="reg-pass-1" class="input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-pass-confirm-1" class="form-group__label">Confirm Password</label>
+                        <input type="password" id="reg-pass-confirm-1" class="input" required>
+                    </div>
+                    <div class="form-group">
+                         <label class="checkbox-group">
+                            <input type="checkbox" id="terms" class="checkbox__input" required>
+                            <span class="checkbox__control">
+                                <svg viewBox="0 0 24 24"><path fill="none" d="M0 0h24v24H0z"/><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                            </span>
+                            <span class="checkbox__label">I agree to the <a href='#' class='link'>Terms of Service</a> and <a href='#' class='link'>Privacy Policy</a>.</span>
+                        </label>
+                    </div>
+                </fieldset>
+                <button type="submit" class="btn btn--primary">Register</button>
+                <footer class="auth-form__footer">
+                    Already have an account? <a href="#" class="link">Log In</a>
+                </footer>
+            </form>"     
+		
+      <div>
+	 </div>    
+	
+	</body>
+</html>

@@ -1,0 +1,32 @@
+flowchart TD
+    A[User Opens Help System] --> B{Choose Discovery Method};
+
+    subgraph "Browse Journey"
+        direction TD
+        B --> C[1. User clicks a Category];
+        C --> D[2. Display list of articles in Category];
+        D --> E[3. User clicks a desired Article];
+    end
+
+    subgraph "Search Journey"
+        direction TD
+        B --> F[1. User types query into Search Bar];
+        F --> G[2. Submits Search];
+        G --> H{Results Found?};
+        H -->|Yes| I[3a. Display ranked list of results];
+        I --> J[4a. User clicks a relevant Result];
+        H -->|No| K[3b. Display 'No Results Found' message];
+        K --> F;
+    end
+
+    E --> Z([View Article Content]);
+    J --> Z([View Article Content]);
+
+    %% Styling
+    classDef startEnd fill:#e8f5e9,stroke:#4caf50,color:#000;
+    classDef decision fill:#fff3e0,stroke:#fb8c00,color:#000;
+    classDef process fill:#e3f2fd,stroke:#2196f3,color:#000;
+
+    class A,Z startEnd;
+    class B,H decision;
+    class C,D,E,F,G,I,J,K process;

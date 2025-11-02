@@ -1,0 +1,64 @@
+flowchart TD
+    subgraph User Action
+        A[User clicks 'Save' in Wizard]
+    end
+
+    subgraph Client-Side Validation
+        B{Is Name Valid?\n(Format, Length, Keywords)}
+        C{Are Formulas Valid?\n(Syntax, Variable refs)}
+    end
+
+    subgraph API Interaction
+        D[Send Save Request to API]
+        E{API: Is Name Unique for User?}
+        F[API: Attempt to Save to DB]
+        G{Save Successful?}
+        H[Return 201 Created]
+        I[Return 409 Conflict Error]
+        J[Return 500 Server Error]
+    end
+
+    subgraph User Feedback
+        K[Show 'Invalid Name' Error]
+        L[Show 'Invalid Formula' Error]
+        M[Show 'Duplicate Name' Error]
+        N[Show 'API Save Error']
+        O[Show Success Message]
+        P[Return User to Editor]
+        Q[Redirect to Modes List]
+    end
+
+    A --> B
+    B -->|No| K
+    K --> P
+
+    B -->|Yes| C
+    C -->|No| L
+    L --> P
+
+    C -->|Yes| D
+    D --> E
+    E -->|No| I
+    I --> M
+    M --> P
+
+    E -->|Yes| F
+    F --> G
+    G -->|No| J
+    J --> N
+    N --> P
+
+    G -->|Yes| H
+    H --> O
+    O --> Q
+
+    %% Styling
+    classDef errorNode fill:#fdecea,stroke:#d32f2f,color:#333
+    classDef successNode fill:#e8f5e9,stroke:#4caf50,color:#333
+    classDef processNode fill:#e3f2fd,stroke:#2196f3,color:#333
+    classDef decisionNode fill:#fff8e1,stroke:#f57c00,color:#333
+
+    class K,L,M,N errorNode
+    class O,Q successNode
+    class A,D,F,H,I,J,P processNode
+    class B,C,E,G decisionNode

@@ -1,0 +1,36 @@
+sequenceDiagram
+    actor "Client: React SPA" as ClientReactSPA
+    participant "API Gateway" as APIGateway
+    actor "User & Data Service" as UserDataService
+    participant "Database" as Database
+
+    activate ClientReactSPA
+    ClientReactSPA->>ClientReactSPA: 1. User navigates wizard, enters mode details (name, variables, formulas). Client performs real-time input validation (e.g., required fields, formula syntax).
+    activate APIGateway
+    ClientReactSPA->>APIGateway: 2. On final 'Save', sends new mode definition.
+    APIGateway-->>ClientReactSPA: Returns success (201) or error (4xx/5xx) response.
+    activate UserDataService
+    APIGateway->>UserDataService: 3. Validates JWT with Cognito Authorizer and routes request.
+    UserDataService-->>APIGateway: Forwards backend service response.
+    activate Database
+    UserDataService->>Database: 4. Check for existing mode with same name for the user.
+    Database-->>UserDataService: Returns count of matching records.
+    UserDataService->>Database: 5. If name is unique, insert new mode record.
+    Database-->>UserDataService: Returns the newly created record.
+    UserDataService->>APIGateway: 6. Return 201 Created with new mode data.
+    alt Duplicate Name
+        UserDataService->>APIGateway: 6a. Return 409 Conflict.
+    else Validation Error
+        UserDataService->>APIGateway: 6b. Return 400 Bad Request.
+    end
+    APIGateway->>ClientReactSPA: 7. Forward 201 Created response.
+    ClientReactSPA->>ClientReactSPA: 8. On success, update Redux state, hide loading spinner, show success notification, and navigate to modes list.
+
+    note over ClientReactSPA: The multi-step wizard is managed entirely client-side. Its state is held in a local React component or a dedicated Redux slice.
+    note over ClientReactSPA: Client-side form validation provides immediate user feedback, but authoritative validation is always performed by the backend.
+    note over Database: The 'definition' field in the database is of type JSONB, which allows for efficient querying of the nested data structure.
+
+    deactivate Database
+    deactivate UserDataService
+    deactivate APIGateway
+    deactivate ClientReactSPA

@@ -1,0 +1,361 @@
+# 1 Overview
+
+## 1.1 Diagram Id
+
+SEQ-FEAT-002
+
+## 1.2 Name
+
+Electronics Mode Calculation (with Backend Validation)
+
+## 1.3 Description
+
+A user interacts with a pre-defined electronics mode, like the Ohm's Law calculator. The client provides real-time calculations for a good user experience, but any action is sent to the backend where the business logic, encapsulated in a shared domain library, is re-validated authoritatively.
+
+## 1.4 Type
+
+🔹 FeatureFlow
+
+## 1.5 Purpose
+
+To provide a responsive UI for electronics calculations while ensuring all business rules and data integrity constraints are enforced by the backend as the source of truth, per REQ-API-001 and REQ-BIZ-001.
+
+## 1.6 Complexity
+
+Medium
+
+## 1.7 Priority
+
+🔴 High
+
+## 1.8 Frequency
+
+OnDemand
+
+## 1.9 Participants
+
+- REPO-SPA-CLIENT
+- REPO-API-GATEWAY
+- REPO-APP-USER-DATA
+- REPO-LIB-DOMAIN-LOGIC
+
+## 1.10 Key Interactions
+
+- User enters two values (e.g., Voltage and Current) into the Ohm's Law calculator in the Client SPA.
+- The client-side JavaScript immediately calculates and displays the other two values (Resistance and Power).
+- The client sends the inputs to the User & Data Service for validation or persistence.
+- The User & Data Service imports and calls functions from the `calculator-domain-logic` library to perform the same calculations and validations (e.g., resistance must be positive).
+- If validation passes, the service returns a success response; if not, a 4xx error with a descriptive message is returned to the client.
+
+## 1.11 Triggers
+
+- User interaction with a built-in electronics calculation mode.
+
+## 1.12 Outcomes
+
+- User gets immediate feedback from client-side calculations.
+- Data integrity is guaranteed by authoritative backend validation using shared domain logic.
+
+## 1.13 Business Rules
+
+- Ohm's Law: Resistance (R) must be a positive number.
+- 555 Timer Astable: Duty cycle must be >50% and <100%.
+
+## 1.14 Error Scenarios
+
+- User enters invalid data (e.g., negative resistance) which is flagged by the backend, even if the client-side logic allowed it.
+- Discrepancy between client and server calculation logic leads to a validation failure.
+
+## 1.15 Integration Points
+
+- The `calculator-domain-logic` shared library is consumed by the backend service.
+
+# 2.0 Details
+
+## 2.1 Diagram Id
+
+SEQ-FEAT-002
+
+## 2.2 Name
+
+Electronics Mode Authoritative Backend Validation
+
+## 2.3 Description
+
+Implementation sequence for a user interacting with a pre-defined electronics mode (e.g., Ohm's Law calculator). The client application provides immediate, non-authoritative calculations for a responsive user experience. The client then sends the user's input to the backend for authoritative validation. The backend User & Data Service utilizes a shared, pure domain logic library to enforce all business rules specified in REQ-BIZ-001, ensuring it remains the single source of truth as per REQ-API-001.
+
+## 2.4 Participants
+
+### 2.4.1 Frontend Application
+
+#### 2.4.1.1 Repository Id
+
+REPO-SPA-CLIENT
+
+#### 2.4.1.2 Display Name
+
+Client SPA
+
+#### 2.4.1.3 Type
+
+🔹 Frontend Application
+
+#### 2.4.1.4 Technology
+
+React 18+, TypeScript
+
+#### 2.4.1.5 Order
+
+1
+
+#### 2.4.1.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #4287f5 |
+| Stereotype | UI |
+
+### 2.4.2.0 API Gateway
+
+#### 2.4.2.1 Repository Id
+
+REPO-API-GATEWAY
+
+#### 2.4.2.2 Display Name
+
+API Gateway
+
+#### 2.4.2.3 Type
+
+🔹 API Gateway
+
+#### 2.4.2.4 Technology
+
+Amazon API Gateway
+
+#### 2.4.2.5 Order
+
+2
+
+#### 2.4.2.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | boundary |
+| Color | #f5a623 |
+| Stereotype | AWS |
+
+### 2.4.3.0 Microservice
+
+#### 2.4.3.1 Repository Id
+
+REPO-APP-USER-DATA
+
+#### 2.4.3.2 Display Name
+
+User & Data Service
+
+#### 2.4.3.3 Type
+
+🔹 Microservice
+
+#### 2.4.3.4 Technology
+
+NestJS, Node.js
+
+#### 2.4.3.5 Order
+
+3
+
+#### 2.4.3.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | control |
+| Color | #7ed321 |
+| Stereotype | ECS |
+
+### 2.4.4.0 Shared Library
+
+#### 2.4.4.1 Repository Id
+
+REPO-LIB-DOMAIN-LOGIC
+
+#### 2.4.4.2 Display Name
+
+Domain Logic Library
+
+#### 2.4.4.3 Type
+
+🔹 Shared Library
+
+#### 2.4.4.4 Technology
+
+Pure TypeScript
+
+#### 2.4.4.5 Order
+
+4
+
+#### 2.4.4.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | entity |
+| Color | #bd10e0 |
+| Stereotype | Domain |
+
+## 2.5.0.0 Interactions
+
+### 2.5.1.0 Self-Invocation
+
+#### 2.5.1.1 Source Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.1.2 Target Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.1.3 Message
+
+User inputs two values (e.g., V=12, I=2). Client-side logic immediately calculates and displays derived values (R=6, P=24) for UI responsiveness.
+
+#### 2.5.1.4 Sequence Number
+
+1
+
+#### 2.5.1.5 Type
+
+🔹 Self-Invocation
+
+#### 2.5.1.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.1.7 Return Message
+
+UI is updated with calculated results.
+
+#### 2.5.1.8 Has Return
+
+✅ Yes
+
+#### 2.5.1.9 Is Activation
+
+❌ No
+
+#### 2.5.1.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | Internal Function Call |
+| Method | handleInputChange(event) |
+| Parameters | Input values: { voltage: 12, current: 2 } |
+| Authentication | N/A |
+| Error Handling | Display local validation errors (e.g., for non-num... |
+| Performance | Must complete in <50ms to ensure smooth UX, as per... |
+
+### 2.5.2.0 API Request
+
+#### 2.5.2.1 Source Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.2.2 Target Id
+
+REPO-API-GATEWAY
+
+#### 2.5.2.3 Message
+
+Send user inputs for authoritative validation.
+
+#### 2.5.2.4 Sequence Number
+
+2
+
+#### 2.5.2.5 Type
+
+🔹 API Request
+
+#### 2.5.2.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.2.7 Return Message
+
+HTTP 200 OK (Validation Success) or HTTP 400 Bad Request (Validation Failure).
+
+#### 2.5.2.8 Has Return
+
+✅ Yes
+
+#### 2.5.2.9 Is Activation
+
+✅ Yes
+
+#### 2.5.2.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTPS/REST |
+| Method | POST /api/v1/validate/ohms-law |
+| Parameters | Body: { "voltage": 12, "current": 2 } |
+| Authentication | Required: JWT Bearer token in 'Authorization' head... |
+| Error Handling | Client handles HTTP 4xx/5xx responses. On 400, dis... |
+| Performance | N/A |
+
+#### 2.5.2.11 Nested Interactions
+
+- {'sourceId': 'REPO-API-GATEWAY', 'targetId': 'REPO-APP-USER-DATA', 'message': 'Validate JWT (if present), add Correlation-ID header, and forward request.', 'sequenceNumber': 3, 'type': 'Service Invocation', 'isSynchronous': True, 'returnMessage': 'Forwarded HTTP response from service.', 'hasReturn': True, 'isActivation': True, 'technicalDetails': {'protocol': 'HTTPS', 'method': 'POST /validate/ohms-law', 'parameters': "Forwarded request body and headers, including 'X-Correlation-ID'.", 'authentication': 'Validates JWT signature and claims against AWS Cognito user pool.', 'errorHandling': 'Returns 401/403 for auth failures. Returns 5xx on integration failures.', 'performance': 'Latency added should be minimal (< 20ms).'}, 'nestedInteractions': [{'sourceId': 'REPO-APP-USER-DATA', 'targetId': 'REPO-LIB-DOMAIN-LOGIC', 'message': 'Invoke domain logic for calculation and validation.', 'sequenceNumber': 4, 'type': 'Library Function Call', 'isSynchronous': True, 'returnMessage': 'Returns calculated result object or throws a typed domain error.', 'hasReturn': True, 'isActivation': True, 'technicalDetails': {'protocol': 'In-Process Function Call', 'method': 'OhmLawValidator.validateAndCalculate(dto)', 'parameters': 'Input DTO: OhmLawInput { voltage: 12, current: 2 }', 'authentication': 'N/A', 'errorHandling': 'On validation failure (e.g., negative resistance), throws a specific typed error like `InvalidDomainValueError` with a descriptive message.', 'performance': 'Pure function, execution must be extremely fast.'}}]}
+
+## 2.6.0.0 Notes
+
+### 2.6.1.0 Content
+
+#### 2.6.1.1 Content
+
+Happy Path: The Domain Logic Library successfully validates the input, returns the calculated object. The User & Data Service receives it, maps it to a DTO, and returns an HTTP 200 OK response, confirming the client-side calculation was correct.
+
+#### 2.6.1.2 Position
+
+bottom
+
+#### 2.6.1.3 Participant Id
+
+*Not specified*
+
+#### 2.6.1.4 Sequence Number
+
+4
+
+### 2.6.2.0 Content
+
+#### 2.6.2.1 Content
+
+Error Path: User provides invalid input (e.g., negative resistance). The Domain Logic Library throws `InvalidDomainValueError`. The User & Data Service's global exception filter catches this specific error and translates it into an HTTP 400 Bad Request with an RFC 7807-compliant body: `{ "type": "/errors/validation", "title": "Invalid Input", "detail": "Resistance must be a positive number." }`. The client then displays this authoritative error message to the user.
+
+#### 2.6.2.2 Position
+
+bottom
+
+#### 2.6.2.3 Participant Id
+
+*Not specified*
+
+#### 2.6.2.4 Sequence Number
+
+4
+
+## 2.7.0.0 Implementation Guidance
+
+| Property | Value |
+|----------|-------|
+| Security Requirements | The API Gateway must be configured with an AWS Cog... |
+| Performance Targets | The end-to-end P95 latency for the validation API ... |
+| Error Handling Strategy | The `REPO-APP-USER-DATA` service must implement a ... |
+| Testing Considerations | 1. `REPO-LIB-DOMAIN-LOGIC`: Must have 100% unit te... |
+| Monitoring Requirements | All requests in `REPO-APP-USER-DATA` must be logge... |
+| Deployment Considerations | Since `REPO-APP-USER-DATA` depends on `REPO-LIB-DO... |
+

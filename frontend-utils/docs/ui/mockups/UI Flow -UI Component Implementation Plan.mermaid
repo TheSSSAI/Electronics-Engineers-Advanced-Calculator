@@ -1,0 +1,30 @@
+graph LR
+    subgraph "Phase 1: Foundation"
+        P1["<b>Foundation</b><br/>Core Design System<br/>(Button, Icon, Inputs)<br/>App Shell<br/>(Header, Sidebar, Footer)"]
+    end
+
+    subgraph "Phase 2: Core Calculator"
+        P2["<b>Core Calculator</b><br/>Calculator View Screen<br/>Keypad & Display Integration<br/>Mode Switcher"]
+    end
+
+    subgraph "Phase 3: Auth & Persistence"
+        P3["<b>Authentication & Persistence</b><br/>Login/Register Screens<br/>User Menu<br/>Global Notifications<br/>Account Settings"]
+    end
+
+    subgraph "Phase 4: Advanced Features"
+        P4["<b>Advanced Features</b><br/>Custom Mode Management<br/>Custom Mode Editor<br/>Help System<br/>Guided Tour"]
+    end
+
+    P1 --> P2
+    P2 --> P3
+    P3 --> P4
+
+    classDef phase1 fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000;
+    classDef phase2 fill:#e0f7fa,stroke:#00bcd4,stroke-width:2px,color:#000;
+    classDef phase3 fill:#fff3e0,stroke:#ff9800,stroke-width:2px,color:#000;
+    classDef phase4 fill:#fbe9e7,stroke:#ff5722,stroke-width:2px,color:#000;
+
+    class P1 phase1;
+    class P2 phase2;
+    class P3 phase3;
+    class P4 phase4;

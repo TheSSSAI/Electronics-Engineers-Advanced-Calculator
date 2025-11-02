@@ -1,0 +1,63 @@
+flowchart TD
+    subgraph Legend
+        direction LR
+        legend_step(((Wizard Step)))
+        legend_action([User Action])
+        legend_validation{{Validation}}
+        legend_error[/Error State/]
+        legend_success[\Success Path/]
+    end
+
+    A[User on 'Custom Mode Management' screen] --> B([Clicks 'Create New Mode']);
+    B --> C(((Step 1: Name & Description)));
+    C --> D([User enters details]);
+    D --> E{{Name valid & unique?}};
+    E -->|No| F[/Show validation error/];
+    F --> C;
+    E -->|Yes| G([Clicks 'Next']);
+
+    G --> H(((Step 2: Define Variables)));
+    H --> I([User adds/edits variables]);
+    I --> J{{>=1 Input AND >=1 Output?}};
+    J -->|No| K[/'Next' button disabled/];
+    K --> H;
+    J -->|Yes| L([Clicks 'Next']);
+
+    L --> M(((Step 3: Write Formulas)));
+    M --> N([User writes formulas]);
+    N --> O{{All formulas syntactically valid?}};
+    O -->|No| P[/Show real-time syntax error/];
+    P --> M;
+    O -->|Yes| Q([Clicks 'Save Mode']);
+
+    Q --> R[Frontend sends POST /api/v1/modes];
+    R --> S{API Response};
+    S -->|Error (4xx/5xx)| T[/Show API error message/];
+    T --> M;
+    S -->|Success (201)| U[\Persist new mode to DB/];
+    U --> V[\Update UI & show success toast/];
+    V --> W[\Redirect to Management Screen/];
+
+    subgraph Cancel Flow
+        X([Clicks 'Cancel' at any step]) --> Y{{Confirm Cancellation?}};
+        Y -->|Yes| Z[Discard changes & close wizard];
+        Y -->|No| Z_no(Return to current step);
+        Z --> A;
+    end
+
+    C --> X;
+    H --> X;
+    M --> X;
+
+    %% Styling
+    classDef step fill:#e3f2fd,stroke:#1976d2,color:#000;
+    classDef action fill:#e8f5e9,stroke:#2e7d32,color:#000;
+    classDef validation fill:#fff3e0,stroke:#ed6c02,color:#000;
+    classDef error fill:#ffebee,stroke:#d32f2f,color:#000;
+    classDef success fill:#dcedc8,stroke:#558b2f,color:#000;
+
+    class C,H,M step;
+    class B,D,G,I,L,N,Q,X action;
+    class E,J,O,S,Y validation;
+    class F,K,P,T error;
+    class U,V,W success;

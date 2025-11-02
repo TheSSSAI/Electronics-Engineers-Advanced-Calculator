@@ -1,0 +1,74 @@
+-- =================================================================
+-- Schema for Calculator Application
+-- Target Database: PostgreSQL
+-- =================================================================
+
+-- -----------------------------------------------------
+-- Table: "User"
+-- Represents system users and their authentication identity.
+-- -----------------------------------------------------
+CREATE TABLE "User" (
+    "userId" UUID NOT NULL PRIMARY KEY,
+    "authProviderId" VARCHAR(255) NOT NULL UNIQUE,
+    "email" VARCHAR(255) NOT NULL UNIQUE,
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX "IX_User_CreatedAt" ON "User" ("createdAt");
+CREATE INDEX "IX_User_Email_AuthProviderId" ON "User" ("email", "authProviderId");
+
+-- -----------------------------------------------------
+-- Table: "CustomMode"
+-- Stores user-defined calculation modes.
+-- -----------------------------------------------------
+CREATE TABLE "CustomMode" (
+    "customModeId" UUID NOT NULL PRIMARY KEY,
+    "userId" UUID NOT NULL REFERENCES "User"("userId") ON DELETE CASCADE ON UPDATE CASCADE,
+    "name" VARCHAR(100) NOT NULL,
+    "description" TEXT,
+    "definition" JSONB NOT NULL,
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "UC_CustomMode_User_Name" UNIQUE ("userId", "name")
+);
+
+CREATE INDEX "IX_CustomMode_User" ON "CustomMode" ("userId");
+CREATE INDEX "idx_gin_custommode_definition" ON "CustomMode" USING GIN ("definition");
+
+-- -----------------------------------------------------
+-- Table: "UserVariable"
+-- Stores named variables created by users.
+-- -----------------------------------------------------
+CREATE TABLE "UserVariable" (
+    "userVariableId" UUID NOT NULL PRIMARY KEY,
+    "userId" UUID NOT NULL REFERENCES "User"("userId") ON DELETE CASCADE ON UPDATE CASCADE,
+    "name" VARCHAR(50) NOT NULL,
+    "value" VARCHAR(255) NOT NULL,
+    "valueType" VARCHAR(20) NOT NULL DEFAULT 'string' CHECK ("valueType" IN ('string', 'number', 'boolean')),
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "UC_UserVariable_User_Name" UNIQUE ("userId", "name")
+);
+
+CREATE INDEX "IX_UserVariable_User" ON "UserVariable" ("userId");
+
+-- -----------------------------------------------------
+-- Table: "CalculationHistory"
+-- Logs a user's past calculations. Partitioned by month.
+-- -----------------------------------------------------
+CREATE TABLE "CalculationHistory" (
+    "calculationHistoryId" UUID NOT NULL,
+    "userId" UUID NOT NULL REFERENCES "User"("userId") ON DELETE CASCADE ON UPDATE CASCADE,
+    "expression" TEXT NOT NULL,
+    "result" VARCHAR(255) NOT NULL,
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    -- For PostgreSQL partitioned tables, the primary key must include the partition key.
+    PRIMARY KEY ("calculationHistoryId", "createdAt")
+) PARTITION BY RANGE ("createdAt");
+
+CREATE INDEX "IX_CalculationHistory_User_CreatedAt_Desc" ON "CalculationHistory" ("userId", "createdAt" DESC);
+
+-- NOTE: Partitions must be created manually or via a maintenance script, for example:
+-- CREATE TABLE "CalculationHistory_2024_01" PARTITION OF "CalculationHistory"
+-- FOR VALUES FROM ('2024-01-01') TO ('2024-02-01');

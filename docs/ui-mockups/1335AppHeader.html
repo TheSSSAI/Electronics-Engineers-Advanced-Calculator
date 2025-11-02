@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AppHeader Component</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+  <style>
+    /* CSS Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      background-color: var(--color-neutrals-gray_100);
+      color: var(--color-neutrals-gray_800);
+      line-height: 1.6;
+    }
+    
+    /* Design System Tokens */
+    :root {
+        /* Color Palette */
+        --color-primary-50: #E3F2FD;
+        --color-primary-100: #BBDEFB;
+        --color-primary-500: #2196F3;
+        --color-primary-600: #1E88E5;
+        --color-primary-700: #1976D2;
+
+        --color-neutrals-white: #FFFFFF;
+        --color-neutrals-gray_50: #F8F9FA;
+        --color-neutrals-gray_100: #F1F3F5;
+        --color-neutrals-gray_200: #E9ECEF;
+        --color-neutrals-gray_500: #ADB5BD;
+        --color-neutrals-gray_600: #868E96;
+        --color-neutrals-gray_700: #495057;
+        --color-neutrals-gray_800: #343A40;
+        --color-neutrals-gray_900: #212529;
+
+        --color-semantic-error: #D32F2F;
+
+        /* Spacing System */
+        --spacing-xs: 4px;
+        --spacing-sm: 8px;
+        --spacing-md: 16px;
+        --spacing-lg: 24px;
+        --spacing-xl: 32px;
+        
+        /* Typography */
+        --font-primary: 'Roboto', sans-serif;
+        --font-weight-bold: 700;
+        --font-size-h3: 28px;
+        --font-size-body: 16px;
+        --font-size-caption: 14px;
+        
+        /* Borders & Shadows */
+        --border-radius-sm: 4px;
+        --border-radius-main: 8px;
+        --shadow-main: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        --shadow-md: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+    }
+    
+    /* Screen Scaffolding */
+    .screen-container {
+        padding: var(--spacing-lg);
+    }
+
+    .screen-header {
+      font-size: var(--font-size-h3);
+      font-weight: var(--font-weight-bold);
+      margin-bottom: var(--spacing-xl);
+      padding-bottom: var(--spacing-md);
+      border-bottom: 1px solid var(--color-neutrals-gray_200);
+      color: var(--color-neutrals-gray_900);
+    }
+
+    /* AppHeader Component Styles */
+    .app-header-wrapper {
+        position: relative; /* For context */
+    }
+
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-sm) var(--spacing-md);
+      background-color: var(--color-neutrals-white);
+      box-shadow: var(--shadow-main);
+      height: 64px;
+    }
+
+    .header-left, .header-right {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      text-decoration: none;
+      color: var(--color-neutrals-gray_900);
+      font-weight: var(--font-weight-bold);
+      font-size: 20px;
+    }
+
+    .logo svg {
+        width: 32px;
+        height: 32px;
+        fill: var(--color-primary-600);
+    }
+
+    /* Generic Icon Button Style */
+    .icon-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        background-color: transparent;
+        border-radius: 50%;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        cursor: pointer;
+        color: var(--color-neutrals-gray_700);
+        transition: background-color 150ms ease-in-out, color 150ms ease-in-out;
+    }
+
+    .icon-button:hover {
+        background-color: var(--color-neutrals-gray_100);
+    }
+
+    .icon-button:focus-visible {
+        outline: 2px solid var(--color-primary-700);
+        outline-offset: 2px;
+    }
+
+    .icon-button svg {
+        width: 24px;
+        height: 24px;
+        stroke: currentColor;
+    }
+    
+    /* Hamburger Menu Specifics */
+    .hamburger-menu .line {
+        transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms cubic-bezier(0.4, 0, 0.2, 1);
+        transform-origin: center;
+    }
+
+    .app-header-wrapper.sidebar-open .hamburger-menu .line1 {
+        transform: translateY(6px) rotate(45deg);
+    }
+    .app-header-wrapper.sidebar-open .hamburger-menu .line2 {
+        opacity: 0;
+    }
+    .app-header-wrapper.sidebar-open .hamburger-menu .line3 {
+        transform: translateY(-6px) rotate(-45deg);
+    }
+
+
+    /* Mode Switcher Mockup */
+    .mode-switcher {
+      display: flex;
+      align-items: center;
+      padding: var(--spacing-sm) var(--spacing-md);
+      border: 1px solid var(--color-neutrals-gray_200);
+      border-radius: var(--border-radius-main);
+      background-color: var(--color-neutrals-gray_50);
+      color: var(--color-neutrals-gray_800);
+      font-size: var(--font-size-caption);
+      font-weight: 500;
+      gap: var(--spacing-sm);
+      cursor: pointer;
+      transition: background-color 150ms ease;
+    }
+    .mode-switcher:hover {
+        background-color: var(--color-neutrals-gray_100);
+    }
+    .mode-switcher svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* User Menu Mockup */
+    .user-menu img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid var(--color-neutrals-gray_200);
+      cursor: pointer;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .logo-text {
+            display: none;
+        }
+        .mode-switcher .mode-name {
+            display: none;
+        }
+        .mode-switcher {
+            padding: var(--spacing-sm);
+        }
+    }
+
+
+    /* Variations Section for Demo */
+    .screen-variations {
+      margin-top: var(--spacing-xl);
+      border-top: 1px dashed var(--color-neutrals-gray_500);
+      padding-top: var(--spacing-lg);
+    }
+    .variation-group {
+      margin-top: var(--spacing-lg);
+      padding: var(--spacing-md);
+      background-color: #fdfdfd;
+      border: 1px solid var(--color-neutrals-gray_200);
+      border-radius: var(--border-radius-main);
+    }
+    .variation-group h3 {
+      font-size: 20px;
+      margin-bottom: var(--spacing-sm);
+    }
+    .variation-group normal {
+      display: block;
+      color: var(--color-neutrals-gray_700);
+      margin-bottom: var(--spacing-md);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="screen-container">
+    <header class="screen-header">
+      <h1>AppHeader Component</h1>
+    </header>
+
+    <div id="interactive-header" class="app-header-wrapper">
+        <header class="app-header">
+            <div class="header-left">
+                <button class="icon-button hamburger-menu" type="button" aria-label="Toggle Navigation Menu" aria-expanded="false" aria-controls="main-nav">
+                    <svg class="hamburger-icon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line class="line line1" x1="3" y1="12" x2="21" y2="12"></line>
+                        <line class="line line2" x1="3" y1="6" x2="21" y2="6"></line>
+                        <line class="line line3" x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <a href="#" class="logo">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                    <span class="logo-text">ElecCalc</span>
+                </a>
+            </div>
+            <nav class="header-right">
+                <button class="mode-switcher" type="button" aria-haspopup="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M14.5 3.5c-1.2 1.2-1 3.3.6 4.9.8.8 1.9.9 2.8.3m-4.4 3.1c-1.2 1.2-1 3.3.6 4.9.8.8 1.9.9 2.8.3m-4.4 3.1c-1.2 1.2-1 3.3.6 4.9.8.8 1.9.9 2.8.3m-8.8-12C3.1 8.8 3 10.9 4.6 12.5c.8.8 1.9.9 2.8.3m-4.4 3.1c-1.2 1.2-1 3.3.6 4.9.8.8 1.9.9 2.8.3" />
+                    </svg>
+                    <span class="mode-name">Ohm's Law</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="user-menu">
+                    <button class="icon-button" type="button" aria-label="Open user menu">
+                        <img src="https://i.pravatar.cc/40?u=a042581f4e29026704d" alt="User avatar">
+                    </button>
+                </div>
+            </nav>
+        </header>
+    </div>
+  </div>
+
+  <div class="screen-variations">
+    <h2>Screen Variations</h2>
+    
+    <div class="variation-group">
+      <h3>Variant Name: "Default State"</h3>
+      <normal>Standard header appearance with the sidebar closed. The hamburger icon is in its default state.</normal>
+      <div class="app-header-wrapper">
+        <header class="app-header">
+            <div class="header-left">
+                <button class="icon-button hamburger-menu" type="button" aria-label="Toggle Navigation Menu" aria-expanded="false">
+                    <svg class="hamburger-icon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line class="line line1" x1="3" y1="12" x2="21" y2="12"></line>
+                        <line class="line line2" x1="3" y1="6" x2="21" y2="6"></line>
+                        <line class="line line3" x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <a href="#" class="logo">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <span class="logo-text">ElecCalc</span>
+                </a>
+            </div>
+            <nav class="header-right">
+                <button class="mode-switcher" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 3.5c-1.2 1.2-1 3.3.6 4.9.8.8 1.9.9 2.8.3m-4.4 3.1c-1.2 1.2-1 3.3.6 4.9.8.8 1.9.9 2.8.3m-4.4 3.1c-1.2 1.2-1 3.3.6 4.9.8.8 1.9.9 2.8.3m-8.8-12C3.1 8.8 3 10.9 4.6 12.5c.8.8 1.9.9 2.8.3m-4.4 3.1c-1.2 1.2-1 3.3.6 4.9.8.8 1.9.9 2.8.3" /></svg><span class="mode-name">Scientific</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
+                <div class="user-menu"><button class="icon-button" type="button" aria-label="Open user menu"><img src="https://i.pravatar.cc/40?u=a042581f4e29026704d" alt="User avatar"></button></div>
+            </nav>
+        </header>
+      </div>
+    </div>
+    
+    <div class="variation-group">
+      <h3>Variant Name: "Sidebar Open State"</h3>
+      <normal>The header appearance when the navigation sidebar is open. The hamburger icon transforms into a close 'X' icon.</normal>
+      <div class="app-header-wrapper sidebar-open">
+        <header class="app-header">
+            <div class="header-left">
+                <button class="icon-button hamburger-menu" type="button" aria-label="Toggle Navigation Menu" aria-expanded="true">
+                    <svg class="hamburger-icon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line class="line line1" x1="3" y1="12" x2="21" y2="12"></line>
+                        <line class="line line2" x1="3" y1="6" x2="21" y2="6"></line>
+                        <line class="line line3" x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <a href="#" class="logo">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <span class="logo-text">ElecCalc</span>
+                </a>
+            </div>
+            <nav class="header-right">
+                <button class="mode-switcher" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 3.5c-1.2 1.2-1 3.3.6 4.9.8.8 1.9.9 2.8.3m-4.4 3.1c-1.2 1.2-1 3.3.6 4.9.8.8 1.9.9 2.8.3m-4.4 3.1c-1.2 1.2-1 3.3.6 4.9.8.8 1.9.9 2.8.3m-8.8-12C3.1 8.8 3 10.9 4.6 12.5c.8.8 1.9.9 2.8.3m-4.4 3.1c-1.2 1.2-1 3.3.6 4.9.8.8 1.9.9 2.8.3" /></svg><span class="mode-name">Scientific</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
+                <div class="user-menu"><button class="icon-button" type="button" aria-label="Open user menu"><img src="https://i.pravatar.cc/40?u=a042581f4e29026704d" alt="User avatar"></button></div>
+            </nav>
+        </header>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Simple script for interactive demo of the hamburger menu
+    const interactiveHeader = document.getElementById('interactive-header');
+    const hamburgerButton = interactiveHeader.querySelector('.hamburger-menu');
+    
+    hamburgerButton.addEventListener('click', () => {
+        const isExpanded = hamburgerButton.getAttribute('aria-expanded') === 'true';
+        interactiveHeader.classList.toggle('sidebar-open');
+        hamburgerButton.setAttribute('aria-expanded', !isExpanded);
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,49 @@
+flowchart TD
+    subgraph User Interaction on Frontend SPA
+        A[User on Registration Page]
+        B[User fills out Email, Password, and Confirmation]
+        C{Terms of Service Accepted?}
+        D[User clicks 'Create Account']
+        E[Display 'Terms must be accepted' Error]
+        F[Display 'Email already in use' Error]
+        G[Display 'Password does not meet policy' Error]
+        H[Display 'An unexpected error occurred' Error]
+    end
+
+    subgraph Backend API & Identity Provider
+        I[POST /api/register]
+        J{API Validation}
+        K[Create User in Cognito]
+    end
+
+    A --> B
+    B --> C
+    C -->|No| D
+    D --x E
+    E --> B
+
+    C -->|Yes| D
+    D --> I
+    I --> J
+
+    J -->|Email already exists| F
+    J -->|Password too weak| G
+    J -->|Other 5xx Error| H
+    J -->|Validation Success| K
+    
+    F --> B
+    G --> B
+    H --> B
+
+    K --> L[Success: Redirect to Dashboard]
+
+    %% Styling
+    classDef errorNode fill:#ffebee,stroke:#d32f2f,color:#b71c1c
+    classDef successNode fill:#e8f5e9,stroke:#4caf50,color:#1b5e20
+    classDef processNode fill:#e3f2fd,stroke:#2196f3,color:#0d47a1
+    classDef decision fill:#fff8e1,stroke:#ffc107,color:#000
+
+    class E,F,G,H errorNode
+    class L successNode
+    class I,K processNode
+    class C,J decision

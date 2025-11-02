@@ -1,0 +1,182 @@
+
+{
+  "component_inventory": {
+    "atomic_components": [
+      {
+        "component_name": "Admonition Block",
+        "category": "content_display",
+        "variants": ["note", "tip", "info", "warning", "danger"],
+        "states": ["default"],
+        "responsive_needs": "Text content must wrap correctly on all screen sizes.",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 2,
+        "estimated_effort": "1-2 hours (theming)"
+      },
+      {
+        "component_name": "Code Block",
+        "category": "content_display",
+        "variants": ["syntax-highlighted", "plain-text", "with-title"],
+        "states": ["default"],
+        "responsive_needs": "Horizontal scrolling for long lines on mobile, or line wrapping.",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 2,
+        "estimated_effort": "2-3 hours (theming)"
+      },
+      {
+        "component_name": "Inline Link",
+        "category": "navigation",
+        "variants": ["internal-doc", "external"],
+        "states": ["default", "hover", "active", "focus", "visited"],
+        "responsive_needs": "Adequate touch target size on mobile.",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 1,
+        "estimated_effort": "1 hour (theming)"
+      }
+    ],
+    "molecular_components": [
+      {
+        "component_name": "Search Bar",
+        "category": "navigation",
+        "variants": ["desktop-expanded", "mobile-icon"],
+        "states": ["default", "focused", "with_results_dropdown", "no_results", "loading"],
+        "responsive_needs": "Collapses into an icon on mobile, opens in a modal/overlay.",
+        "dependencies": ["Search Input", "Icon"],
+        "complexity_level": "medium",
+        "implementation_priority": 3,
+        "estimated_effort": "8-12 hours (integration with search provider)"
+      },
+      {
+        "component_name": "Sidebar Navigation Item",
+        "category": "navigation",
+        "variants": ["collapsible-category", "doc-link"],
+        "states": ["default", "hover", "active", "focus", "collapsed", "expanded"],
+        "responsive_needs": "Must be legible and tappable on mobile viewports.",
+        "dependencies": ["Inline Link", "Icon"],
+        "complexity_level": "low",
+        "implementation_priority": 2,
+        "estimated_effort": "2-4 hours (configuration and theming)"
+      },
+      {
+        "component_name": "Doc Paginator",
+        "category": "navigation",
+        "variants": ["previous-only", "next-only", "both"],
+        "states": ["default", "hover", "focus"],
+        "responsive_needs": "Layout may stack vertically on very narrow screens.",
+        "dependencies": ["Inline Link"],
+        "complexity_level": "low",
+        "implementation_priority": 2,
+        "estimated_effort": "1-2 hours (theming)"
+      }
+    ],
+    "organism_components": [
+      {
+        "component_name": "Docs Site Header",
+        "category": "layout",
+        "variants": ["default"],
+        "states": ["default", "mobile_collapsed"],
+        "responsive_needs": "Contains the hamburger menu toggle for the sidebar on mobile.",
+        "dependencies": ["Search Bar"],
+        "complexity_level": "medium",
+        "implementation_priority": 1,
+        "estimated_effort": "4-6 hours (theming to match main app)"
+      },
+      {
+        "component_name": "Docs Site Sidebar",
+        "category": "layout",
+        "variants": ["desktop-persistent", "mobile-drawer"],
+        "states": ["open", "closed"],
+        "responsive_needs": "Functions as a slide-in drawer on mobile, persistent on desktop.",
+        "dependencies": ["Sidebar Navigation Item"],
+        "complexity_level": "medium",
+        "implementation_priority": 2,
+        "estimated_effort": "3-5 hours (configuration and theming)"
+      },
+      {
+        "component_name": "Article Layout",
+        "category": "layout",
+        "variants": ["with-toc", "without-toc"],
+        "states": ["default"],
+        "responsive_needs": "Right-hand Table of Contents is hidden on smaller screens.",
+        "dependencies": ["Doc Paginator", "Admonition Block", "Code Block"],
+        "complexity_level": "low",
+        "implementation_priority": 2,
+        "estimated_effort": "2-4 hours (theming)"
+      }
+    ]
+  },
+  "screen_inventory": [
+    {
+      "screen_name": "Documentation Article",
+      "screen_type": "content_page",
+      "variants": ["desktop", "tablet", "mobile"],
+      "states": ["loading", "loaded"],
+      "required_components": ["Docs Site Header", "Docs Site Sidebar", "Article Layout"],
+      "platform_optimizations": "Mobile: Sidebar is a drawer, Table of Contents is hidden. Desktop: Three-column layout (Sidebar, Content, ToC).",
+      "implementation_priority": 2,
+      "estimated_effort": "N/A (This is a template, effort is in content creation)",
+      "user_flow_criticality": "high"
+    },
+    {
+      "screen_name": "Documentation Home",
+      "screen_type": "landing_page",
+      "variants": ["desktop", "tablet", "mobile"],
+      "states": ["loaded"],
+      "required_components": ["Docs Site Header", "Docs Site Sidebar"],
+      "platform_optimizations": "A card-based layout linking to the main documentation sections.",
+      "implementation_priority": 2,
+      "estimated_effort": "4-8 hours (custom homepage layout)",
+      "user_flow_criticality": "high"
+    },
+    {
+      "screen_name": "Search Results",
+      "screen_type": "search",
+      "variants": ["desktop", "mobile"],
+      "states": ["loading", "results-found", "no-results"],
+      "required_components": ["Docs Site Header", "Search Bar"],
+      "platform_optimizations": "On mobile, this may be a full-screen modal. On desktop, it's a dedicated page.",
+      "implementation_priority": 3,
+      "estimated_effort": "6-10 hours (theming and integration)",
+      "user_flow_criticality": "high"
+    }
+  ],
+  "implementation_plan": {
+    "phase_1_foundation": {
+      "components": ["Docusaurus project initialization", "Base theme configuration (colors, fonts)", "Docs Site Header theming"],
+      "rationale": "Establish the core Docusaurus project and align its visual foundation with the main application for a consistent look and feel.",
+      "estimated_duration": "2-3 days"
+    },
+    "phase_2_building_blocks": {
+      "components": ["Docs Site Sidebar configuration", "Article Layout theming", "Doc Paginator theming", "Admonition/Code Block theming"],
+      "rationale": "Configure the main navigation structure and style the core content presentation components.",
+      "estimated_duration": "3-4 days"
+    },
+    "phase_3_complex_components": {
+      "components": ["Search Bar integration (e.g., Algolia)", "Search Results page theming"],
+      "rationale": "Implement the critical search functionality which requires external service integration and configuration.",
+      "estimated_duration": "4-6 days"
+    },
+    "phase_4_screens": {
+      "screens": ["Create placeholder MDX files for all doc pages", "Develop custom Documentation Home page"],
+      "rationale": "Build out the full site structure with placeholder content to enable end-to-end testing of navigation and search. Actual content writing is a separate, parallel task.",
+      "estimated_duration": "3-5 days"
+    }
+  },
+  "platform_implementation_strategy": {
+    "target_platform": "Responsive Web (to be embedded in a SPA)",
+    "implementation_approach": "mobile_first",
+    "responsive_strategy": "Leverage Docusaurus's built-in responsive design, with custom media queries for fine-tuning.",
+    "progressive_enhancement": "Core content (HTML) is primary, enhanced with CSS for layout and JS for interactivity (search, navigation).",
+    "browser_support": "Latest versions of Chrome, Firefox, Safari, and Edge.",
+    "accessibility_integration": "WCAG 2.1 AA compliance is a primary goal, leveraging Docusaurus's strong accessibility foundation."
+  },
+  "quality_assurance_plan": {
+    "component_testing": "Theming and configuration of Docusaurus components will be visually verified.",
+    "integration_testing": "CI/CD pipeline will build the Docusaurus site on every commit to ensure no breaking changes.",
+    "responsive_testing": "Manual testing across mobile, tablet, and desktop breakpoints for all page templates.",
+    "accessibility_testing": "Automated checks (e.g., Axe) and manual keyboard/screen reader testing on key page templates.",
+    "performance_testing": "Lighthouse scores will be monitored to ensure fast load times for the static assets."
+  }
+}

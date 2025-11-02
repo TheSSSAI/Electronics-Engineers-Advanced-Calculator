@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+ <html lang="en">
+ <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Molecular Component: Sidebar Navigation Item</title>
+     <style>
+         /* --- Base Setup --- */
+         *, *::before, *::after { box-sizing: border-box; }
+         body {
+             background-color: #f8f9fa;
+             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+             padding: 2rem;
+             color: #212529;
+         }
+ 
+         /* --- Design System Tokens --- */
+         :root {
+             /* Colors */
+             --color-primary-50: #E3F2FD;
+             --color-primary-700: #1976D2;
+             --color-neutrals-white: #FFFFFF;
+             --color-gray-100: #F1F3F5;
+             --color-gray-600: #868E96;
+             --color-gray-700: #495057;
+             --color-gray-900: #212529;
+             --color-focus-ring: #2196F380;
+ 
+             /* Typography */
+             --font-family-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+             --font-size-body: 16px;
+             --font-size-caption: 14px;
+             --font-weight-normal: 400;
+             --font-weight-semibold: 600;
+ 
+             /* Spacing */
+             --space-xs: 4px;
+             --space-sm: 8px;
+             --space-md: 16px;
+ 
+             /* Borders & Transitions */
+             --border-radius-md: 6px;
+             --transition-fast: 150ms ease-in-out;
+             --transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+         }
+ 
+         /* --- Showcase Specific Styles --- */
+         .showcase-wrapper {
+             display: grid;
+             grid-template-columns: 300px 1fr;
+             gap: 2rem;
+         }
+         .sidebar-container {
+             background-color: var(--color-neutrals-white);
+             border-radius: 8px;
+             padding: var(--space-md);
+             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+         }
+         .showcase-notes h1 { margin-bottom: 1.5rem; }
+         .showcase-notes h2 { margin-top: 2rem; margin-bottom: 1rem; }
+         .showcase-notes p { margin-bottom: 0.5rem; color: var(--color-gray-600); line-height: 1.6; }
+         .showcase-notes code { background: #e9ecef; padding: 2px 4px; border-radius: 4px; font-family: monospace; }
+ 
+         @media (max-width: 768px) {
+             .showcase-wrapper {
+                 grid-template-columns: 1fr;
+             }
+         }
+ 
+         /* --- Component Styles: Sidebar Navigation Item --- */
+ 
+         /* List wrapper styles */
+         .sidebar-nav__list {
+             list-style: none;
+             padding: 0;
+             margin: 0;
+         }
+ 
+         .sidebar-nav__item {
+             margin-bottom: var(--space-xs);
+         }
+ 
+         /* Common styles for both links and category toggles */
+         .sidebar-nav__link,
+         .sidebar-nav__category-toggle {
+             display: flex;
+             align-items: center;
+             width: 100%;
+             padding: var(--space-sm) var(--space-md);
+             font-family: var(--font-family-sans);
+             font-size: var(--font-size-caption);
+             font-weight: var(--font-weight-normal);
+             line-height: 1.5;
+             text-align: left;
+             border: none;
+             background-color: transparent;
+             border-radius: var(--border-radius-md);
+             cursor: pointer;
+             transition: background-color var(--transition-fast), color var(--transition-fast);
+             color: var(--color-gray-700);
+             text-decoration: none;
+             min-height: 44px; /* Touch target */
+         }
+ 
+         /* States */
+         .sidebar-nav__link:hover,
+         .sidebar-nav__category-toggle:hover {
+             background-color: var(--color-gray-100);
+             color: var(--color-gray-900);
+         }
+ 
+         .sidebar-nav__link:focus-visible,
+         .sidebar-nav__category-toggle:focus-visible {
+             outline: 2px solid var(--color-focus-ring);
+             outline-offset: 2px;
+         }
+ 
+         .sidebar-nav__link.is-active,
+         .sidebar-nav__link.is-active:hover {
+             background-color: var(--color-primary-50);
+             color: var(--color-primary-700);
+             font-weight: var(--font-weight-semibold);
+         }
+ 
+         /* When a child link is active, make the parent category toggle bold */
+         .sidebar-nav__item.has-active-child > .sidebar-nav__category-toggle {
+             font-weight: var(--font-weight-semibold);
+             color: var(--color-gray-900);
+         }
+ 
+         /* Collapsible Category Variant */
+         .sidebar-nav__category-toggle {
+             justify-content: space-between;
+         }
+ 
+         .sidebar-nav__category-icon {
+             width: 16px;
+             height: 16px;
+             color: var(--color-gray-600);
+             transition: transform var(--transition-fast);
+             flex-shrink: 0;
+         }
+ 
+         .sidebar-nav__category-toggle[aria-expanded="true"] .sidebar-nav__category-icon {
+             transform: rotate(90deg);
+         }
+ 
+         .sidebar-nav__submenu {
+             list-style: none;
+             padding: var(--space-xs) 0 0 var(--space-md);
+             margin: 0;
+             overflow: hidden;
+             max-height: 0;
+             transition: max-height var(--transition-smooth);
+         }
+ 
+         .sidebar-nav__category-toggle[aria-expanded="true"] + .sidebar-nav__submenu {
+             max-height: 500px; /* Should be larger than the max possible content height */
+         }
+ 
+         .sidebar-nav__submenu .sidebar-nav__link {
+             font-size: calc(var(--font-size-caption) * 0.95);
+             padding-left: calc(var(--space-md) + var(--space-sm));
+         }
+     </style>
+ </head>
+ <body>
+     <div class="showcase-wrapper">
+         <aside class="sidebar-container">
+             <nav aria-label="Documentation Navigation">
+                 <ul class="sidebar-nav__list">
+                     <li class="sidebar-nav__item">
+                         <a href="#" class="sidebar-nav__link">
+                             Introduction
+                         </a>
+                     </li>
+                     <li class="sidebar-nav__item">
+                         <button class="sidebar-nav__category-toggle" aria-expanded="false" aria-controls="submenu-core">
+                             <span>Core Calculator</span>
+                             <svg class="sidebar-nav__category-icon" xmlns="http://www.w.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                         </button>
+                         <ul class="sidebar-nav__submenu" id="submenu-core">
+                             <li class="sidebar-nav__item">
+                                 <a href="#" class="sidebar-nav__link">Arithmetic</a>
+                             </li>
+                             <li class="sidebar-nav__item">
+                                 <a href="#" class="sidebar-nav__link">Trigonometry</a>
+                             </li>
+                         </ul>
+                     </li>
+                     <li class="sidebar-nav__item has-active-child">
+                         <button class="sidebar-nav__category-toggle" aria-expanded="true" aria-controls="submenu-electronics">
+                             <span>Electronics</span>
+                             <svg class="sidebar-nav__category-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                         </button>
+                         <ul class="sidebar-nav__submenu" id="submenu-electronics">
+                             <li class="sidebar-nav__item">
+                                 <a href="#" class="sidebar-nav__link">Ohm's Law</a>
+                             </li>
+                             <li class="sidebar-nav__item">
+                                 <a href="#" class="sidebar-nav__link is-active">555 Timer</a>
+                             </li>
+                             <li class="sidebar-nav__item">
+                                 <a href="#" class="sidebar-nav__link">Resistor Codes</a>
+                             </li>
+                         </ul>
+                     </li>
+                     <li class="sidebar-nav__item">
+                        <a href="#" class="sidebar-nav__link">
+                            User Accounts
+                        </a>
+                    </li>
+                 </ul>
+             </nav>
+         </aside>
+ 
+         <main class="showcase-notes">
+             <h1>Sidebar Navigation Item</h1>
+             <p>This component is used to build the primary navigation for the documentation sidebar. It supports two main variants: a simple document link and a collapsible category for hierarchical content.</p>
+ 
+             <h2>Component Variations & States</h2>
+             <p>The sidebar on the left is an interactive example. The states below are static for demonstration.</p>
+ 
+             <h3>Variant: Document Link (<code>.sidebar-nav__link</code>)</h3>
+             <div class="sidebar-container" style="width: 100%; margin-top: 1rem;">
+                 <ul class="sidebar-nav__list">
+                     <li class="sidebar-nav__item">
+                         <a href="#" class="sidebar-nav__link">Default State</a>
+                     </li>
+                     <li class="sidebar-nav__item">
+                         <a href="#" class="sidebar-nav__link" style="background-color: var(--color-gray-100); color: var(--color-gray-900);">Hover State</a>
+                     </li>
+                     <li class="sidebar-nav__item">
+                         <a href="#" class="sidebar-nav__link is-active">Active State</a>
+                     </li>
+                     <li class="sidebar-nav__item">
+                         <a href="#" class="sidebar-nav__link" style="outline: 2px solid var(--color-focus-ring); outline-offset: 2px;">Focus State</a>
+                     </li>
+                 </ul>
+             </div>
+ 
+             <h3>Variant: Collapsible Category (<code>.sidebar-nav__category-toggle</code>)</h3>
+             <div class="sidebar-container" style="width: 100%; margin-top: 1rem;">
+                 <ul class="sidebar-nav__list">
+                     <li class="sidebar-nav__item">
+                         <p style="padding: 0 var(--space-md) var(--space-sm);"><strong>Collapsed State (Default)</strong></p>
+                         <button class="sidebar-nav__category-toggle" aria-expanded="false" aria-controls="demo-submenu-1">
+                             <span>Category Name</span>
+                             <svg class="sidebar-nav__category-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                         </button>
+                         <ul class="sidebar-nav__submenu" id="demo-submenu-1"></ul>
+                     </li>
+                     <li class="sidebar-nav__item" style="margin-top: 1rem;">
+                         <p style="padding: 0 var(--space-md) var(--space-sm);"><strong>Expanded State</strong></p>
+                         <button class="sidebar-nav__category-toggle" aria-expanded="true" aria-controls="demo-submenu-2">
+                             <span>Category Name</span>
+                             <svg class="sidebar-nav__category-icon" style="transform: rotate(90deg);" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                         </button>
+                         <ul class="sidebar-nav__submenu" id="demo-submenu-2" style="max-height: 500px;">
+                             <li class="sidebar-nav__item"><a href="#" class="sidebar-nav__link">Sub-item 1</a></li>
+                         </ul>
+                     </li>
+                     <li class="sidebar-nav__item has-active-child" style="margin-top: 1rem;">
+                        <p style="padding: 0 var(--space-md) var(--space-sm);"><strong>Expanded with Active Child</strong></p>
+                        <button class="sidebar-nav__category-toggle" aria-expanded="true" aria-controls="demo-submenu-3">
+                            <span>Category Name</span>
+                            <svg class="sidebar-nav__category-icon" style="transform: rotate(90deg);" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </button>
+                        <ul class="sidebar-nav__submenu" id="demo-submenu-3" style="max-height: 500px;">
+                            <li class="sidebar-nav__item"><a href="#" class="sidebar-nav__link is-active">Active Sub-item</a></li>
+                        </ul>
+                    </li>
+                 </ul>
+             </div>
+         </main>
+     </div>
+ </body>
+ </html>

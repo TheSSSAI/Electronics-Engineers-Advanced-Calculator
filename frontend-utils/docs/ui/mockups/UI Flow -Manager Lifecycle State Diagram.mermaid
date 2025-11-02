@@ -1,0 +1,34 @@
+stateDiagram-v2
+    direction LR
+
+    [*] --> Idle
+    Idle --> Initializing : init()
+
+    state Initializing {
+        direction TB
+        [*] --> CheckingDependencies
+        CheckingDependencies --> ConnectingToServices : Dependencies OK
+        ConnectingToServices --> [*] : Services Connected
+    }
+    note right of Initializing
+        The init() method is asynchronous.
+        It performs setup tasks like dependency checks and service connections.
+    end note
+
+    Initializing --> Ready : onInitSuccess
+    Initializing --> Error : onInitFailure
+
+    Ready --> Processing : startOperation()
+    Processing --> Ready : onOperationComplete
+    Processing --> Ready : onOperationFailure
+    note left of Processing
+        Operation failures do not terminate the manager.
+        The system returns to a 'Ready' state to accept new operations.
+        Errors should be logged and handled appropriately.
+    end note
+
+    Ready --> Destroying : destroy()
+    Error --> Destroying : destroy()
+    Error --> Initializing : retryInit()
+
+    Destroying --> [*] : onDestroyComplete

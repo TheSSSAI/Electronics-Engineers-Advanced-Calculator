@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atomic Components Showcase: Documentation</title>
+  <style>
+    /* --- CSS Reset and Basic Setup --- */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* --- Design System Tokens --- */
+    :root {
+      /* Colors - Base */
+      --color-white: #ffffff;
+      --color-black: #1a1a1a;
+      --color-gray-50: #f8f9fa;
+      --color-gray-100: #f1f3f5;
+      --color-gray-200: #e9ecef;
+      --color-gray-400: #ced4da;
+      --color-gray-600: #868e96;
+      --color-gray-700: #495057;
+      --color-gray-800: #343a40;
+      --color-gray-900: #212529;
+
+      /* Colors - Semantic */
+      --color-link: #0066cc;
+      --color-link-hover: #0052a3;
+      --color-link-visited: #551a8b;
+      --color-focus-ring: #0066cc80;
+
+      /* Admonition Colors */
+      --color-info-bg: #e7f5ff;
+      --color-info-border: #99d9ff;
+      --color-info-icon: #33aaff;
+      --color-tip-bg: #e6fcf5;
+      --color-tip-border: #96f2d7;
+      --color-tip-icon: #20c997;
+      --color-warning-bg: #fff9e6;
+      --color-warning-border: #ffe066;
+      --color-warning-icon: #fab005;
+      --color-danger-bg: #fff5f5;
+      --color-danger-border: #ffc9c9;
+      --color-danger-icon: #fa5252;
+      --color-note-bg: var(--color-gray-100);
+      --color-note-border: var(--color-gray-400);
+      --color-note-icon: var(--color-gray-600);
+
+      /* Code Block Colors */
+      --color-code-bg: var(--color-gray-900);
+      --color-code-text: #f8f8f2;
+      --color-code-title-bg: var(--color-gray-800);
+      --color-code-title-text: var(--color-gray-200);
+      --color-code-keyword: #ff79c6;
+      --color-code-string: #f1fa8c;
+      --color-code-function: #50fa7b;
+      --color-code-comment: #6272a4;
+      --color-code-number: #bd93f9;
+      --color-code-punctuation: #f8f8f2;
+
+      /* Typography */
+      --font-family-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+      --font-family-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+      --font-size-base: 1rem;
+      --font-size-sm: 0.875rem;
+      --font-size-lg: 1.125rem;
+      --line-height-base: 1.6;
+
+      /* Spacing */
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      --space-xl: 2rem;
+      --space-xxl: 3rem;
+
+      /* Borders & Shadows */
+      --border-radius-sm: 4px;
+      --border-radius-md: 6px;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    /* --- Showcase Page Styles --- */
+    body {
+      font-family: var(--font-family-sans);
+      background-color: var(--color-white);
+      color: var(--color-gray-800);
+      line-height: var(--line-height-base);
+      padding: var(--space-xl);
+    }
+
+    .showcase__header {
+      margin-bottom: var(--space-xxl);
+      border-bottom: 1px solid var(--color-gray-200);
+      padding-bottom: var(--space-lg);
+    }
+
+    .showcase__header h1 {
+      font-size: 2.5rem;
+      color: var(--color-black);
+      margin-bottom: var(--space-xs);
+    }
+
+    .component-section {
+      margin-bottom: var(--space-xxl);
+    }
+
+    .component-section > h2 {
+      font-size: 1.75rem;
+      color: var(--color-black);
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-sm);
+      border-bottom: 1px solid var(--color-gray-200);
+    }
+
+    .component-group {
+      margin-bottom: var(--space-xl);
+      padding: var(--space-lg);
+      border: 1px solid var(--color-gray-200);
+      border-radius: var(--border-radius-md);
+    }
+
+    .component-group > h3 {
+      font-size: 1.25rem;
+      margin-bottom: var(--space-sm);
+    }
+    
+    .component-group > p {
+      color: var(--color-gray-600);
+      margin-bottom: var(--space-md);
+    }
+
+    .state-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-md);
+        align-items: center;
+    }
+
+    /* --- Inline Link --- */
+    .link {
+      font-family: inherit;
+      color: var(--color-link);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: all 0.2s ease-in-out;
+    }
+    .link:hover {
+      color: var(--color-link-hover);
+      border-bottom-color: var(--color-link-hover);
+    }
+    .link:focus {
+      outline: 2px solid var(--color-focus-ring);
+      outline-offset: 2px;
+      border-radius: var(--border-radius-sm);
+    }
+    .link:active {
+      transform: translateY(1px);
+    }
+    .link:visited {
+      color: var(--color-link-visited);
+    }
+    .link--external::after {
+        content: ' ↗';
+        font-size: 0.8em;
+        vertical-align: super;
+        display: inline-block;
+    }
+    /* For showcasing states */
+    .link.pseudo-hover { color: var(--color-link-hover); border-bottom-color: var(--color-link-hover); }
+    .link.pseudo-focus { outline: 2px solid var(--color-focus-ring); outline-offset: 2px; border-radius: var(--border-radius-sm); }
+    .link.pseudo-active { transform: translateY(1px); }
+    .link.pseudo-visited { color: var(--color-link-visited); }
+
+    /* --- Admonition Block --- */
+    .admonition {
+      padding: var(--space-md);
+      margin-bottom: var(--space-md);
+      border-left-width: 4px;
+      border-left-style: solid;
+      border-radius: var(--border-radius-md);
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-md);
+    }
+
+    .admonition__icon {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      margin-top: 2px;
+    }
+
+    .admonition__content p {
+      margin: 0;
+    }
+    
+    .admonition--note {
+      background-color: var(--color-note-bg);
+      border-color: var(--color-note-border);
+    }
+    .admonition--note .admonition__icon { color: var(--color-note-icon); }
+
+    .admonition--tip {
+      background-color: var(--color-tip-bg);
+      border-color: var(--color-tip-border);
+    }
+    .admonition--tip .admonition__icon { color: var(--color-tip-icon); }
+
+    .admonition--info {
+      background-color: var(--color-info-bg);
+      border-color: var(--color-info-border);
+    }
+    .admonition--info .admonition__icon { color: var(--color-info-icon); }
+    
+    .admonition--warning {
+      background-color: var(--color-warning-bg);
+      border-color: var(--color-warning-border);
+    }
+    .admonition--warning .admonition__icon { color: var(--color-warning-icon); }
+
+    .admonition--danger {
+      background-color: var(--color-danger-bg);
+      border-color: var(--color-danger-border);
+    }
+    .admonition--danger .admonition__icon { color: var(--color-danger-icon); }
+
+    /* --- Code Block --- */
+    .code-block {
+      background-color: var(--color-code-bg);
+      border-radius: var(--border-radius-md);
+      margin-bottom: var(--space-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .code-block__title {
+      background-color: var(--color-code-title-bg);
+      color: var(--color-code-title-text);
+      padding: var(--space-sm) var(--space-md);
+      font-family: var(--font-family-sans);
+      font-size: var(--font-size-sm);
+      border-bottom: 1px solid var(--color-gray-700);
+    }
+    .code-block pre {
+      margin: 0;
+      padding: var(--space-md);
+      overflow-x: auto;
+    }
+    .code-block code {
+      font-family: var(--font-family-mono);
+      font-size: var(--font-size-sm);
+      color: var(--color-code-text);
+      white-space: pre;
+    }
+
+    /* Syntax Highlighting Tokens */
+    .token.keyword { color: var(--color-code-keyword); }
+    .token.string { color: var(--color-code-string); }
+    .token.function { color: var(--color-code-function); }
+    .token.comment { color: var(--color-code-comment); font-style: italic; }
+    .token.number { color: var(--color-code-number); }
+    .token.punctuation { color: var(--color-code-punctuation); }
+
+  </style>
+</head>
+<body>
+
+  <main class="showcase">
+    <header class="showcase__header">
+      <h1>Atomic Components: Documentation System</h1>
+      <p>A showcase of atomic components used in the in-app help and documentation system.</p>
+    </header>
+
+    <section class="component-section">
+      <h2>Navigation Components</h2>
+
+      <div class="component-group">
+        <h3>Inline Link</h3>
+        <p>Used for navigation within and outside the documentation. All states are demonstrated.</p>
+        <h4>Interactive Example</h4>
+        <p>This is a paragraph with an <a href="#" class="link">interactive internal link</a> and an <a href="https://example.com" class="link link--external" target="_blank" rel="noopener noreferrer">interactive external link</a>.</p>
+        
+        <h4>States Showcase</h4>
+        <div class="state-grid">
+            <a href="#" class="link">Default</a>
+            <a href="#" class="link pseudo-hover">Hover</a>
+            <a href="#" class="link pseudo-active">Active</a>
+            <a href="#" class="link pseudo-focus">Focus</a>
+            <a href="#" class="link pseudo-visited">Visited</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="component-section">
+      <h2>Content Display Components</h2>
+
+      <div class="component-group">
+        <h3>Admonition Block</h3>
+        <p>Used to draw attention to specific pieces of information with semantic variants.</p>
+
+        <div class="admonition admonition--note" role="note">
+          <svg class="admonition__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <div class="admonition__content">
+            <p><strong>Note:</strong> This is a standard note. It provides additional information that is relevant to the main text.</p>
+          </div>
+        </div>
+
+        <div class="admonition admonition--tip" role="note">
+            <svg class="admonition__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v-5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11"/><path d="m9 9 2 2 4-4"/><path d="M22 13v6a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-2"/></svg>
+          <div class="admonition__content">
+            <p><strong>Tip:</strong> This is a helpful tip or a best practice suggestion that can improve the user's workflow.</p>
+          </div>
+        </div>
+
+        <div class="admonition admonition--info" role="note">
+          <svg class="admonition__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <div class="admonition__content">
+            <p><strong>Info:</strong> Use this for important information that users should be aware of but is not critical.</p>
+          </div>
+        </div>
+
+        <div class="admonition admonition--warning" role="alert">
+          <svg class="admonition__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div class="admonition__content">
+            <p><strong>Warning:</strong> This indicates a potential issue or a caution that requires user attention to avoid problems.</p>
+          </div>
+        </div>
+
+        <div class="admonition admonition--danger" role="alert">
+          <svg class="admonition__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div class="admonition__content">
+            <p><strong>Danger:</strong> This is a critical warning. Ignoring this may lead to data loss or other serious consequences.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="component-group">
+        <h3>Code Block</h3>
+        <p>Used for displaying code snippets, terminal commands, or other preformatted text.</p>
+
+        <h4>Plain Text Variant</h4>
+        <div class="code-block">
+          <pre><code>This is a plain text code block.
+It preserves whitespace and line breaks.
+No syntax highlighting is applied.</code></pre>
+        </div>
+
+        <h4>With Title Variant</h4>
+        <div class="code-block">
+          <div class="code-block__title">config.js</div>
+          <pre><code>// This code block has a title.
+const setting = "enabled";</code></pre>
+        </div>
+        
+        <h4>Syntax Highlighted Variant</h4>
+        <div class="code-block">
+          <div class="code-block__title">example.js</div>
+          <pre><code><span class="token.comment">// This is a JavaScript example with syntax highlighting.</span>
+<span class="token.keyword">import</span> React <span class="token.keyword">from</span> <span class="token.string">'react'</span><span class="token.punctuation">;</span>
+
+<span class="token.keyword">function</span> <span class="token.function">HelloWorld</span><span class="token.punctuation">({</span> name <span class="token.punctuation">})</span> <span class="token.punctuation">{</span>
+  <span class="token.keyword">const</span> PI <span class="token.punctuation">=</span> <span class="token.number">3.14</span><span class="token.punctuation">;</span>
+  <span class="token.keyword">return</span> <span class="token.punctuation">(</span>
+    <span class="token.punctuation">&lt;</span>div<span class="token.punctuation">&gt;</span>Hello<span class="token.punctuation">,</span> <span class="token.punctuation">{</span>name<span class="token.punctuation">}</span><span class="token.punctuation">!&lt;/</span>div<span class="token.punctuation">&gt;</span>
+  <span class="token.punctuation">)</span><span class="token.punctuation">;</span>
+<span class="token.punctuation">}</span></code></pre>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</body>
+</html>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Individual Component - Component Specifications</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.6;
+            color: #2d3748;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        
+        .component-type-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 8px;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 30px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .section h2 {
+            color: #1e293b;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #4f46e5;
+            display: inline-block;
+        }
+        
+        .section h3 {
+            color: #4f46e5;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 20px 0 12px 0;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .info-card {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .info-card h4 {
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+        
+        .info-card p {
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .variations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+        
+        .variation-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .variation-name {
+            font-weight: 600;
+            color: #4f46e5;
+            margin-bottom: 8px;
+        }
+        
+        .variation-code {
+            background: #f1f5f9;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+            color: #1e293b;
+            overflow-x: auto;
+            margin: 8px 0;
+            border-left: 4px solid #4f46e5;
+        }
+        
+        .variation-description {
+            font-size: 13px;
+            color: #64748b;
+            font-style: italic;
+        }
+        
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        
+        .feature-category {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .feature-category h4 {
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        
+        .feature-category ul {
+            list-style: none;
+        }
+        
+        .feature-category li {
+            padding: 6px 0;
+            color: #4b5563;
+            font-size: 14px;
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .feature-category li:before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        .tokens-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 8px;
+        }
+        
+        .token {
+            background: #f0f9ff;
+            color: #0369a1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            border: 1px solid #bae6fd;
+            text-align: center;
+        }
+        
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 16px 0;
+            line-height: 1.4;
+        }
+        
+        .stats-bar {
+            background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+        
+        .stat {
+            flex: 1;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .stats-bar {
+                flex-direction: column;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Individual Component</h1>
+            <div class="component-type-badge">Unknown Component</div>
+        </div>
+        <div class="stats-bar">
+            <div class="stat">
+                <span class="stat-number">0</span>
+                <span class="stat-label">Variations</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">0</span>
+                <span class="stat-label">Design Tokens</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">0</span>
+                <span class="stat-label">Breakpoints</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">0</span>
+                <span class="stat-label">A11y Features</span>
+            </div>
+        </div><div class="content">
+        <div class="section">
+            <h2>Implementation Notes</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>Css Architecture</h4>
+                    <p>All styles are embedded in a <style> tag, using CSS Custom Properties for design tokens. BEM-like naming convention is used.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Component Organization</h4>
+                    <p>Components are grouped into logical sections with clear headings and descriptions.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Responsive Design</h4>
+                    <p>A mobile-first approach is applied, ensuring components are functional and readable on all screen sizes.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Accessibility Compliance</h4>
+                    <p>Components adhere to WCAG 2.1 AA guidelines, featuring semantic markup, sufficient color contrast, and visible focus states.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Browser Support</h4>
+                    <p>Designed for modern browsers including Chrome, Firefox, Safari, and Edge.</p>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Usage Guidelines</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>File Purpose</h4><p>This file serves as a living style guide and a single source of truth for the atomic components of the documentation system.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Development Workflow</h4><p>Developers can copy the HTML structure and CSS classes for direct implementation into the application.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Testing Scenarios</h4><p>The page can be used for visual regression testing, accessibility audits, and cross-browser compatibility checks for all atomic components.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Stakeholder Review</h4><p>This showcase can be shared with designers and product managers for visual review and sign-off on component implementation.</p>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</body>
+</html>

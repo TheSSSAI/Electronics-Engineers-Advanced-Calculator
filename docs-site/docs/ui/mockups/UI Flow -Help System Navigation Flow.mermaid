@@ -1,0 +1,44 @@
+flowchart TD
+    subgraph "Entry & Main View"
+        A["User Clicks Global Help Icon (US-025)"] --> B["Help System Modal Opens"]
+        B --> C{"User Decides to Browse or Search"}
+    end
+
+    C --> D["Browse Content"]
+    C --> E["Use Search"]
+
+    subgraph "Browse Path"
+        D --> F["User Clicks Category Link"]
+        F --> G["User Clicks Article Link"]
+    end
+
+    subgraph "Search Path (US-026)"
+        E --> H["User Types Query in Search Bar"]
+        H --> I["User Submits Search"]
+        I --> J{"Results Found?"}
+        J -->|"No"| K["Display 'No Results Found' Message"]
+        K --> H
+        J -->|"Yes"| L["Display List of Relevant Articles"]
+        L --> M["User Clicks a Result Link"]
+    end
+
+    subgraph "Viewing & Exit"
+        G --> Z["Article Content is Displayed"]
+        M --> Z
+        Z --> X["User Clicks 'Close' or Presses ESC"]
+        B --> X
+        L --> X
+        K --> X
+        X --> Y["Help System Closes & Returns to App"]
+    end
+
+    %% Styling
+    classDef userAction fill:#e3f2fd,stroke:#2196f3,color:#000
+    classDef systemState fill:#e8f5e9,stroke:#4caf50,color:#000
+    classDef decisionPoint fill:#fff9c4,stroke:#fbc02d,color:#000
+    classDef errorState fill:#ffebee,stroke:#d32f2f,color:#000
+
+    class A,F,G,H,I,M,X userAction;
+    class B,L,Y,Z systemState;
+    class C,J decisionPoint;
+    class K errorState;

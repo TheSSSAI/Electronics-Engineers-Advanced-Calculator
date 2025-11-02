@@ -1,0 +1,51 @@
+sequenceDiagram
+    actor "Client SPA" as ClientSPA
+    participant "API Gateway" as APIGateway
+    actor "User & Data Service" as UserDataService
+    participant "Export Job Queue" as ExportJobQueue
+    participant "Export Worker" as ExportWorker
+    participant "Application Database" as ApplicationDatabase
+    participant "Secure Storage" as SecureStorage
+    participant "Email Service" as EmailService
+
+    activate APIGateway
+    ClientSPA->>APIGateway: 1. Initiate data export request
+    APIGateway-->>ClientSPA: HTTP 202 Accepted
+    activate UserDataService
+    APIGateway->>UserDataService: 2. POST /users/me/export
+    UserDataService-->>APIGateway: 202 Accepted response object
+    UserDataService->>UserDataService: 3. Validate export eligibility
+    UserDataService-->>UserDataService: Eligibility status (true/false)
+    activate ExportJobQueue
+    UserDataService->>ExportJobQueue: 4. Queue export job
+    ExportJobQueue-->>UserDataService: Message ID
+    activate ExportWorker
+    ExportJobQueue->>ExportWorker: 5. Trigger worker with export job message
+    activate ApplicationDatabase
+    ExportWorker->>ApplicationDatabase: 6. Fetch all user-associated data
+    ApplicationDatabase-->>ExportWorker: User data records
+    ExportWorker->>ApplicationDatabase: 6.1. SELECT * FROM users WHERE id = :userId
+    ExportWorker->>ApplicationDatabase: 6.2. SELECT * FROM custom_modes WHERE user_id = :userId
+    ExportWorker->>ApplicationDatabase: 6.3. SELECT * FROM user_variables WHERE user_id = :userId
+    ExportWorker->>ApplicationDatabase: 6.4. SELECT * FROM calculation_history WHERE user_id = :userId
+    ExportWorker->>ExportWorker: 7. Aggregate data and generate JSON file
+    ExportWorker-->>ExportWorker: JSON string buffer
+    activate SecureStorage
+    ExportWorker->>SecureStorage: 8. Upload generated JSON file
+    SecureStorage-->>ExportWorker: S3 Object ETag
+    ExportWorker->>SecureStorage: 9. Generate secure download link
+    SecureStorage-->>ExportWorker: Pre-signed URL string
+    activate EmailService
+    ExportWorker->>EmailService: 10. Send email notification with download link
+    EmailService-->>ExportWorker: Message ID
+
+    note over ExportWorker: A Dead Letter Queue (DLQ) is configured for the SQS queue. If the Lambda worker fails after multi...
+    note over SecureStorage: The S3 bucket must be configured with Block all public access ON. Access is granted exclusively t...
+
+    deactivate EmailService
+    deactivate SecureStorage
+    deactivate ApplicationDatabase
+    deactivate ExportWorker
+    deactivate ExportJobQueue
+    deactivate UserDataService
+    deactivate APIGateway

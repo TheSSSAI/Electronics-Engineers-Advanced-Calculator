@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resistor Color Code Converter</title>
+  <style>
+    /* CSS Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+        height: 100%;
+    }
+
+    /* Design System Tokens (CSS Custom Properties) */
+    :root {
+        --font-primary: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+        --font-monospace: 'Roboto Mono', 'Fira Code', 'Courier New', monospace;
+
+        --font-size-h2: 36px;
+        --font-size-h3: 20px;
+        --font-size-body: 16px;
+        --font-size-caption: 14px;
+
+        --font-weight-normal: 400;
+        --font-weight-bold: 600;
+
+        --color-primary-100: #BBDEFB;
+        --color-primary-500: #2196F3;
+        --color-primary-700: #1976D2;
+
+        --color-white: #FFFFFF;
+        --color-gray-50: #F8F9FA;
+        --color-gray-100: #F1F3F5;
+        --color-gray-200: #E9ECEF;
+        --color-gray-500: #ADB5BD;
+        --color-gray-700: #495057;
+        --color-gray-900: #212529;
+
+        --color-success: #2E7D32;
+        --color-warning: #ED6C02;
+        --color-error: #D32F2F;
+
+        --spacing-xs: 4px;
+        --spacing-sm: 8px;
+        --spacing-md: 16px;
+        --spacing-lg: 24px;
+        --spacing-xl: 32px;
+
+        --border-radius: 8px;
+        --shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        
+        /* Resistor Colors */
+        --res-black: #333;
+        --res-brown: #A0522D;
+        --res-red: #D32F2F;
+        --res-orange: #F57C00;
+        --res-yellow: #FBC02D;
+        --res-green: #388E3C;
+        --res-blue: #1976D2;
+        --res-violet: #7B1FA2;
+        --res-gray: #616161;
+        --res-white: #FAFAFA;
+        --res-gold: #FFD700;
+        --res-silver: #C0C0C0;
+        --res-body: #F5DEB3;
+    }
+
+    /* Base Styles */
+    body {
+        font-family: var(--font-primary);
+        font-size: var(--font-size-body);
+        line-height: 1.6;
+        color: var(--color-gray-900);
+        background-color: var(--color-gray-100);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: var(--spacing-lg);
+    }
+    
+    h1, h2, h3 {
+        font-weight: var(--font-weight-bold);
+        line-height: 1.3;
+    }
+
+    /* Screen Container */
+    .screen-container {
+        width: 100%;
+        max-width: 900px;
+        background-color: var(--color-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        padding: var(--spacing-lg);
+    }
+
+    .screen-header {
+        margin-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-md);
+        border-bottom: 1px solid var(--color-gray-200);
+    }
+
+    .screen-header h1 {
+        font-size: var(--font-size-h2);
+    }
+
+    /* Tab Navigation */
+    .tabs {
+        display: flex;
+        border-bottom: 2px solid var(--color-gray-200);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .tab-button {
+        padding: var(--spacing-sm) var(--spacing-md);
+        border: none;
+        background: none;
+        font-size: var(--font-size-body);
+        font-weight: var(--font-weight-bold);
+        cursor: pointer;
+        color: var(--color-gray-700);
+        border-bottom: 3px solid transparent;
+        margin-bottom: -2px;
+        transition: color 0.2s, border-color 0.2s;
+    }
+
+    .tab-button:hover {
+        color: var(--color-primary-700);
+    }
+
+    .tab-button.active {
+        color: var(--color-primary-700);
+        border-bottom-color: var(--color-primary-700);
+    }
+    
+    .tab-panel {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xl);
+    }
+
+    /* Form & Controls */
+    .form-section {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-lg);
+    }
+    
+    fieldset {
+        border: 1px solid var(--color-gray-200);
+        padding: var(--spacing-md);
+        border-radius: var(--border-radius);
+    }
+    
+    legend {
+        font-weight: var(--font-weight-bold);
+        padding: 0 var(--spacing-sm);
+        margin-left: var(--spacing-sm);
+    }
+
+    .radio-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-md);
+    }
+    
+    .radio-group label {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        cursor: pointer;
+    }
+    
+    .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+    
+    .input-group label {
+        font-size: var(--font-size-caption);
+        font-weight: var(--font-weight-bold);
+        color: var(--color-gray-700);
+    }
+    
+    select, input[type="text"] {
+        width: 100%;
+        padding: 10px 12px;
+        font-size: var(--font-size-body);
+        border: 1px solid var(--color-gray-500);
+        border-radius: 4px;
+        background-color: var(--color-white);
+    }
+    
+    select:focus, input[type="text"]:focus {
+        outline: 2px solid var(--color-primary-500);
+        outline-offset: 2px;
+        border-color: var(--color-primary-500);
+    }
+    
+    .input-error {
+        border-color: var(--color-error);
+    }
+
+    .error-message, .suggestion-text {
+        font-size: var(--font-size-caption);
+        margin-top: var(--spacing-xs);
+    }
+    
+    .error-message {
+        color: var(--color-error);
+    }
+
+    .suggestion-text {
+        color: var(--color-primary-700);
+        background-color: var(--color-primary-100);
+        padding: var(--spacing-sm);
+        border-radius: 4px;
+    }
+    
+    .suggestion-text a {
+        font-weight: var(--font-weight-bold);
+        text-decoration: underline;
+        cursor: pointer;
+    }
+
+
+    /* Color Selectors Specifics */
+    .color-selectors-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: var(--spacing-md);
+    }
+
+    /* Resistor Visual */
+    .resistor-visual-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--color-gray-50);
+        padding: var(--spacing-xl);
+        border-radius: var(--border-radius);
+        min-height: 150px;
+    }
+
+    .resistor-body {
+        position: relative;
+        width: 250px;
+        height: 80px;
+        background-color: var(--res-body);
+        border-radius: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        border: 1px solid #D2B48C;
+    }
+    
+    .resistor-wire {
+        position: absolute;
+        height: 3px;
+        background-color: var(--color-gray-500);
+        width: 50px;
+        z-index: -1;
+    }
+    
+    .resistor-wire.left { left: -45px; }
+    .resistor-wire.right { right: -45px; }
+
+    .resistor-bands {
+        display: flex;
+        gap: 15px;
+        height: 100%;
+        width: 100%;
+        align-items: center;
+        padding: 0 30px;
+    }
+    
+    .resistor-band {
+        height: 100%;
+        width: 12px;
+        flex-shrink: 0;
+    }
+    
+    .resistor-band.band-6 { margin-left: auto; }
+    .resistor-band.band-5 { margin-left: auto; }
+    .resistor-band.band-4 { margin-left: auto; }
+
+    /* Results Display */
+    .results-container dl {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: var(--spacing-sm) var(--spacing-md);
+        align-items: center;
+    }
+    
+    .results-container dt {
+        font-weight: var(--font-weight-bold);
+        color: var(--color-gray-700);
+    }
+    
+    .results-container dd {
+        font-family: var(--font-monospace);
+        font-size: var(--font-size-h3);
+        font-weight: var(--font-weight-bold);
+        text-align: right;
+    }
+
+    /* Responsive Styles */
+    @media (min-width: 768px) {
+        .tab-panel {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+    
+    /* Variations section for demonstration */
+    .screen-variations {
+      margin-top: var(--spacing-xl);
+      padding-top: var(--spacing-lg);
+      border-top: 2px dashed var(--color-gray-500);
+    }
+    .variation-group {
+      margin-bottom: var(--spacing-xl);
+    }
+    .variation-group h3 {
+        margin-bottom: var(--spacing-md);
+        font-size: var(--font-size-h3);
+    }
+    .variation-group h3 + normal {
+        display: block;
+        margin-top: -12px;
+        margin-bottom: 12px;
+        font-size: var(--font-size-caption);
+        color: var(--color-gray-700);
+    }
+
+  </style>
+</head>
+<body>
+  <div class="screen-container">
+    <header class="screen-header">
+      <h1>Resistor Color Code Converter</h1>
+    </header>
+    
+    <main class="screen-content">
+        <nav class="tabs" role="tablist">
+            <button class="tab-button active" role="tab" aria-selected="true" aria-controls="panel-color-to-value">Color to Value</button>
+            <button class="tab-button" role="tab" aria-selected="false" aria-controls="panel-value-to-color">Value to Color</button>
+        </nav>
+
+        <!-- Main Demo: Color to Value (Default State) -->
+        <section id="panel-color-to-value" class="tab-panel" role="tabpanel">
+            <div class="form-section">
+                <fieldset>
+                    <legend>Number of Bands</legend>
+                    <div class="radio-group">
+                        <label><input type="radio" name="bands" value="3"> 3 Bands</label>
+                        <label><input type="radio" name="bands" value="4" checked> 4 Bands</label>
+                        <label><input type="radio" name="bands" value="5"> 5 Bands</label>
+                        <label><input type="radio" name="bands" value="6"> 6 Bands</label>
+                    </div>
+                </fieldset>
+                
+                <div class="color-selectors-grid">
+                    <div class="input-group">
+                        <label for="c2v-band1">Band 1</label>
+                        <select id="c2v-band1">
+                            <option>Brown</option><option>Red</option><option>Orange</option><option>Yellow</option><option>Green</option><option>Blue</option><option>Violet</option><option>Gray</option><option>White</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="c2v-band2">Band 2</label>
+                        <select id="c2v-band2">
+                            <option>Black</option><option>Brown</option><option>Red</option><option>Orange</option><option>Yellow</option><option>Green</option><option>Blue</option><option>Violet</option><option>Gray</option><option>White</option>
+                        </select>
+                    </div>
+                     <div class="input-group">
+                        <label for="c2v-band3">Multiplier</label>
+                        <select id="c2v-band3">
+                           <option>Black</option><option>Brown</option><option>Red</option><option>Orange</option><option>Yellow</option><option>Green</option><option>Blue</option><option>Violet</option><option>Gray</option><option>White</option><option>Gold</option><option>Silver</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="c2v-band4">Tolerance</label>
+                        <select id="c2v-band4">
+                           <option>Brown</option><option>Red</option><option>Green</option><option>Blue</option><option>Violet</option><option>Gray</option><option>Gold</option><option>Silver</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <div class="resistor-visual-container">
+                    <div class="resistor-body">
+                         <div class="resistor-wire left"></div>
+                         <div class="resistor-bands">
+                             <div class="resistor-band band-1" style="background-color: var(--res-brown);"></div>
+                             <div class="resistor-band band-2" style="background-color: var(--res-black);"></div>
+                             <div class="resistor-band band-3" style="background-color: var(--res-red);"></div>
+                             <div class="resistor-band band-4" style="background-color: var(--res-gold);"></div>
+                         </div>
+                         <div class="resistor-wire right"></div>
+                    </div>
+                </div>
+                <div class="results-container">
+                    <dl>
+                        <dt>Resistance</dt>
+                        <dd>--</dd>
+                        <dt>Tolerance</dt>
+                        <dd>--</dd>
+                    </dl>
+                </div>
+            </div>
+        </section>
+    </main>
+  </div>
+  
+  <!-- Screen Variations Section -->
+  <div class="screen-variations">
+    <h2>Screen Variations</h2>
+    
+    <div class="variation-group">
+        <h3>Variant Name: "Color to Value - Calculated"</h3>
+        <normal>Shows the result after a user selects colors for a 5-band resistor.</normal>
+        <section class="tab-panel">
+             <div class="form-section">
+                <p><strong>Bands:</strong> 5-band selected</p>
+                <p><strong>Selections:</strong> Orange, Orange, Black, Brown (Multiplier), Brown (Tolerance)</p>
+             </div>
+             <div class="form-section">
+                <div class="resistor-visual-container">
+                    <div class="resistor-body">
+                         <div class="resistor-wire left"></div>
+                         <div class="resistor-bands">
+                             <div class="resistor-band band-1" style="background-color: var(--res-orange);"></div>
+                             <div class="resistor-band band-2" style="background-color: var(--res-orange);"></div>
+                             <div class="resistor-band band-3" style="background-color: var(--res-black);"></div>
+                             <div class="resistor-band band-4" style="background-color: var(--res-brown);"></div>
+                             <div class="resistor-band band-5" style="background-color: var(--res-brown);"></div>
+                         </div>
+                         <div class="resistor-wire right"></div>
+                    </div>
+                </div>
+                <div class="results-container">
+                    <dl>
+                        <dt>Resistance</dt>
+                        <dd>3.3 kΩ</dd>
+                        <dt>Tolerance</dt>
+                        <dd>±1%</dd>
+                    </dl>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="variation-group">
+        <h3>Variant Name: "Value to Color - Suggestion Visible"</h3>
+        <normal>Shows the suggestion feature when a non-standard value is entered for a 5% tolerance resistor (E24 series).</normal>
+         <section class="tab-panel">
+            <div class="form-section">
+                <fieldset>
+                    <legend>Number of Bands</legend>
+                     <div class="radio-group">
+                        <label><input type="radio" name="bands2" value="4" checked> 4 Bands</label>
+                    </div>
+                </fieldset>
+                
+                <div class="input-group">
+                    <label for="v2c-resistance">Resistance (Ω)</label>
+                    <input type="text" id="v2c-resistance" value="480">
+                    <div class="suggestion-text">
+                        Nearest standard value: <a href="#">470 Ω</a>
+                    </div>
+                </div>
+                 <div class="input-group">
+                    <label for="v2c-tolerance">Tolerance</label>
+                    <select id="v2c-tolerance">
+                        <option>±5%</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-section">
+                <div class="resistor-visual-container">
+                   <div class="resistor-body">
+                         <div class="resistor-wire left"></div>
+                         <div class="resistor-bands">
+                             <div class="resistor-band band-1" style="background-color: var(--res-yellow);"></div>
+                             <div class="resistor-band band-2" style="background-color: var(--res-gray);"></div>
+                             <div class="resistor-band band-3" style="background-color: var(--res-brown);"></div>
+                             <div class="resistor-band band-4" style="background-color: var(--res-gold);"></div>
+                         </div>
+                         <div class="resistor-wire right"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <div class="variation-group">
+        <h3>Variant Name: "Value to Color - Calculated (6-band)"</h3>
+        <normal>Shows the calculated color bands after a user enters a value, tolerance, and temperature coefficient.</normal>
+        <section class="tab-panel">
+            <div class="form-section">
+                <p><strong>Bands:</strong> 6-band selected</p>
+                <p><strong>Inputs:</strong> 2.75 MΩ, ±5% Tolerance, 100 ppm/°C TempCo</p>
+            </div>
+            <div class="form-section">
+                <div class="resistor-visual-container">
+                    <div class="resistor-body">
+                        <div class="resistor-wire left"></div>
+                        <div class="resistor-bands">
+                            <div class="resistor-band band-1" style="background-color: var(--res-red);"></div>
+                            <div class="resistor-band band-2" style="background-color: var(--res-violet);"></div>
+                            <div class="resistor-band band-3" style="background-color: var(--res-green);"></div>
+                            <div class="resistor-band band-4" style="background-color: var(--res-orange);"></div>
+                            <div class="resistor-band band-5" style="background-color: var(--res-gold);"></div>
+                            <div class="resistor-band band-6" style="background-color: var(--res-brown);"></div>
+                        </div>
+                        <div class="resistor-wire right"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="variation-group">
+        <h3>Variant Name: "Input Error State"</h3>
+        <normal>Shows how an invalid input is handled in the 'Value to Color' mode.</normal>
+        <div class="input-group">
+            <label for="v2c-error-input">Resistance (Ω)</label>
+            <input type="text" id="v2c-error-input" class="input-error" value="abc">
+            <p class="error-message">Invalid number. Please enter a valid resistance value.</p>
+        </div>
+    </div>
+  </div>
+</body>
+</html>

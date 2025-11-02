@@ -1,0 +1,92 @@
+name: Build and Publish Formula Execution Service
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  lint-and-test:
+    name: Lint and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+
+  build-and-publish:
+    name: Build and Publish to AWS Lambda
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Required for OIDC authentication with AWS
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: GitHubActionsFormulaExecDeploy
+
+      - name: Build Lambda package
+        run: |
+          # Use the Dockerfile.build to create a build environment
+          # This ensures native dependencies like isolated-vm are compiled for Amazon Linux 2
+          echo "Building docker image for build environment..."
+          docker build -t formula-exec-builder -f Dockerfile.build .
+
+          # Create a container from the image, but don't start it
+          echo "Creating container..."
+          container_id=$(docker create formula-exec-builder)
+
+          # Copy the compiled node_modules out of the container
+          echo "Copying compiled node_modules from container..."
+          rm -rf node_modules
+          docker cp "${container_id}:/usr/app/node_modules" .
+
+          # Clean up the container
+          docker rm -v "${container_id}"
+
+          # Now build the TypeScript source code locally
+          echo "Building TypeScript source..."
+          # We need to install dev dependencies for webpack
+          npm install --only=development 
+          npm run build
+          
+          # Create the final deployment package
+          echo "Creating deployment package..."
+          mkdir -p deployment_package
+          cp -r node_modules deployment_package/
+          cp -r dist/* deployment_package/
+          cp package.json deployment_package/
+          
+          # Zip the contents
+          cd deployment_package
+          zip -r ../formula-execution-service.zip .
+
+      - name: Deploy to AWS Lambda
+        run: |
+          aws lambda update-function-code \
+            --function-name formula-execution-service \
+            --zip-file fileb://formula-execution-service.zip \
+            --region ${{ secrets.AWS_REGION }}

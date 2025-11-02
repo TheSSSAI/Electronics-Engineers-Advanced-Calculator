@@ -1,0 +1,573 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UserMenu - Component Specifications</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.6;
+            color: #2d3748;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        
+        .component-type-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 8px;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 30px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .section h2 {
+            color: #1e293b;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #4f46e5;
+            display: inline-block;
+        }
+        
+        .section h3 {
+            color: #4f46e5;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 20px 0 12px 0;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .info-card {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .info-card h4 {
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+        
+        .info-card p {
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .variations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+        
+        .variation-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .variation-name {
+            font-weight: 600;
+            color: #4f46e5;
+            margin-bottom: 8px;
+        }
+        
+        .variation-code {
+            background: #f1f5f9;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+            color: #1e293b;
+            overflow-x: auto;
+            margin: 8px 0;
+            border-left: 4px solid #4f46e5;
+        }
+        
+        .variation-description {
+            font-size: 13px;
+            color: #64748b;
+            font-style: italic;
+        }
+        
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        
+        .feature-category {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .feature-category h4 {
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        
+        .feature-category ul {
+            list-style: none;
+        }
+        
+        .feature-category li {
+            padding: 6px 0;
+            color: #4b5563;
+            font-size: 14px;
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .feature-category li:before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        .tokens-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 8px;
+        }
+        
+        .token {
+            background: #f0f9ff;
+            color: #0369a1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            border: 1px solid #bae6fd;
+            text-align: center;
+        }
+        
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 16px 0;
+            line-height: 1.4;
+        }
+        
+        .stats-bar {
+            background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+        
+        .stat {
+            flex: 1;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .stats-bar {
+                flex-direction: column;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>UserMenu</h1>
+            <div class="component-type-badge">molecular Component</div>
+        </div>
+        <div class="stats-bar">
+            <div class="stat">
+                <span class="stat-number">0</span>
+                <span class="stat-label">Variations</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">14</span>
+                <span class="stat-label">Design Tokens</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">3</span>
+                <span class="stat-label">Breakpoints</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">5</span>
+                <span class="stat-label">A11y Features</span>
+            </div>
+        </div><div class="content">
+        <div class="section">
+            <h2>Component Information</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>Component Id</h4>
+                    <p>MU-nav-002</p>
+                </div>
+                <div class="info-card">
+                    <h4>Component Name</h4>
+                    <p>UserMenu</p>
+                </div>
+                <div class="info-card">
+                    <h4>Component Type</h4>
+                    <p>molecular</p>
+                </div>
+                <div class="info-card">
+                    <h4>Description</h4>
+                    <p>Provides a dropdown menu for user-related actions. It displays a login/register button for logged-out users and an avatar with a menu for authenticated users, offering options like profile management and logout.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Design System Alignment</h4>
+                    <p>This component utilizes the design system's color palette for backgrounds and text, spacing for padding, typography for font styles, and border-radius for shaping. It depends on the atomic Button and Icon components for its composition.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Organism Map</h4>
+                    <p>AppHeader</p>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Design Tokens Used</h2>
+            <div class="tokens-grid"><div class="token">--color-primary-100</div><div class="token">--color-primary-200</div><div class="token">--color-primary-700</div><div class="token">--color-neutral-white</div><div class="token">--color-neutral-gray-100</div><div class="token">--color-neutral-gray-200</div><div class="token">--color-neutral-gray-700</div><div class="token">--color-neutral-gray-900</div><div class="token">--color-danger-500</div><div class="token">--space-sm</div><div class="token">--space-md</div><div class="token">--border-radius</div><div class="token">--font-size-body</div><div class="token">--font-size-small</div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Responsive Specifications</h2>
+            <div class="feature-list">
+                <div class="feature-category">
+                    <h4>Mobile Adaptations</h4>
+                    <ul><li>Dropdown positioning with `right: 0` ensures it doesn't overflow the viewport on the right.</li><li>For very small screens, a media query could be added to make the dropdown full-width (`width: calc(100vw - 32px); left: 16px; right: 16px;`).</li><li>All interactive elements (trigger, menu items) have a minimum height of 44px to ensure adequate touch targets.</li>
+                    </ul>
+                </div>
+                <div class="feature-category">
+                    <h4>Tablet Adaptations</h4>
+                    <ul><li>The component maintains its desktop appearance and behavior.</li>
+                    </ul>
+                </div>
+                <div class="feature-category">
+                    <h4>Desktop Enhancements</h4>
+                    <ul><li>The component uses hover and focus states for clear interactivity.</li><li>The shadow on the dropdown provides a sense of depth and separation from the main content.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Accessibility Features</h2>
+            <div class="feature-list">
+                <div class="feature-category">
+                    <h4>Keyboard Support</h4><p>The trigger button is focusable. When the dropdown is open, Tab key navigates through the menu items. Escape key (if JS is used) would close the menu.</p>
+                </div>
+                <div class="feature-category">
+                    <h4>Screen Reader Support</h4><p>The trigger button uses `aria-haspopup='true'` and `aria-expanded` to announce its function. The dropdown has `role='menu'` and items have `role='menuitem'` when implemented with JavaScript.</p>
+                </div>
+                <div class="feature-category">
+                    <h4>Focus Management</h4><p>A visible focus ring is applied to the trigger and all menu items. The showcase uses `:focus-within` to demonstrate how focus should be contained within the component when open.</p>
+                </div>
+                <div class="feature-category">
+                    <h4>Aria Attributes</h4><ul><li>aria-haspopup</li><li>aria-expanded</li><li>aria-controls</li></ul>
+                </div>
+                <div class="feature-category">
+                    <h4>Color Contrast</h4><p>All text and background color combinations adhere to WCAG 2.1 AA standards by using the predefined design system tokens.</p>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>CSS Implementation</h2>
+            <div class="code-block">/* UserMenu Component CSS */
+
+/* Component Base */
+.user-menu {
+  position: relative;
+  display: inline-block;
+}
+
+/* Trigger Button (Avatar) */
+.user-menu__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: var(--color-primary-100);
+  color: var(--color-primary-700);
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.user-menu__trigger .icon {
+  width: 24px;
+  height: 24px;
+}
+
+.user-menu__trigger:focus-visible {
+  outline: 2px solid var(--color-primary-700);
+  outline-offset: 2px;
+}
+
+.user-menu__trigger:hover {
+  background-color: var(--color-primary-200);
+}
+
+/* Dropdown Panel */
+.user-menu__dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 240px;
+  background-color: var(--color-neutral-white);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--color-neutral-gray-200);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 100;
+  list-style: none;
+  padding: var(--space-sm) 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+}
+
+/* Open State */
+.user-menu.is-open .user-menu__dropdown,
+.user-menu:focus-within .user-menu__dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Dropdown Header (User Info) */
+.user-menu__header {
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--color-neutral-gray-200);
+  margin-bottom: var(--space-sm);
+}
+
+.user-menu__header-name {
+  font-weight: 600;
+  color: var(--color-neutral-gray-900);
+  line-height: 1.3;
+}
+
+.user-menu__header-email {
+  font-size: var(--font-size-small);
+  color: var(--color-neutral-gray-700);
+  word-break: break-all;
+}
+
+/* Dropdown Items */
+.user-menu__item a,
+.user-menu__item button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  width: 100%;
+  text-align: left;
+  padding: 10px var(--space-md);
+  font-size: var(--font-size-body);
+  color: var(--color-neutral-gray-900);
+  text-decoration: none;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.user-menu__item a .icon,
+.user-menu__item button .icon {
+  color: var(--color-neutral-gray-700);
+}
+
+.user-menu__item a:hover,
+.user-menu__item button:hover,
+.user-menu__item a:focus-visible,
+.user-menu__item button:focus-visible {
+  background-color: var(--color-neutral-gray-100);
+  outline: none;
+}
+
+/* Divider */
+.user-menu__divider {
+  height: 1px;
+  background-color: var(--color-neutral-gray-200);
+  margin: var(--space-sm) 0;
+}
+
+/* Item - Danger Zone */
+.user-menu__item--danger button {
+  color: var(--color-danger-500);
+}
+
+.user-menu__item--danger button .icon {
+  color: var(--color-danger-500);
+}
+
+.user-menu__item--danger button:hover,
+.user-menu__item--danger button:focus-visible {
+  background-color: rgba(211, 47, 47, 0.1);
+}
+</div>
+        </div>
+        <div class="section">
+            <h2>Implementation Notes</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>Embedded Css Architecture</h4>
+                    <p>All styles are embedded in a single `<style>` tag, using CSS custom properties for design tokens and a BEM-like naming convention for the component structure.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Component Organization</h4>
+                    <p>The HTML is structured to demonstrate the component's variants (logged-in, logged-out) and states (open, closed, interactive) in a clear, organized showcase.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Responsive Design</h4>
+                    <p>The component is inherently responsive due to its simple, flexible layout. The absolute positioning of the dropdown from the right edge is a mobile-first friendly approach.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Accessibility Compliance</h4>
+                    <p>Semantic HTML (`button`, `ul`, `li`, `a`) is used. ARIA attributes are included on the trigger button. Focus states are clearly defined in the CSS.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Browser Support</h4>
+                    <p>The component uses modern, widely-supported CSS properties and should function correctly in all target browsers.</p>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Usage Guidelines</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>When To Use</h4><p>Use in the main application header (`AppHeader` organism) to provide access to user authentication and profile management.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Content Guidelines</h4><p>Menu items should use concise, action-oriented text (e.g., 'Log Out', 'Manage Profile'). User email in the header should be truncated if it's too long.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Placement Rules</h4><p>Typically placed on the far right of the application header.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Customization Options</h4><ul><li style="list-style: disc; margin-left: 16px; padding-left: 0;">The number and type of menu items are fully customizable by changing the `<li>` elements within the dropdown.</li><li style="list-style: disc; margin-left: 16px; padding-left: 0;">The trigger can be customized to show a user's initial or a full avatar image instead of a generic icon.</li></ul>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Testing Recommendations</h2>
+            <div class="feature-list">
+                <div class="feature-category">
+                    <h4>Browser Testing</h4><p>Test in Chrome, Firefox, Safari, Edge to ensure consistent positioning and transitions.</p>
+                </div>
+                <div class="feature-category">
+                    <h4>Device Testing</h4><p>Test on mobile and desktop viewports to verify dropdown positioning and usability.</p>
+                </div>
+                <div class="feature-category">
+                    <h4>Accessibility Testing</h4><ul><li>Verify keyboard navigation can open the menu and traverse all items.</li><li>Use a screen reader to check that ARIA attributes are announced correctly.</li><li>Check that focus indicators are always visible and have sufficient contrast.</li></ul>
+                </div>
+                <div class="feature-category">
+                    <h4>Performance Testing</h4><p>N/A for this component, as animations are simple CSS transitions.</p>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</body>
+</html>

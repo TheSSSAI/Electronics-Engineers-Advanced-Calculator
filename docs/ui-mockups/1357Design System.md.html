@@ -1,0 +1,237 @@
+
+{
+  "visual_foundation": {
+    "typography": {
+      "font_families": {
+        "primary": "'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif",
+        "secondary": "'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif",
+        "monospace": "'Roboto Mono', 'Fira Code', 'Courier New', monospace"
+      },
+      "font_scale": {
+        "h1": {
+          "size": "48px",
+          "weight": "700",
+          "line_height": "1.2"
+        },
+        "h2": {
+          "size": "36px",
+          "weight": "600",
+          "line_height": "1.3"
+        },
+        "h3": {
+          "size": "28px",
+          "weight": "600",
+          "line_height": "1.4"
+        },
+        "h4": {
+          "size": "20px",
+          "weight": "600",
+          "line_height": "1.5"
+        },
+        "body": {
+          "size": "16px",
+          "weight": "400",
+          "line_height": "1.6"
+        },
+        "caption": {
+          "size": "14px",
+          "weight": "400",
+          "line_height": "1.4"
+        }
+      },
+      "responsive_scaling": "Use CSS clamp() for fluid typography between mobile (375px) and desktop (1280px) breakpoints. Body font size will scale from 15px to 16px. Headings will scale more dramatically to maintain hierarchy and impact on larger screens."
+    },
+    "color_palette": {
+      "primary": {
+        "50": "#E3F2FD",
+        "100": "#BBDEFB",
+        "200": "#90CAF9",
+        "300": "#64B5F6",
+        "400": "#42A5F5",
+        "500": "#2196F3",
+        "600": "#1E88E5",
+        "700": "#1976D2",
+        "800": "#1565C0",
+        "900": "#0D47A1"
+      },
+      "secondary": {
+        "50": "#E0F7FA",
+        "500": "#00BCD4",
+        "900": "#006064"
+      },
+      "neutrals": {
+        "white": "#FFFFFF",
+        "gray_50": "#F8F9FA",
+        "gray_100": "#F1F3F5",
+        "gray_500": "#ADB5BD",
+        "gray_900": "#212529",
+        "black": "#000000"
+      },
+      "semantic": {
+        "success": "#2E7D32",
+        "warning": "#ED6C02",
+        "error": "#D32F2F",
+        "info": "#0288D1"
+      }
+    },
+    "spacing_system": {
+      "scale": [
+        "4px",
+        "8px",
+        "16px",
+        "24px",
+        "32px",
+        "48px",
+        "64px",
+        "96px"
+      ],
+      "grid_system": "A 12-column responsive grid system based on CSS Grid, with standard gutter widths of 16px on mobile and 24px on desktop.",
+      "container_widths": {
+        "mobile": "100%",
+        "tablet": "768px",
+        "desktop": "1200px"
+      },
+      "responsive_spacing": "Spacing values (tokens) are consistent across breakpoints. Layouts will reflow based on the grid system, but padding/margin tokens remain the same for predictability and ease of implementation."
+    }
+  },
+  "component_specifications": {
+    "buttons": {
+      "primary": {
+        "default_state": {
+          "background": "#1976D2",
+          "text": "#FFFFFF",
+          "padding": "12px 24px"
+        },
+        "hover_state": {
+          "background": "#1565C0",
+          "text": "#FFFFFF",
+          "elevation": "0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12)"
+        },
+        "active_state": {
+          "background": "#0D47A1",
+          "transform": "scale(0.98)"
+        },
+        "disabled_state": {
+          "background": "#E0E0E0",
+          "text": "#9E9E9E",
+          "cursor": "not-allowed"
+        },
+        "focus_state": {
+          "outline": "2px solid #1976D2",
+          "outline_offset": "2px"
+        }
+      },
+      "secondary": "A contained button with a light primary background (primary.50: #E3F2FD) and primary text color (primary.700: #1976D2). States follow a similar pattern of darkening on hover/active.",
+      "accessibility": "Buttons must have a minimum touch target of 44x44px. Icon-only buttons require a descriptive aria-label. Focus states must be highly visible and meet contrast requirements."
+    },
+    "form_inputs": {
+      "text_input": {
+        "default_state": {
+          "border": "1px solid #CED4DA",
+          "padding": "12px 16px"
+        },
+        "focus_state": {
+          "border": "2px solid #2196F3",
+          "box_shadow": "0 0 0 3px rgba(33, 150, 243, 0.2)"
+        },
+        "error_state": {
+          "border": "2px solid #D32F2F"
+        },
+        "disabled_state": {
+          "background": "#F1F3F5",
+          "cursor": "not-allowed"
+        },
+        "accessibility": "Every input must have a corresponding <label>. Error messages must be linked via aria-describedby for screen reader announcements."
+      }
+    },
+    "navigation": {
+      "header": {
+        "desktop_layout": "Persistent AppBar at the top containing utility navigation (User Profile, Help) and a hamburger icon to toggle the main navigation Drawer.",
+        "mobile_layout": "AppBar remains, but main navigation is accessed exclusively via the hamburger menu opening a modal Drawer.",
+        "active_states": "The active navigation item in the Drawer has a distinct background color (primary.50: #E3F2FD) and bold text.",
+        "accessibility": "Focus must be trapped within the Drawer when open. The hamburger button must have an aria-label='Open navigation menu'."
+      }
+    },
+    "data_display": {
+      "cards": {
+        "default_card": {
+          "padding": "24px",
+          "border_radius": "8px",
+          "shadow": "0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)"
+        },
+        "hover_state": {
+          "elevation": "0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23)",
+          "transform": "translateY(-2px)"
+        },
+        "content_structure": "Cards can contain a CardHeader, CardContent, and CardActions area to structure information consistently."
+      }
+    },
+    "feedback": {
+      "alerts": {
+        "success": {
+          "background": "#EDF7ED",
+          "icon": "CheckCircleOutline",
+          "text": "#1E4620"
+        },
+        "error": {
+          "background": "#FDEDED",
+          "icon": "ErrorOutline",
+          "text": "#5F2120"
+        },
+        "accessibility": "Alerts used for notifications (Snackbars/Toasts) must have role='status' and use an aria-live region to be announced by screen readers."
+      }
+    }
+  },
+  "interaction_patterns": {
+    "micro_interactions": [
+      {
+        "pattern_name": "Button Press Feedback",
+        "trigger": "User clicks/taps any primary or secondary button.",
+        "animation": "A ripple effect originates from the press location, and the button scales down to 0.98 for 150ms.",
+        "accessibility": "Animations are disabled if the user has 'prefers-reduced-motion' enabled."
+      },
+      {
+        "pattern_name": "Focus Ring",
+        "trigger": "User navigates to an interactive element using the keyboard (Tab key).",
+        "animation": "A highly visible, high-contrast outline appears around the element.",
+        "accessibility": "This is a core accessibility feature and must not be disabled."
+      }
+    ],
+    "loading_states": [
+      {
+        "pattern_name": "Content Loading",
+        "visual": "Use Skeleton screens that mimic the shape of the content being loaded (e.g., skeleton list items for history). Use a CircularProgress spinner for actions like saving a mode.",
+        "duration": "Skeleton animations should be a subtle, slow pulse.",
+        "accessibility": "Screen readers should be notified of the loading state, e.g., 'Loading custom modes...'"
+      }
+    ]
+  },
+  "implementation_guidelines": {
+    "css_architecture": {
+      "custom_properties": {
+        "--color-primary-500": "#2196F3",
+        "--color-text-primary": "#212529",
+        "--spacing-md": "16px",
+        "--font-size-body": "16px"
+      },
+      "naming_conventions": "Component-scoped styling via Material-UI's Emotion/Styled-components is the primary method. For any global utility styles, a BEM-like convention (e.g., `u-text-center`) should be used.",
+      "component_organization": "Each component resides in its own directory (e.g., `/components/Button/`) containing the component file, style definitions, and unit tests.",
+      "utility_classes": "Limited use of utility classes for simple layout adjustments (e.g., margin, padding) is acceptable, but complex styling should be encapsulated within components."
+    },
+    "responsive_strategy": {
+      "breakpoints": {
+        "mobile": "375px",
+        "tablet": "768px",
+        "desktop": "1024px"
+      },
+      "approach": "Mobile-first. Design and build for the mobile viewport first, then use media queries to adapt the layout for larger screens (tablet, desktop).",
+      "component_adaptations": "Navigation collapses to a hamburger menu. Grids reflow from multiple columns to a single column. Touch target sizes are enforced on smaller screens."
+    },
+    "accessibility_implementation": {
+      "focus_management": "A consistent, highly visible focus ring (2px solid outline with a 2px offset) must be applied to all interactive elements on focus. For modals and drawers, focus must be trapped within the component.",
+      "color_contrast": "All text/background color combinations must be programmatically checked against the WCAG 2.1 AA requirement of 4.5:1 (3:1 for large text).",
+      "screen_reader_support": "Use semantic HTML5 elements (`<nav>`, `<main>`, `<button>`) wherever possible. Apply ARIA roles, states, and properties where semantics are insufficient (e.g., custom components, live regions for notifications).",
+      "keyboard_navigation": "All interactive elements must be reachable and operable via the keyboard. The tab order must be logical and follow the visual flow of the page."
+    }
+  }
+}

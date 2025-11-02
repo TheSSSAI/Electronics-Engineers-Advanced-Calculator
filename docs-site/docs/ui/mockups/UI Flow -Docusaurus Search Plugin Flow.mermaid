@@ -1,0 +1,34 @@
+flowchart TD
+    subgraph "Build-Time: Content Indexing"
+        direction LR
+        A[Developer/Writer <br> Writes/Updates .md Docs] --> B[Git Push to Repository]
+        B --> C[CI/CD Pipeline Triggered <br> (GitHub Actions)]
+        C --> D[Run Docusaurus Build]
+        D --> E{Invoke Search Plugin <br> (e.g., Algolia DocSearch)}
+        E --> F[Crawler Scans <br> Generated HTML Content]
+        F --> G[POST Index Data]
+        G --> H[<--fa:fa-cloud--> Search Provider API <br> (e.g., Algolia)]
+        H --> I([fa:fa-database<br>Search Index Updated])
+    end
+
+    subgraph "Runtime: User Search Query"
+        direction TD
+        J[User Opens Help System <br> (React SPA)] --> K[Enters Query in Search Bar]
+        K --> L[Search UI Component]
+        L -- "1. Sends search query (API call)" --> H
+        H -- "2. Returns ranked results (JSON)" --> L
+        L --> M[Renders Titles & Snippets <br> with Keyword Highlighting]
+        M --> N{User Clicks a Result}
+        N --> O[SPA Navigates to <br> Selected Help Article]
+    end
+
+    %% Styling
+    classDef actor fill:#fffde7,stroke:#f57f17,color:#000
+    classDef process fill:#e3f2fd,stroke:#2196f3,color:#000
+    classDef system fill:#f3e5f5,stroke:#8e24aa,color:#000
+    classDef data fill:#e8f5e9,stroke:#388e3c,color:#000
+
+    class A,J actor
+    class B,C,D,F,K,M,N,O process
+    class E,L,H system
+    class I data

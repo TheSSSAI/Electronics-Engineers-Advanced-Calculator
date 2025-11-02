@@ -1,0 +1,35 @@
+sequenceDiagram
+    actor "Client SPA" as ClientSPA
+    participant "API Gateway" as APIGateway
+    actor "User & Data Service" as UserDataService
+    participant "PostgreSQL Database" as PostgreSQLDatabase
+
+    activate ClientSPA
+    ClientSPA->>ClientSPA: 1. 1. User enters expression (e.g., '10k * 2') and triggers calculation.
+    ClientSPA->>ClientSPA: 2. 2. evaluateExpression(expression) & updateState(result)
+    ClientSPA-->>ClientSPA: result: '20000'
+    activate APIGateway
+    ClientSPA->>APIGateway: 3. 3. POST /api/v1/history
+    APIGateway->>APIGateway: 4. 4. Validate JWT with Cognito User Pool
+    APIGateway-->>APIGateway: Valid token claims (incl. userId)
+    activate UserDataService
+    APIGateway->>UserDataService: 5. 5. Forward validated request
+    UserDataService->>UserDataService: 6. 6. HistoryController.addHistory(dto, user)
+    activate PostgreSQLDatabase
+    UserDataService->>PostgreSQLDatabase: 7. 7. INSERT INTO calculation_history
+    PostgreSQLDatabase-->>UserDataService: New row with generated ID
+    PostgreSQLDatabase->>UserDataService: 8. 8. Return new record
+    UserDataService-->>PostgreSQLDatabase: CalculationHistory Entity
+    UserDataService->>APIGateway: 9. 9. HTTP 201 Created
+    APIGateway-->>UserDataService: Body: { id: '...', userId: '...', expression: '...', result: '...', createdAt: '...' }
+    APIGateway->>ClientSPA: 10. 10. Forward HTTP 201 Created
+    ClientSPA-->>APIGateway: Body: { id: '...', ... }
+    ClientSPA->>ClientSPA: 11. 11. updateHistoryItemInState(response)
+
+    note over APIGateway: Security Checkpoint: The API Gateway acts as the authoritative gatekeeper, strictly enforcing tha...
+    note over UserDataService: Domain Logic: The User & Data Service is responsible for enforcing the business rule that a histo...
+
+    deactivate PostgreSQLDatabase
+    deactivate UserDataService
+    deactivate APIGateway
+    deactivate ClientSPA

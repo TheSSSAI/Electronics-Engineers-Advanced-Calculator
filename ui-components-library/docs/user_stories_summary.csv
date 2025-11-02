@@ -1,0 +1,2 @@
+"total_stories","total_story_points","must_have_stories","should_have_stories","could_have_stories","epics_identified","estimated_sprints","key_dependencies"
+"7","55","6","1","0","[""User Account & Authentication"",""Core Calculator Functionality"",""User Data Persistence"",""User-Extensible Functionality"",""Advanced Electronics Features""]","3","[""AWS Cognito Setup"",""Database Schema Migration"",""Core Expression Evaluation Engine""]"

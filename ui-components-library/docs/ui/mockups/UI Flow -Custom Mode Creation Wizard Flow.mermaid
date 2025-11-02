@@ -1,0 +1,48 @@
+flowchart TD
+    Start[User clicks 'Create New Mode'] --> S1("Step 1: Enter Name & Description")
+    
+    subgraph "Step 1: Details"
+        S1 -- Clicks 'Next' --> V1{Server Validation:<br/>Is Name valid & unique?}
+        V1 -- No --> E1["Show Name Error (e.g., 'Name already exists')"]
+        E1 --> S1
+    end
+
+    subgraph "Step 2: Variables"
+        V1 -- Yes --> S2("Step 2: Define Input/Output Variables")
+        S2 -- Clicks 'Next' --> V2{Client Validation:<br/>≥1 Input & ≥1 Output?<br/>All names valid?}
+        V2 -- No --> E2["Show Variable Error (e.g., 'Must have one input')"]
+        E2 --> S2
+    end
+    
+    subgraph "Step 3: Formulas & Save"
+        V2 -- Yes --> S3("Step 3: Define Formulas")
+        S3 -- Clicks 'Save' --> V3{Client & Server Validation:<br/>Are all formulas valid?}
+        V3 -- No --> E3["Show Formula Error (e.g., 'Undefined variable')"]
+        E3 --> S3
+        V3 -- Yes --> Save[Save Mode via API]
+        Save --> API{API Response}
+        API -- "Error 4xx/5xx" --> E4["Show API Error"]
+        E4 --> S3
+        API -- "Success 201" --> Success([Success! Mode Created])
+    end
+
+    subgraph "Universal Actions"
+        S1 -- Clicks 'Cancel' --> Cancel{Confirm Cancellation}
+        S2 -- Clicks 'Cancel' --> Cancel
+        S3 -- Clicks 'Cancel' --> Cancel
+        Cancel -- Yes --> Discard[Discard & Exit]
+        Cancel -- No ---> S1
+        Cancel -- No ---> S2
+        Cancel -- No ---> S3
+    end
+    
+    %% Styling
+    classDef step fill:#e3f2fd,stroke:#1976d2,color:#000
+    classDef decision fill:#fff9c4,stroke:#fbc02d,color:#000
+    classDef error fill:#ffebee,stroke:#d32f2f,color:#000
+    classDef success fill:#e8f5e9,stroke:#388e3c,color:#000
+    
+    class S1,S2,S3 step
+    class V1,V2,V3,API,Cancel decision
+    class E1,E2,E3,E4 error
+    class Success,Discard,Start,Save success

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organism Component: AppFooter</title>
+  <style>
+    /* --- DESIGN SYSTEM TOKENS --- */
+    :root {
+      /* Colors */
+      --color-primary-700: #1976D2;
+      --color-neutral-white: #FFFFFF;
+      --color-neutral-gray-50: #F8F9FA;
+      --color-neutral-gray-200: #E9ECEF;
+      --color-neutral-gray-500: #ADB5BD;
+      --color-neutral-gray-700: #495057;
+      --color-neutral-gray-900: #212529;
+
+      /* Typography */
+      --font-family-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      --font-size-body: 16px;
+      --font-size-caption: 14px;
+      --line-height-body: 1.6;
+
+      /* Spacing */
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+      --space-xxl: 64px;
+
+      /* Breakpoints */
+      --breakpoint-tablet: 768px;
+    }
+
+    /* --- SHOWCASE & DEMO STYLES --- */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      font-family: var(--font-family-primary);
+      background-color: var(--color-neutral-white);
+      color: var(--color-neutral-gray-900);
+      line-height: var(--line-height-body);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .main-content {
+      flex: 1 0 auto;
+      padding: var(--space-xxl) var(--space-xl);
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .main-content h1 {
+      font-size: 2.5rem;
+      margin-bottom: var(--space-md);
+    }
+    .main-content p {
+      margin-bottom: var(--space-lg);
+      max-width: 75ch;
+    }
+
+    /* --- ORGANISM COMPONENT: AppFooter --- */
+
+    .app-footer {
+      flex-shrink: 0;
+      background-color: var(--color-neutral-gray-50);
+      border-top: 1px solid var(--color-neutral-gray-200);
+      padding: var(--space-lg) var(--space-xl);
+      font-family: var(--font-family-primary);
+      font-size: var(--font-size-caption);
+      color: var(--color-neutral-gray-700);
+    }
+
+    .app-footer__container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    .app-footer__nav {
+      width: 100%;
+    }
+
+    .app-footer__list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    .app-footer__link {
+      color: var(--color-neutral-gray-700);
+      text-decoration: none;
+      transition: color 0.2s ease;
+      padding: var(--space-sm);
+    }
+
+    /* Component States */
+    .app-footer__link:hover {
+      color: var(--color-primary-700);
+      text-decoration: underline;
+    }
+
+    .app-footer__link:focus-visible {
+      outline: 2px solid var(--color-primary-700);
+      outline-offset: 2px;
+      border-radius: 4px;
+      color: var(--color-primary-700);
+    }
+    
+    .app-footer__copyright {
+      color: var(--color-neutral-gray-500);
+    }
+
+    /* Responsive Adaptations */
+    @media (min-width: 768px) {
+      .app-footer__container {
+        flex-direction: row;
+        justify-content: space-between;
+      }
+
+      .app-footer__list {
+        flex-direction: row;
+        gap: var(--space-lg);
+      }
+
+      .app-footer__nav {
+        width: auto;
+      }
+    }
+
+    /* Accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      .app-footer__link {
+        transition: none;
+      }
+    }
+
+    /* Print Styles */
+    @media print {
+      .app-footer {
+        background: none !important;
+        border-top: 1px solid #000;
+        color: #000 !important;
+        padding: 16px 0;
+      }
+
+      .app-footer__link, .app-footer__copyright {
+        color: #000 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <main class="main-content">
+    <h1>AppFooter Component Showcase</h1>
+    <p>This page demonstrates the AppFooter organism. It is designed to be placed at the bottom of the application layout, pushed down by the main content.</p>
+    <p>On mobile screens (below 768px), the copyright and navigation links are stacked vertically in the center. On larger screens, they are arranged horizontally, with the copyright on the left and links on the right.</p>
+  </main>
+
+  <footer class="app-footer">
+    <div class="app-footer__container">
+      <p class="app-footer__copyright">&copy; 2025 CalcPro. All rights reserved.</p>
+      <nav class="app-footer__nav" aria-label="Legal">
+        <ul class="app-footer__list">
+          <li class="app-footer__item">
+            <a href="#" class="app-footer__link" target="_blank" rel="noopener noreferrer">Terms of Service</a>
+          </li>
+          <li class="app-footer__item">
+            <a href="#" class="app-footer__link" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </footer>
+
+	
+	<div> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : default<h3>
+		<normal> Standard footer layout. Stacks on mobile and arranges horizontally on larger screens. </normal>
+		<footer class="app-footer">
+    <div class="app-footer__container">
+      <p class="app-footer__copyright">&copy; 2025 CalcPro. All rights reserved.</p>
+      <nav class="app-footer__nav" aria-label="Legal">
+        <ul class="app-footer__list">
+          <li class="app-footer__item">
+            <a href="#" class="app-footer__link" target="_blank" rel="noopener noreferrer">Terms of Service</a>
+          </li>
+          <li class="app-footer__item">
+            <a href="#" class="app-footer__link" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </footer>     
+		
+      <div>
+	 </div>
+	</body>
+</html>

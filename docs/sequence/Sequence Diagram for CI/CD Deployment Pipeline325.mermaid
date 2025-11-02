@@ -1,0 +1,37 @@
+sequenceDiagram
+    participant "Developer" as Developer
+    participant "GitHub Repository" as GitHubRepository
+    participant "GitHub Actions" as GitHubActions
+    participant "Amazon ECR" as AmazonECR
+    participant "Terraform" as Terraform
+    participant "AWS Environment" as AWSEnvironment
+
+    Developer->>GitHubRepository: 1. 1. Push code to main branch
+    GitHubRepository-->>Developer: Success confirmation
+    activate GitHubActions
+    GitHubRepository->>GitHubActions: 2. 2. Trigger 'on push' workflow
+    GitHubActions->>GitHubActions: 3. 3. Run CI Stage: Lint, Test, Security Scans
+    GitHubActions-->>GitHubActions: CI Stage Status (Success/Failure)
+    GitHubActions->>GitHubActions: 4. 4. Build & Scan Docker Image
+    GitHubActions-->>GitHubActions: Docker Image with Tag
+    GitHubActions->>AmazonECR: 5. 5. Authenticate and Push Image to ECR
+    AmazonECR-->>GitHubActions: Push confirmation
+    GitHubActions->>AWSEnvironment: 6. 6. Run Database Migrations
+    AWSEnvironment-->>GitHubActions: Migration status
+    activate Terraform
+    GitHubActions->>Terraform: 7. 7. Apply Terraform for 'Green' Environment
+    Terraform-->>GitHubActions: Terraform apply result
+    Terraform->>AWSEnvironment: 8. 8. Provision/Update 'Green' ECS Service
+    AWSEnvironment-->>Terraform: Resource ARNs and status
+    GitHubActions->>AWSEnvironment: 9. 9. Perform Health Checks on 'Green' Environment
+    AWSEnvironment-->>GitHubActions: Health status (200 OK / non-200)
+    GitHubActions->>AWSEnvironment: 10. 10. Switch Production Traffic to 'Green'
+    AWSEnvironment-->>GitHubActions: Traffic switch confirmation
+    GitHubActions->>GitHubRepository: 11. 11. Update Commit Status to 'Success'
+    GitHubRepository-->>GitHubActions: API response
+
+    note over GitHubActions: All sensitive data (AWS credentials, DB connection strings) must be stored in GitHub Encrypted Se...
+    note over AWSEnvironment: The 'Green' environment health check can be a simple endpoint check or a more comprehensive suite...
+
+    deactivate Terraform
+    deactivate GitHubActions

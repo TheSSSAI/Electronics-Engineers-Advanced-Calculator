@@ -1,0 +1,336 @@
+
+{
+  "component_inventory": {
+    "atomic_components": [
+      {
+        "component_name": "Button",
+        "category": "form_controls",
+        "variants": ["primary", "secondary", "danger", "icon_only", "link"],
+        "states": ["default", "hover", "active", "focus", "disabled", "loading"],
+        "responsive_needs": "Minimum touch target size of 44x44px on mobile",
+        "dependencies": ["Icon"],
+        "complexity_level": "low",
+        "implementation_priority": 1,
+        "estimated_effort": "4-6 hours"
+      },
+      {
+        "component_name": "TextInput",
+        "category": "form_controls",
+        "variants": ["text", "email", "password", "number"],
+        "states": ["default", "focus", "error", "disabled", "with_icon"],
+        "responsive_needs": "Font size and padding adapted for mobile",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 1,
+        "estimated_effort": "3-5 hours"
+      },
+      {
+        "component_name": "Checkbox",
+        "category": "form_controls",
+        "variants": ["default"],
+        "states": ["unchecked", "checked", "disabled", "focus"],
+        "responsive_needs": "Increased touch target area",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 2,
+        "estimated_effort": "2-3 hours"
+      },
+      {
+        "component_name": "Icon",
+        "category": "display",
+        "variants": ["help", "user", "settings", "menu", "close", "delete", "edit", "export", "import"],
+        "states": ["default", "interactive"],
+        "responsive_needs": "Ensure SVG scales correctly",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 1,
+        "estimated_effort": "1-2 hours"
+      },
+      {
+        "component_name": "Tooltip",
+        "category": "feedback",
+        "variants": ["default", "warning"],
+        "states": ["visible", "hidden"],
+        "responsive_needs": "Positioning logic must adapt to screen edges on mobile",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 2,
+        "estimated_effort": "2-4 hours"
+      },
+      {
+        "component_name": "Spinner",
+        "category": "feedback",
+        "variants": ["small", "medium", "large"],
+        "states": ["spinning"],
+        "responsive_needs": "No specific needs",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 1,
+        "estimated_effort": "1-2 hours"
+      },
+      {
+        "component_name": "AngleModeIndicator",
+        "category": "display",
+        "variants": [],
+        "states": ["DEG", "RAD", "GRAD"],
+        "responsive_needs": "Font size scales with display",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 2,
+        "estimated_effort": "1 hour"
+      }
+    ],
+    "molecular_components": [
+      {
+        "component_name": "FormGroup",
+        "category": "form_controls",
+        "variants": ["standard", "compact"],
+        "states": ["default", "error"],
+        "responsive_needs": "Stack label above input on mobile",
+        "dependencies": ["TextInput", "Checkbox"],
+        "complexity_level": "low",
+        "implementation_priority": 2,
+        "estimated_effort": "2-3 hours"
+      },
+      {
+        "component_name": "UserMenu",
+        "category": "navigation",
+        "variants": ["logged_in", "logged_out"],
+        "states": ["open", "closed"],
+        "responsive_needs": "Dropdown positioning must work on mobile",
+        "dependencies": ["Icon", "Button"],
+        "complexity_level": "medium",
+        "implementation_priority": 3,
+        "estimated_effort": "4-6 hours"
+      },
+      {
+        "component_name": "ModeSwitcher",
+        "category": "navigation",
+        "variants": ["main_modes", "angle_modes"],
+        "states": ["default", "active_selection"],
+        "responsive_needs": "May collapse into a dropdown on mobile",
+        "dependencies": ["Button"],
+        "complexity_level": "medium",
+        "implementation_priority": 2,
+        "estimated_effort": "4-6 hours"
+      },
+      {
+        "component_name": "ConfirmationModal",
+        "category": "feedback",
+        "variants": ["destructive_action", "informational"],
+        "states": ["open", "closed", "loading"],
+        "responsive_needs": "Full-width on mobile, centered with max-width on desktop",
+        "dependencies": ["Button", "Icon"],
+        "complexity_level": "medium",
+        "implementation_priority": 3,
+        "estimated_effort": "5-8 hours"
+      },
+      {
+        "component_name": "GlobalNotification",
+        "category": "feedback",
+        "variants": ["offline_banner", "sync_status_toast", "error_toast", "success_toast"],
+        "states": ["visible", "hidden"],
+        "responsive_needs": "Positioned at top or bottom of viewport, full-width on mobile",
+        "dependencies": ["Icon"],
+        "complexity_level": "medium",
+        "implementation_priority": 3,
+        "estimated_effort": "4-6 hours"
+      }
+    ],
+    "organism_components": [
+      {
+        "component_name": "AppHeader",
+        "category": "layout",
+        "variants": ["default"],
+        "states": ["default", "sidebar_open"],
+        "responsive_needs": "Displays hamburger menu on mobile/tablet, may hide some utility icons",
+        "dependencies": ["Icon", "UserMenu", "ModeSwitcher"],
+        "complexity_level": "medium",
+        "implementation_priority": 1,
+        "estimated_effort": "6-8 hours"
+      },
+      {
+        "component_name": "AppSidebar",
+        "category": "navigation",
+        "variants": ["desktop_persistent", "mobile_drawer"],
+        "states": ["open", "closed"],
+        "responsive_needs": "Functions as a modal drawer on mobile, persistent on desktop",
+        "dependencies": ["Link", "Icon"],
+        "complexity_level": "medium",
+        "implementation_priority": 1,
+        "estimated_effort": "5-7 hours"
+      },
+      {
+        "component_name": "AppFooter",
+        "category": "layout",
+        "variants": ["default"],
+        "states": ["default"],
+        "responsive_needs": "Link layout may stack on mobile",
+        "dependencies": ["Link"],
+        "complexity_level": "low",
+        "implementation_priority": 1,
+        "estimated_effort": "2-3 hours"
+      },
+      {
+        "component_name": "AuthForm",
+        "category": "forms",
+        "variants": ["login", "register"],
+        "states": ["default", "loading", "error"],
+        "responsive_needs": "Layout is optimized for single-column mobile view",
+        "dependencies": ["FormGroup", "Button", "Checkbox", "Link"],
+        "complexity_level": "medium",
+        "implementation_priority": 2,
+        "estimated_effort": "8-10 hours"
+      },
+      {
+        "component_name": "HelpSystemHost",
+        "category": "overlays",
+        "variants": ["modal"],
+        "states": ["open", "closed", "loading", "error"],
+        "responsive_needs": "Full-screen on mobile, large modal on desktop",
+        "dependencies": ["Icon", "Spinner"],
+        "complexity_level": "medium",
+        "implementation_priority": 4,
+        "estimated_effort": "6-10 hours"
+      },
+      {
+        "component_name": "GuidedTour",
+        "category": "overlays",
+        "variants": ["first_time_user", "custom_mode_creation"],
+        "states": ["active_step", "inactive"],
+        "responsive_needs": "Popover positioning must be robust on all screen sizes",
+        "dependencies": ["Tooltip", "Button"],
+        "complexity_level": "high",
+        "implementation_priority": 4,
+        "estimated_effort": "12-16 hours"
+      }
+    ]
+  },
+  "screen_inventory": [
+    {
+      "screen_name": "Main Application Shell",
+      "screen_type": "layout",
+      "variants": ["desktop", "tablet", "mobile"],
+      "states": ["loading_user", "authenticated", "anonymous", "offline"],
+      "required_components": ["AppHeader", "AppSidebar", "AppFooter", "GlobalNotification"],
+      "platform_optimizations": "Handles the core responsive layout shifts for the header and sidebar.",
+      "implementation_priority": 1,
+      "estimated_effort": "10-14 hours",
+      "user_flow_criticality": "high"
+    },
+    {
+      "screen_name": "Calculator View",
+      "screen_type": "core_feature",
+      "variants": ["scientific_mode", "electronics_mode"],
+      "states": ["loading", "loaded", "error"],
+      "required_components": ["ModeSwitcher", "ScientificCalculatorKeypad (Imported)", "Ohm'sLawCalculator (Imported)", "HistoryPanel (Organism)", "VariablePanel (Organism)"],
+      "platform_optimizations": "Side panels (History, Variables) may become drawers or tabs on mobile.",
+      "implementation_priority": 2,
+      "estimated_effort": "16-24 hours",
+      "user_flow_criticality": "high"
+    },
+    {
+      "screen_name": "Login Screen",
+      "screen_type": "authentication",
+      "variants": ["desktop", "mobile"],
+      "states": ["default", "loading", "error"],
+      "required_components": ["AuthForm"],
+      "platform_optimizations": "Centered layout, optimized for mobile keyboards.",
+      "implementation_priority": 2,
+      "estimated_effort": "4-6 hours",
+      "user_flow_criticality": "high"
+    },
+    {
+      "screen_name": "Registration Screen",
+      "screen_type": "authentication",
+      "variants": ["desktop", "mobile"],
+      "states": ["default", "loading", "error"],
+      "required_components": ["AuthForm"],
+      "platform_optimizations": "Centered layout, optimized for mobile keyboards.",
+      "implementation_priority": 2,
+      "estimated_effort": "4-6 hours",
+      "user_flow_criticality": "high"
+    },
+    {
+      "screen_name": "Account Settings Screen",
+      "screen_type": "settings",
+      "variants": ["desktop", "mobile"],
+      "states": ["default", "loading"],
+      "required_components": ["Button", "ConfirmationModal"],
+      "platform_optimizations": "Simple single-column layout for all devices.",
+      "implementation_priority": 3,
+      "estimated_effort": "6-8 hours",
+      "user_flow_criticality": "medium"
+    },
+    {
+      "screen_name": "Custom Mode Management Screen",
+      "screen_type": "list_view",
+      "variants": ["desktop", "mobile"],
+      "states": ["loading", "loaded", "empty", "error"],
+      "required_components": ["Button", "CustomModeList (Organism)"],
+      "platform_optimizations": "List items may be simpler on mobile, with actions in a kebab menu.",
+      "implementation_priority": 3,
+      "estimated_effort": "8-12 hours",
+      "user_flow_criticality": "high"
+    },
+    {
+      "screen_name": "Custom Mode Editor Screen",
+      "screen_type": "workflow",
+      "variants": ["create", "edit"],
+      "states": ["loading", "step_1", "step_2", "step_3", "saving", "error"],
+      "required_components": ["CustomModeBuilder (Imported)"],
+      "platform_optimizations": "Wizard steps might stack vertically on mobile.",
+      "implementation_priority": 3,
+      "estimated_effort": "10-16 hours",
+      "user_flow_criticality": "high"
+    },
+    {
+      "screen_name": "NotFound Screen (404)",
+      "screen_type": "utility",
+      "variants": ["default"],
+      "states": ["default"],
+      "required_components": ["Button", "Link"],
+      "platform_optimizations": "Simple centered content for all devices.",
+      "implementation_priority": 2,
+      "estimated_effort": "2-4 hours",
+      "user_flow_criticality": "low"
+    }
+  ],
+  "implementation_plan": {
+    "phase_1_foundation": {
+      "components": ["Button", "Icon", "TextInput", "Spinner", "AppHeader", "AppSidebar", "AppFooter"],
+      "rationale": "Establish the core design system primitives and the main application shell and routing structure.",
+      "estimated_duration": "5-7 days"
+    },
+    "phase_2_core_calculator": {
+      "components": ["AngleModeIndicator", "ModeSwitcher", "Calculator View Screen"],
+      "rationale": "Build the main calculator screen and integrate the core calculator UI components from the library. A functional, non-persistent calculator should be working.",
+      "estimated_duration": "4-6 days"
+    },
+    "phase_3_authentication_and_persistence": {
+      "components": ["AuthForm", "UserMenu", "ConfirmationModal", "GlobalNotification", "Login Screen", "Registration Screen", "Account Settings Screen"],
+      "rationale": "Implement all user authentication flows and the global UI/state management for data persistence and offline capabilities.",
+      "estimated_duration": "7-10 days"
+    },
+    "phase_4_advanced_features": {
+      "components": ["Custom Mode Management Screen", "Custom Mode Editor Screen", "HelpSystemHost", "GuidedTour"],
+      "rationale": "Build the screens and complex organisms required to host and manage the advanced features like custom modes and the help system.",
+      "estimated_duration": "8-12 days"
+    }
+  },
+  "platform_implementation_strategy": {
+    "target_platform": "Responsive Web (Desktop and Mobile browsers)",
+    "implementation_approach": "mobile_first",
+    "responsive_strategy": "A combination of a flexible grid layout, media queries for major breakpoints (mobile, tablet, desktop), and component-level adaptations.",
+    "progressive_enhancement": "Core functionality works without JavaScript (where possible, though limited for an SPA). Offline capabilities are layered on for supported browsers. Advanced animations respect `prefers-reduced-motion`.",
+    "browser_support": "Latest stable versions of Chrome, Firefox, Safari, and Edge.",
+    "accessibility_integration": "WCAG 2.1 Level AA compliance is integrated into all phases of development, from component creation to E2E testing."
+  },
+  "quality_assurance_plan": {
+    "component_testing": "Unit and component tests using Jest and React Testing Library for all components to verify props, states, and event handling.",
+    "integration_testing": "Testing how components and screens interact, especially focusing on state management (Redux) and routing.",
+    "responsive_testing": "Automated E2E tests (Cypress) run against multiple viewports. Manual testing on physical devices for key user flows.",
+    "accessibility_testing": "Automated accessibility scans (Axe) integrated into the CI pipeline. Manual keyboard-only and screen reader (NVDA, VoiceOver) testing for all interactive features.",
+    "performance_testing": "Lighthouse scores (LCP, CLS) are monitored for key screens. UI interaction responsiveness is manually verified."
+  }
+}

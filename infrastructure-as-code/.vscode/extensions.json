@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "hashicorp.terraform",
+    "editorconfig.editorconfig",
+    "redhat.vscode-yaml",
+    "golang.go",
+    "gruntwork-io.terragrunt-hcl-syntax-highlight"
+  ],
+  "unwantedRecommendations": []
+}

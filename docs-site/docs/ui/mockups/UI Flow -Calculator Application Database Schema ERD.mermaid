@@ -1,0 +1,36 @@
+erDiagram
+    User {
+        UUID id PK "Primary Key"
+        VARCHAR authProviderId UQ "Cognito User ID"
+        VARCHAR email UQ
+        DateTimeOffset termsAcceptedAt
+        DateTimeOffset updatedAt "For offline sync"
+    }
+
+    CustomMode {
+        UUID id PK "Primary Key"
+        UUID userId FK "Links to User"
+        VARCHAR name
+        JSONB definition
+        DateTimeOffset updatedAt "For offline sync"
+    }
+
+    UserVariable {
+        UUID id PK "Primary Key"
+        UUID userId FK "Links to User"
+        VARCHAR name
+        VARCHAR value
+        DateTimeOffset updatedAt "For offline sync"
+    }
+
+    CalculationHistory {
+        UUID id PK "Primary Key"
+        UUID userId FK "Links to User"
+        TEXT expression
+        VARCHAR result
+        DateTimeOffset createdAt "Used for partitioning"
+    }
+
+    User ||--o{ CustomMode : "defines"
+    User ||--o{ UserVariable : "creates"
+    User ||--o{ CalculationHistory : "has"

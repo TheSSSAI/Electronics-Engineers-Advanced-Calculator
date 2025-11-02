@@ -1,0 +1,42 @@
+flowchart TD
+    subgraph User Interaction on Client
+        A[User navigates to Registration Page] --> B[Fills Email, Password, Confirm Password];
+        B --> C[Checks 'Accept Terms & Policy' checkbox];
+        C --> D[Clicks 'Register' button];
+        D --> E{Client-side Validation};
+        E -->|Invalid| F[Display inline error messages<br/>e.g., 'Passwords do not match'];
+        F --> B;
+    end
+
+    subgraph Backend Processing
+        G[POST /api/register<br/>(with email, password)] --> H{Backend Validation};
+        H -->|Error: Email Exists, Weak Password, etc.| I[Return 4xx Error Response];
+        H -->|Success| J[Create user in AWS Cognito User Pool];
+        J --> K[Create corresponding user record in PostgreSQL DB];
+        K --> L[Generate JWTs (Access/Refresh Tokens)];
+        L --> M[Return Success (201 Created) with JWTs];
+    end
+    
+    subgraph Client State Update
+        N[Display server error to user<br/>e.g., 'Email already in use'];
+        N --> B;
+        O[Client stores session tokens securely];
+        O --> P[Fetch initial user data (e.g., profile)];
+        P --> Q[Redirect to Main Calculator View];
+        Q --> R[Display 'Welcome!' notification];
+    end
+    
+    E -->|Valid| G;
+    I --> N;
+    M --> O;
+
+    %% Styling
+    classDef errorNode fill:#ffebee,stroke:#d32f2f,color:#333
+    classDef successNode fill:#e8f5e8,stroke:#4caf50,color:#333
+    classDef processNode fill:#e3f2fd,stroke:#2196f3,color:#333
+    classDef decision fill:#fffde7,stroke:#fbc02d,color:#333
+
+    class F,I,N errorNode;
+    class J,K,L,M,O,P,Q,R successNode;
+    class A,B,C,D,G processNode;
+    class E,H decision;

@@ -1,0 +1,29 @@
+sequenceDiagram
+    actor "Client SPA" as ClientSPA
+    actor "User & Data Service" as UserDataService
+    participant "Data Export Queue" as DataExportQueue
+    participant "Data Export Worker" as DataExportWorker
+    participant "Application Database" as ApplicationDatabase
+    participant "Secure Storage" as SecureStorage
+    participant "Email Service" as EmailService
+
+    activate UserDataService
+    ClientSPA->>UserDataService: 1. POST /users/me/data-export
+    UserDataService-->>ClientSPA: 202 Accepted
+    UserDataService->>ApplicationDatabase: 2. SELECT export_status FROM users WHERE id = :userId
+    UserDataService->>ApplicationDatabase: 3. UPDATE users SET export_status = 'PENDING' WHERE id = :userId
+    UserDataService->>DataExportQueue: 4. SendMessage(QueueUrl, MessageBody)
+    ClientSPA->>ClientSPA: 5. Display success toast: 'Your data export request has been received.'
+    activate DataExportWorker
+    DataExportQueue->>DataExportWorker: 6. ReceiveMessage -> Trigger Lambda Invocation
+    DataExportWorker->>ApplicationDatabase: 7. SELECT * FROM users, calculation_history, user_variables, custom_modes WHERE user_id = :userId
+    DataExportWorker->>DataExportWorker: 8. Compile data into standardized JSON format
+    DataExportWorker->>SecureStorage: 9. PutObject(Bucket, Key, Body)
+    DataExportWorker->>SecureStorage: 10. getSignedUrl(GetObjectCommand)
+    DataExportWorker->>EmailService: 11. SendEmail(Source, Destination, Message)
+    DataExportWorker->>ApplicationDatabase: 12. UPDATE users SET export_status = 'COMPLETED', export_completed_at = NOW() WHERE id = :userId
+
+    note over DataExportWorker: AC-007 (Job Failure): The Lambda function's main handler must be wrapped in a try/catch block. Th...
+
+    deactivate DataExportWorker
+    deactivate UserDataService

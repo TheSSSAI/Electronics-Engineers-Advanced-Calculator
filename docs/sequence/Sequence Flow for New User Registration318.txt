@@ -1,0 +1,1196 @@
+# 1 Overview
+
+## 1.1 Diagram Id
+
+SEQ-AUTH-001
+
+## 1.2 Name
+
+New User Registration
+
+## 1.3 Description
+
+A new user signs up for an account using their email and a secure password. The process is managed by AWS Cognito, which enforces password policies. Upon successful identity creation, a corresponding user record is created in the application's database via an authenticated API call.
+
+## 1.4 Type
+
+🔹 AuthenticationFlow
+
+## 1.5 Purpose
+
+To allow new users to create a secure account to access personalized features, ensuring compliance with password policies and legal terms acceptance.
+
+## 1.6 Complexity
+
+Medium
+
+## 1.7 Priority
+
+🚨 Critical
+
+## 1.8 Frequency
+
+OnDemand
+
+## 1.9 Participants
+
+- REPO-SPA-CLIENT
+- REPO-IAM-COGNITO
+- REPO-API-GATEWAY
+- REPO-APP-USER-DATA
+- REPO-DB-POSTGRES
+
+## 1.10 Key Interactions
+
+- Client SPA sends registration details (email, password) to AWS Cognito.
+- Cognito validates details, enforces password policy (REQ-BIZ-001), and creates the user identity, sending a confirmation code.
+- User submits confirmation code to Cognito.
+- Upon successful confirmation, the Client SPA makes an authenticated API call to the User & Data Service to create the application-level user profile.
+- User & Data Service creates a new record in the User table in the PostgreSQL database.
+
+## 1.11 Triggers
+
+- User submits the registration form and accepts the Terms of Service (REQ-LGL-001).
+
+## 1.12 Outcomes
+
+- A new identity is created in Cognito.
+- A new user record is created in the application database.
+- The user is ready to log in for the first time.
+
+## 1.13 Business Rules
+
+- Password must meet complexity requirements defined in REQ-BIZ-001.
+- User email must be unique.
+- User must explicitly accept Terms of Service and Privacy Policy.
+
+## 1.14 Error Scenarios
+
+- Email address already exists in the Cognito User Pool.
+- Password does not meet the complexity policy.
+- Cognito service is unavailable.
+- Backend service fails to create the user record in the database.
+
+## 1.15 Integration Points
+
+- AWS Cognito for identity management.
+
+# 2.0 Details
+
+## 2.1 Diagram Id
+
+SEQ-USR-003
+
+## 2.2 Name
+
+User Personal Data Export Request
+
+## 2.3 Description
+
+A comprehensive, asynchronous sequence for handling a user's request to export their personal data, in compliance with GDPR/CCPA. The process is initiated via a synchronous API call which queues a background job. The job, executed by a Lambda worker, aggregates user data from multiple database tables, generates a JSON file, stores it securely in a private S3 bucket, creates a time-limited pre-signed URL for access, and notifies the user via email.
+
+## 2.4 Participants
+
+### 2.4.1 Frontend Application
+
+#### 2.4.1.1 Repository Id
+
+REPO-SPA-CLIENT
+
+#### 2.4.1.2 Display Name
+
+Client SPA
+
+#### 2.4.1.3 Type
+
+🔹 Frontend Application
+
+#### 2.4.1.4 Technology
+
+React, TypeScript
+
+#### 2.4.1.5 Order
+
+1
+
+#### 2.4.1.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #1E90FF |
+| Stereotype | UI |
+
+### 2.4.2.0 API Gateway
+
+#### 2.4.2.1 Repository Id
+
+REPO-API-GATEWAY
+
+#### 2.4.2.2 Display Name
+
+API Gateway
+
+#### 2.4.2.3 Type
+
+🔹 API Gateway
+
+#### 2.4.2.4 Technology
+
+Amazon API Gateway
+
+#### 2.4.2.5 Order
+
+2
+
+#### 2.4.2.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | boundary |
+| Color | #FF4500 |
+| Stereotype | Gateway |
+
+### 2.4.3.0 Microservice
+
+#### 2.4.3.1 Repository Id
+
+REPO-APP-USER-DATA
+
+#### 2.4.3.2 Display Name
+
+User & Data Service
+
+#### 2.4.3.3 Type
+
+🔹 Microservice
+
+#### 2.4.3.4 Technology
+
+NestJS, Node.js
+
+#### 2.4.3.5 Order
+
+3
+
+#### 2.4.3.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #32CD32 |
+| Stereotype | Service |
+
+### 2.4.4.0 Message Queue
+
+#### 2.4.4.1 Repository Id
+
+REPO-INFRA-SQS-QUEUE
+
+#### 2.4.4.2 Display Name
+
+Export Job Queue
+
+#### 2.4.4.3 Type
+
+🔹 Message Queue
+
+#### 2.4.4.4 Technology
+
+Amazon SQS
+
+#### 2.4.4.5 Order
+
+4
+
+#### 2.4.4.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | queue |
+| Color | #FFD700 |
+| Stereotype | Queue |
+
+### 2.4.5.0 Serverless Function
+
+#### 2.4.5.1 Repository Id
+
+REPO-WORKER-EXPORT-LAMBDA
+
+#### 2.4.5.2 Display Name
+
+Export Worker
+
+#### 2.4.5.3 Type
+
+🔹 Serverless Function
+
+#### 2.4.5.4 Technology
+
+AWS Lambda (Node.js)
+
+#### 2.4.5.5 Order
+
+5
+
+#### 2.4.5.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #9370DB |
+| Stereotype | Lambda |
+
+### 2.4.6.0 Database
+
+#### 2.4.6.1 Repository Id
+
+REPO-DB-POSTGRES
+
+#### 2.4.6.2 Display Name
+
+Application Database
+
+#### 2.4.6.3 Type
+
+🔹 Database
+
+#### 2.4.6.4 Technology
+
+PostgreSQL (RDS)
+
+#### 2.4.6.5 Order
+
+6
+
+#### 2.4.6.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | database |
+| Color | #808080 |
+| Stereotype | DB |
+
+### 2.4.7.0 Object Storage
+
+#### 2.4.7.1 Repository Id
+
+REPO-INFRA-S3-STORAGE
+
+#### 2.4.7.2 Display Name
+
+Secure Storage
+
+#### 2.4.7.3 Type
+
+🔹 Object Storage
+
+#### 2.4.7.4 Technology
+
+Amazon S3
+
+#### 2.4.7.5 Order
+
+7
+
+#### 2.4.7.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | cloud |
+| Color | #4682B4 |
+| Stereotype | Storage |
+
+### 2.4.8.0 Notification Service
+
+#### 2.4.8.1 Repository Id
+
+REPO-INFRA-SES-EMAIL
+
+#### 2.4.8.2 Display Name
+
+Email Service
+
+#### 2.4.8.3 Type
+
+🔹 Notification Service
+
+#### 2.4.8.4 Technology
+
+Amazon SES
+
+#### 2.4.8.5 Order
+
+8
+
+#### 2.4.8.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #20B2AA |
+| Stereotype | SES |
+
+## 2.5.0.0 Interactions
+
+### 2.5.1.0 API Request
+
+#### 2.5.1.1 Source Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.1.2 Target Id
+
+REPO-API-GATEWAY
+
+#### 2.5.1.3 Message
+
+Initiate data export request
+
+#### 2.5.1.4 Sequence Number
+
+1
+
+#### 2.5.1.5 Type
+
+🔹 API Request
+
+#### 2.5.1.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.1.7 Return Message
+
+HTTP 202 Accepted
+
+#### 2.5.1.8 Has Return
+
+✅ Yes
+
+#### 2.5.1.9 Is Activation
+
+✅ Yes
+
+#### 2.5.1.10 Technical Details
+
+##### 2.5.1.10.1 Protocol
+
+HTTPS
+
+##### 2.5.1.10.2 Method
+
+POST /api/v1/users/me/export
+
+##### 2.5.1.10.3 Parameters
+
+{}
+
+##### 2.5.1.10.4 Authentication
+
+Authorization: Bearer <JWT>
+
+##### 2.5.1.10.5 Error Handling
+
+Client handles 401, 409, 5xx responses.
+
+##### 2.5.1.10.6 Performance
+
+###### 2.5.1.10.6.1 Latency
+
+<200ms (P95)
+
+### 2.5.2.0.0.0 Service Call
+
+#### 2.5.2.1.0.0 Source Id
+
+REPO-API-GATEWAY
+
+#### 2.5.2.2.0.0 Target Id
+
+REPO-APP-USER-DATA
+
+#### 2.5.2.3.0.0 Message
+
+POST /users/me/export
+
+#### 2.5.2.4.0.0 Sequence Number
+
+2
+
+#### 2.5.2.5.0.0 Type
+
+🔹 Service Call
+
+#### 2.5.2.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.2.7.0.0 Return Message
+
+202 Accepted response object
+
+#### 2.5.2.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.2.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.2.10.0.0 Technical Details
+
+##### 2.5.2.10.1.0 Protocol
+
+HTTP
+
+##### 2.5.2.10.2.0 Method
+
+Forward POST request
+
+##### 2.5.2.10.3.0 Parameters
+
+User context from validated JWT
+
+##### 2.5.2.10.4.0 Authentication
+
+JWT validation via Cognito Authorizer
+
+##### 2.5.2.10.5.0 Error Handling
+
+Propagates 4xx/5xx responses from service.
+
+##### 2.5.2.10.6.0 Performance
+
+*No data available*
+
+### 2.5.3.0.0.0 Internal Logic
+
+#### 2.5.3.1.0.0 Source Id
+
+REPO-APP-USER-DATA
+
+#### 2.5.3.2.0.0 Target Id
+
+REPO-APP-USER-DATA
+
+#### 2.5.3.3.0.0 Message
+
+Validate export eligibility
+
+#### 2.5.3.4.0.0 Sequence Number
+
+3
+
+#### 2.5.3.5.0.0 Type
+
+🔹 Internal Logic
+
+#### 2.5.3.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.3.7.0.0 Return Message
+
+Eligibility status (true/false)
+
+#### 2.5.3.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.3.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.3.10.0.0 Technical Details
+
+##### 2.5.3.10.1.0 Protocol
+
+Internal
+
+##### 2.5.3.10.2.0 Method
+
+checkActiveExport(userId)
+
+##### 2.5.3.10.3.0 Parameters
+
+userId from JWT
+
+##### 2.5.3.10.4.0 Authentication
+
+N/A
+
+##### 2.5.3.10.5.0 Error Handling
+
+If active export exists, throw HttpException(409 Conflict).
+
+##### 2.5.3.10.6.0 Performance
+
+###### 2.5.3.10.6.1 Latency
+
+<50ms
+
+### 2.5.4.0.0.0 Message Enqueue
+
+#### 2.5.4.1.0.0 Source Id
+
+REPO-APP-USER-DATA
+
+#### 2.5.4.2.0.0 Target Id
+
+REPO-INFRA-SQS-QUEUE
+
+#### 2.5.4.3.0.0 Message
+
+Queue export job
+
+#### 2.5.4.4.0.0 Sequence Number
+
+4
+
+#### 2.5.4.5.0.0 Type
+
+🔹 Message Enqueue
+
+#### 2.5.4.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.4.7.0.0 Return Message
+
+Message ID
+
+#### 2.5.4.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.4.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.4.10.0.0 Technical Details
+
+##### 2.5.4.10.1.0 Protocol
+
+AWS SDK
+
+##### 2.5.4.10.2.0 Method
+
+sqs.sendMessage()
+
+##### 2.5.4.10.3.0 Parameters
+
+| Property | Value |
+|----------|-------|
+| Queue Url | DataExportQueueURL |
+| Message Body | {"userId": "...", "email": "...", "correlationId":... |
+
+##### 2.5.4.10.4.0 Authentication
+
+IAM Role for ECS Task
+
+##### 2.5.4.10.5.0 Error Handling
+
+If send fails, throw HttpException(500), triggering API error response.
+
+##### 2.5.4.10.6.0 Performance
+
+*No data available*
+
+### 2.5.5.0.0.0 Asynchronous Invocation
+
+#### 2.5.5.1.0.0 Source Id
+
+REPO-INFRA-SQS-QUEUE
+
+#### 2.5.5.2.0.0 Target Id
+
+REPO-WORKER-EXPORT-LAMBDA
+
+#### 2.5.5.3.0.0 Message
+
+Trigger worker with export job message
+
+#### 2.5.5.4.0.0 Sequence Number
+
+5
+
+#### 2.5.5.5.0.0 Type
+
+🔹 Asynchronous Invocation
+
+#### 2.5.5.6.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.5.7.0.0 Return Message
+
+
+
+#### 2.5.5.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.5.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.5.10.0.0 Technical Details
+
+##### 2.5.5.10.1.0 Protocol
+
+Lambda Event Source Mapping
+
+##### 2.5.5.10.2.0 Method
+
+Invoke
+
+##### 2.5.5.10.3.0 Parameters
+
+SQS Message Payload
+
+##### 2.5.5.10.4.0 Authentication
+
+Lambda Execution Role with SQS read permissions
+
+##### 2.5.5.10.5.0 Error Handling
+
+On failure, message goes to DLQ after configured retries.
+
+##### 2.5.5.10.6.0 Performance
+
+*No data available*
+
+### 2.5.6.0.0.0 Database Query
+
+#### 2.5.6.1.0.0 Source Id
+
+REPO-WORKER-EXPORT-LAMBDA
+
+#### 2.5.6.2.0.0 Target Id
+
+REPO-DB-POSTGRES
+
+#### 2.5.6.3.0.0 Message
+
+Fetch all user-associated data
+
+#### 2.5.6.4.0.0 Sequence Number
+
+6
+
+#### 2.5.6.5.0.0 Type
+
+🔹 Database Query
+
+#### 2.5.6.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.6.7.0.0 Return Message
+
+User data records
+
+#### 2.5.6.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.6.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.6.10.0.0 Technical Details
+
+##### 2.5.6.10.1.0 Protocol
+
+TCP/IP (node-postgres)
+
+##### 2.5.6.10.2.0 Method
+
+Multi-query transaction or sequential queries
+
+##### 2.5.6.10.3.0 Parameters
+
+userId from SQS message
+
+##### 2.5.6.10.4.0 Authentication
+
+IAM DB Authentication or credentials from Secrets Manager
+
+##### 2.5.6.10.5.0 Error Handling
+
+Log error to CloudWatch, retry on transient errors, then send to DLQ.
+
+##### 2.5.6.10.6.0 Performance
+
+###### 2.5.6.10.6.1 Notes
+
+Queries must be optimized with indexes on user_id foreign keys.
+
+#### 2.5.6.11.0.0 Nested Interactions
+
+##### 2.5.6.11.1.0 SQL Query
+
+###### 2.5.6.11.1.1 Source Id
+
+REPO-WORKER-EXPORT-LAMBDA
+
+###### 2.5.6.11.1.2 Target Id
+
+REPO-DB-POSTGRES
+
+###### 2.5.6.11.1.3 Message
+
+```sql
+SELECT * FROM users WHERE id = :userId
+```
+
+###### 2.5.6.11.1.4 Sequence Number
+
+6.1
+
+###### 2.5.6.11.1.5 Type
+
+🔹 SQL Query
+
+###### 2.5.6.11.1.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.6.11.1.7 Has Return
+
+✅ Yes
+
+##### 2.5.6.11.2.0 SQL Query
+
+###### 2.5.6.11.2.1 Source Id
+
+REPO-WORKER-EXPORT-LAMBDA
+
+###### 2.5.6.11.2.2 Target Id
+
+REPO-DB-POSTGRES
+
+###### 2.5.6.11.2.3 Message
+
+```sql
+SELECT * FROM custom_modes WHERE user_id = :userId
+```
+
+###### 2.5.6.11.2.4 Sequence Number
+
+6.2
+
+###### 2.5.6.11.2.5 Type
+
+🔹 SQL Query
+
+###### 2.5.6.11.2.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.6.11.2.7 Has Return
+
+✅ Yes
+
+##### 2.5.6.11.3.0 SQL Query
+
+###### 2.5.6.11.3.1 Source Id
+
+REPO-WORKER-EXPORT-LAMBDA
+
+###### 2.5.6.11.3.2 Target Id
+
+REPO-DB-POSTGRES
+
+###### 2.5.6.11.3.3 Message
+
+```sql
+SELECT * FROM user_variables WHERE user_id = :userId
+```
+
+###### 2.5.6.11.3.4 Sequence Number
+
+6.3
+
+###### 2.5.6.11.3.5 Type
+
+🔹 SQL Query
+
+###### 2.5.6.11.3.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.6.11.3.7 Has Return
+
+✅ Yes
+
+##### 2.5.6.11.4.0 SQL Query
+
+###### 2.5.6.11.4.1 Source Id
+
+REPO-WORKER-EXPORT-LAMBDA
+
+###### 2.5.6.11.4.2 Target Id
+
+REPO-DB-POSTGRES
+
+###### 2.5.6.11.4.3 Message
+
+```sql
+SELECT * FROM calculation_history WHERE user_id = :userId
+```
+
+###### 2.5.6.11.4.4 Sequence Number
+
+6.4
+
+###### 2.5.6.11.4.5 Type
+
+🔹 SQL Query
+
+###### 2.5.6.11.4.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.6.11.4.7 Has Return
+
+✅ Yes
+
+### 2.5.7.0.0.0 Internal Logic
+
+#### 2.5.7.1.0.0 Source Id
+
+REPO-WORKER-EXPORT-LAMBDA
+
+#### 2.5.7.2.0.0 Target Id
+
+REPO-WORKER-EXPORT-LAMBDA
+
+#### 2.5.7.3.0.0 Message
+
+Aggregate data and generate JSON file
+
+#### 2.5.7.4.0.0 Sequence Number
+
+7
+
+#### 2.5.7.5.0.0 Type
+
+🔹 Internal Logic
+
+#### 2.5.7.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.7.7.0.0 Return Message
+
+JSON string buffer
+
+#### 2.5.7.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.7.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.7.10.0.0 Technical Details
+
+##### 2.5.7.10.1.0 Protocol
+
+Internal
+
+##### 2.5.7.10.2.0 Method
+
+buildExportFile(dbResults)
+
+##### 2.5.7.10.3.0 Parameters
+
+Data from all queries
+
+##### 2.5.7.10.4.0 Authentication
+
+N/A
+
+##### 2.5.7.10.5.0 Error Handling
+
+Catch data formatting errors, log, and fail the job.
+
+##### 2.5.7.10.6.0 Performance
+
+###### 2.5.7.10.6.1 Notes
+
+For very large histories, consider streaming JSON generation to avoid high memory usage.
+
+### 2.5.8.0.0.0 File Upload
+
+#### 2.5.8.1.0.0 Source Id
+
+REPO-WORKER-EXPORT-LAMBDA
+
+#### 2.5.8.2.0.0 Target Id
+
+REPO-INFRA-S3-STORAGE
+
+#### 2.5.8.3.0.0 Message
+
+Upload generated JSON file
+
+#### 2.5.8.4.0.0 Sequence Number
+
+8
+
+#### 2.5.8.5.0.0 Type
+
+🔹 File Upload
+
+#### 2.5.8.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.8.7.0.0 Return Message
+
+S3 Object ETag
+
+#### 2.5.8.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.8.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.8.10.0.0 Technical Details
+
+##### 2.5.8.10.1.0 Protocol
+
+AWS SDK
+
+##### 2.5.8.10.2.0 Method
+
+s3.putObject()
+
+##### 2.5.8.10.3.0 Parameters
+
+| Property | Value |
+|----------|-------|
+| Bucket | user-data-exports-bucket |
+| Key | exports/{userId}/{timestamp}_{jobId}.json |
+| Body | JSON buffer |
+| Server Side Encryption | aws:kms |
+
+##### 2.5.8.10.4.0 Authentication
+
+Lambda Execution Role with S3 write permissions
+
+##### 2.5.8.10.5.0 Error Handling
+
+Log error, retry, then fail job to DLQ.
+
+##### 2.5.8.10.6.0 Performance
+
+*No data available*
+
+### 2.5.9.0.0.0 Security Operation
+
+#### 2.5.9.1.0.0 Source Id
+
+REPO-WORKER-EXPORT-LAMBDA
+
+#### 2.5.9.2.0.0 Target Id
+
+REPO-INFRA-S3-STORAGE
+
+#### 2.5.9.3.0.0 Message
+
+Generate secure download link
+
+#### 2.5.9.4.0.0 Sequence Number
+
+9
+
+#### 2.5.9.5.0.0 Type
+
+🔹 Security Operation
+
+#### 2.5.9.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.9.7.0.0 Return Message
+
+Pre-signed URL string
+
+#### 2.5.9.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.9.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.9.10.0.0 Technical Details
+
+##### 2.5.9.10.1.0 Protocol
+
+AWS SDK
+
+##### 2.5.9.10.2.0 Method
+
+s3.getSignedUrl('getObject', ...)
+
+##### 2.5.9.10.3.0 Parameters
+
+| Property | Value |
+|----------|-------|
+| Bucket | user-data-exports-bucket |
+| Key | ... |
+| Expires | 86400 |
+
+##### 2.5.9.10.4.0 Authentication
+
+Lambda Execution Role with s3:GetObject permission
+
+##### 2.5.9.10.5.0 Error Handling
+
+Log error and fail job to DLQ.
+
+##### 2.5.9.10.6.0 Performance
+
+*No data available*
+
+### 2.5.10.0.0.0 Email Notification
+
+#### 2.5.10.1.0.0 Source Id
+
+REPO-WORKER-EXPORT-LAMBDA
+
+#### 2.5.10.2.0.0 Target Id
+
+REPO-INFRA-SES-EMAIL
+
+#### 2.5.10.3.0.0 Message
+
+Send email notification with download link
+
+#### 2.5.10.4.0.0 Sequence Number
+
+10
+
+#### 2.5.10.5.0.0 Type
+
+🔹 Email Notification
+
+#### 2.5.10.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.10.7.0.0 Return Message
+
+Message ID
+
+#### 2.5.10.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.10.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.10.10.0.0 Technical Details
+
+##### 2.5.10.10.1.0 Protocol
+
+AWS SDK
+
+##### 2.5.10.10.2.0 Method
+
+ses.sendEmail()
+
+##### 2.5.10.10.3.0 Parameters
+
+| Property | Value |
+|----------|-------|
+| Destination | {'ToAddresses': ['user.email@example.com']} |
+| Message | {'Body': '...', 'Subject': 'Your Personal Data Export is Ready'} |
+| Source | noreply@yourapp.com |
+
+##### 2.5.10.10.4.0 Authentication
+
+Lambda Execution Role with SES send permissions
+
+##### 2.5.10.10.5.0 Error Handling
+
+If email send fails, the job has already succeeded. Log the failure for operational monitoring, but do not fail the SQS message.
+
+##### 2.5.10.10.6.0 Performance
+
+*No data available*
+
+## 2.6.0.0.0.0 Notes
+
+### 2.6.1.0.0.0 Content
+
+#### 2.6.1.1.0.0 Content
+
+The entire process from Step 5 onwards is asynchronous from the user's perspective. The initial API call (Step 1-4) returns immediately.
+
+#### 2.6.1.2.0.0 Position
+
+top
+
+#### 2.6.1.3.0.0 Participant Id
+
+*Not specified*
+
+#### 2.6.1.4.0.0 Sequence Number
+
+5
+
+### 2.6.2.0.0.0 Content
+
+#### 2.6.2.1.0.0 Content
+
+A Dead Letter Queue (DLQ) is configured for the SQS queue. If the Lambda worker fails after multiple retries, the message is moved to the DLQ for manual inspection and a CloudWatch Alarm is triggered.
+
+#### 2.6.2.2.0.0 Position
+
+bottom
+
+#### 2.6.2.3.0.0 Participant Id
+
+REPO-WORKER-EXPORT-LAMBDA
+
+#### 2.6.2.4.0.0 Sequence Number
+
+5
+
+### 2.6.3.0.0.0 Content
+
+#### 2.6.3.1.0.0 Content
+
+The S3 bucket must be configured with `Block all public access` ON. Access is granted exclusively through the short-lived pre-signed URL.
+
+#### 2.6.3.2.0.0 Position
+
+right
+
+#### 2.6.3.3.0.0 Participant Id
+
+REPO-INFRA-S3-STORAGE
+
+#### 2.6.3.4.0.0 Sequence Number
+
+9
+
+## 2.7.0.0.0.0 Implementation Guidance
+
+| Property | Value |
+|----------|-------|
+| Security Requirements | The Lambda Execution Role must follow the principl... |
+| Performance Targets | The initial API response must be < 200ms. The back... |
+| Error Handling Strategy | The `User & Data Service` handles synchronous erro... |
+| Testing Considerations | E2E testing is critical. This involves triggering ... |
+| Monitoring Requirements | CloudWatch Alarms must be configured for: 1) Messa... |
+| Deployment Considerations | All new infrastructure (SQS Queue, DLQ, S3 Bucket,... |
+

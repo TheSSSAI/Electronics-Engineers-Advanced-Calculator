@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organism Component: 555 Timer Designer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* 1. DESIGN SYSTEM & BASE STYLES */
+        :root {
+            /* Colors */
+            --color-primary-50: #E3F2FD;
+            --color-primary-500: #2196F3;
+            --color-primary-700: #1976D2;
+            --color-neutral-100: #F1F3F5;
+            --color-neutral-300: #DEE2E6;
+            --color-neutral-500: #ADB5BD;
+            --color-neutral-700: #495057;
+            --color-neutral-900: #212529;
+            --color-white: #FFFFFF;
+            --color-info: #0288D1;
+            --color-warning: #ED6C02;
+            --color-error: #D32F2F;
+            /* Typography */
+            --font-primary: 'Roboto', sans-serif;
+            --font-monospace: 'Roboto Mono', monospace;
+            --font-size-sm: 14px;
+            --font-size-md: 16px;
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            /* Borders */
+            --border-radius: 8px;
+            --transition-fast: 150ms ease-in-out;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-primary);
+            background-color: var(--color-neutral-100);
+            color: var(--color-neutral-900);
+            padding: var(--space-lg);
+        }
+        
+        /* Showcase Styles */
+        .showcase { max-width: 500px; margin: 0 auto; }
+        .showcase-header { text-align: center; margin-bottom: var(--space-lg); }
+        .showcase-header h1 { font-size: 2rem; }
+        .showcase-header p { color: var(--color-neutral-700); }
+        .showcase-section { margin-bottom: var(--space-lg); }
+        .showcase-section h3 { margin-bottom: var(--space-md); font-size: 1.25rem; }
+
+        /* 2. ATOMIC DEPENDENCIES */
+        /* == NumericInputWithPrefix == */
+        .numeric-input { position: relative; display: flex; align-items: center; }
+        .numeric-input__field {
+            font-family: var(--font-primary);
+            font-size: var(--font-size-md);
+            padding: var(--space-sm) var(--space-md);
+            padding-right: 36px;
+            border: 1px solid var(--color-neutral-500);
+            border-radius: var(--border-radius);
+            width: 100%;
+            transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+        }
+        .numeric-input__field:focus-visible { outline: 2px solid var(--color-primary-500); outline-offset: 2px; border-color: transparent; }
+        .numeric-input__field--error { border-color: var(--color-error); }
+        .numeric-input__field[readonly] { background-color: var(--color-neutral-100); font-weight: 500; }
+        .numeric-input__unit { position: absolute; right: var(--space-md); color: var(--color-neutral-700); pointer-events: none; }
+        
+        /* == WarningIconWithTooltip == */
+        .warning-tooltip {
+            position: relative;
+            display: inline-flex;
+            cursor: help;
+        }
+        .warning-tooltip__icon { color: var(--color-warning); width: 20px; height: 20px; }
+        .warning-tooltip__text {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-8px);
+            background-color: var(--color-neutral-900);
+            color: var(--color-white);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--border-radius);
+            font-size: var(--font-size-sm);
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity var(--transition-fast), visibility var(--transition-fast);
+            z-index: 10;
+        }
+        .warning-tooltip:hover .warning-tooltip__text,
+        .warning-tooltip:focus-within .warning-tooltip__text {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* 3. ORGANISM: Timer555Designer */
+        .timer-designer {
+            background-color: var(--color-white);
+            border: 1px solid var(--color-neutral-300);
+            border-radius: var(--border-radius);
+            padding: var(--space-lg);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .timer-designer__tabs {
+            display: flex;
+            margin-bottom: var(--space-lg);
+            border-radius: var(--border-radius);
+            background-color: var(--color-neutral-100);
+            padding: var(--space-xs);
+        }
+        .timer-designer__tab {
+            flex: 1;
+            padding: var(--space-sm) var(--space-md);
+            border: none;
+            background-color: transparent;
+            border-radius: 6px;
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            color: var(--color-neutral-700);
+            cursor: pointer;
+            transition: background-color var(--transition-fast), color var(--transition-fast);
+        }
+        .timer-designer__tab:hover { background-color: rgba(0,0,0,0.05); }
+        .timer-designer__tab:focus-visible { outline: 2px solid var(--color-primary-500); outline-offset: 2px; }
+        .timer-designer__tab[aria-selected="true"] {
+            background-color: var(--color-white);
+            color: var(--color-primary-700);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .timer-designer__form-grid { display: grid; gap: var(--space-md); }
+        .timer-designer__group { border-top: 1px solid var(--color-neutral-300); padding-top: var(--space-md); }
+        .timer-designer__group-title {
+            font-size: var(--font-size-sm);
+            font-weight: 700;
+            color: var(--color-neutral-700);
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .timer-designer__form-group { display: flex; flex-direction: column; gap: var(--space-xs); }
+        .timer-designer__label { font-size: var(--font-size-sm); font-weight: 500; color: var(--color-neutral-900); }
+
+        .timer-designer__status-message {
+            padding: var(--space-md);
+            border-radius: var(--border-radius);
+            font-size: var(--font-size-sm);
+            text-align: center;
+            margin-top: var(--space-md);
+        }
+        .timer-designer__status-message--info { background-color: var(--color-primary-50); color: var(--color-primary-700); border: 1px solid #90CAF9; }
+        .timer-designer__status-message--error { background-color: #FDEDED; color: var(--color-error); border: 1px solid var(--color-error); }
+        
+        .timer-designer__output-wrapper {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .timer-designer__spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--color-primary-500);
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .timer-designer { padding: var(--space-md); }
+            .timer-designer__tabs { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="showcase">
+    <header class="showcase-header">
+        <h1>555 Timer Designer</h1>
+        <p>An organism for designing 555 timer circuits.</p>
+    </header>
+
+    <section class="showcase-section">
+        <h3>Live Component</h3>
+        <div class="timer-designer">
+            <div class="timer-designer__tabs" role="tablist" aria-label="555 Timer Mode">
+                <button class="timer-designer__tab" role="tab" aria-selected="true" id="tab-astable">Astable</button>
+                <button class="timer-designer__tab" role="tab" aria-selected="false" id="tab-monostable">Monostable</button>
+            </div>
+            <div class="timer-designer__content">
+                <!-- Astable Variant - Calculated State with Warning -->
+                <div id="astable-panel" role="tabpanel" aria-labelledby="tab-astable">
+                    <form class="timer-designer__form-grid">
+                        <fieldset class="timer-designer__group">
+                            <legend class="timer-designer__group-title">Desired Outputs</legend>
+                            <div class="timer-designer__form-group">
+                                <label class="timer-designer__label" for="astable-freq">Frequency</label>
+                                <div class="numeric-input">
+                                    <input type="text" id="astable-freq" class="numeric-input__field" value="10k">
+                                    <span class="numeric-input__unit">Hz</span>
+                                </div>
+                            </div>
+                            <div class="timer-designer__form-group">
+                                <label class="timer-designer__label" for="astable-duty">Duty Cycle</label>
+                                <div class="numeric-input">
+                                    <input type="text" id="astable-duty" class="numeric-input__field" value="75">
+                                    <span class="numeric-input__unit">%</span>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <fieldset class="timer-designer__group">
+                            <legend class="timer-designer__group-title">Known Component</legend>
+                            <div class="timer-designer__form-group">
+                                <label class="timer-designer__label" for="astable-known-c">Capacitor C</label>
+                                <div class="numeric-input">
+                                    <input type="text" id="astable-known-c" class="numeric-input__field" value="1n">
+                                    <span class="numeric-input__unit">F</span>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <fieldset class="timer-designer__group">
+                            <legend class="timer-designer__group-title">Calculated Components</legend>
+                            <div class="timer-designer__form-group">
+                                <label class="timer-designer__label" for="astable-out-ra">Resistor RA</label>
+                                <div class="timer-designer__output-wrapper">
+                                    <div class="numeric-input" style="flex-grow: 1;">
+                                        <input type="text" id="astable-out-ra" class="numeric-input__field" value="72.15k" readonly>
+                                        <span class="numeric-input__unit">Ω</span>
+                                    </div>
+                                    <div class="warning-tooltip" tabindex="0" role="button" aria-describedby="tooltip-ra">
+                                        <svg class="warning-tooltip__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+                                        <span class="warning-tooltip__text" id="tooltip-ra" role="tooltip">Warning: Impractical value.</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="timer-designer__form-group">
+                                <label class="timer-designer__label" for="astable-out-rb">Resistor RB</label>
+                                <div class="numeric-input">
+                                    <input type="text" id="astable-out-rb" class="numeric-input__field" value="36.07k" readonly>
+                                    <span class="numeric-input__unit">Ω</span>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="showcase-section">
+        <h3>States</h3>
+        <!-- Insufficient Input State -->
+        <div style="margin-bottom: var(--space-lg);">
+            <h4>State: Insufficient Input</h4>
+            <div class="timer-designer">
+                <div class="timer-designer__status-message timer-designer__status-message--info">
+                    Please provide Frequency, Duty Cycle, and one known component value.
+                </div>
+            </div>
+        </div>
+        <!-- Calculating State -->
+        <div style="margin-bottom: var(--space-lg);">
+            <h4>State: Calculating</h4>
+            <div class="timer-designer">
+                <fieldset class="timer-designer__group">
+                    <legend class="timer-designer__group-title">Calculated Components</legend>
+                    <div class="timer-designer__form-group">
+                        <label class="timer-designer__label">Resistor RA</label>
+                        <div class="timer-designer__output-wrapper">
+                            <div class="timer-designer__spinner"></div>
+                            <span>Calculating...</span>
+                        </div>
+                    </div>
+                    <div class="timer-designer__form-group">
+                        <label class="timer-designer__label">Resistor RB</label>
+                        <div class="timer-designer__output-wrapper">
+                             <div class="timer-designer__spinner"></div>
+                             <span>Calculating...</span>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+        <!-- Error State -->
+        <div>
+            <h4>State: Error</h4>
+            <div class="timer-designer">
+                 <div class="timer-designer__form-group">
+                    <label class="timer-designer__label" for="duty-error">Duty Cycle</label>
+                    <div class="numeric-input">
+                        <input type="text" id="duty-error" class="numeric-input__field numeric-input__field--error" value="45">
+                        <span class="numeric-input__unit">%</span>
+                    </div>
+                </div>
+                <div class="timer-designer__status-message timer-designer__status-message--error">
+                    Duty Cycle must be between 50% and 100%.
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+
+	<div> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : "astable"<h3>
+		<!--description--><normal> Calculates component values for a 555 timer in astable (oscillator) mode based on frequency, duty cycle, and one known component. </normal>
+		<!-- vrient 1 html -->
+        <div id="astable-panel" role="tabpanel" aria-labelledby="tab-astable">
+                    <form class="timer-designer__form-grid">
+                        <fieldset class="timer-designer__group">
+                            <legend class="timer-designer__group-title">Desired Outputs</legend>
+                            <div class="timer-designer__form-group">
+                                <label class="timer-designer__label" for="astable-freq-variant">Frequency</label>
+                                <div class="numeric-input">
+                                    <input type="text" id="astable-freq-variant" class="numeric-input__field" placeholder="e.g., 1k">
+                                    <span class="numeric-input__unit">Hz</span>
+                                </div>
+                            </div>
+                            <div class="timer-designer__form-group">
+                                <label class="timer-designer__label" for="astable-duty-variant">Duty Cycle</label>
+                                <div class="numeric-input">
+                                    <input type="text" id="astable-duty-variant" class="numeric-input__field" placeholder="e.g., 75">
+                                    <span class="numeric-input__unit">%</span>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <fieldset class="timer-designer__group">
+                            <legend class="timer-designer__group-title">Known Component</legend>
+                            <!-- Radios to select known component would go here -->
+                            <div class="timer-designer__form-group">
+                                <label class="timer-designer__label" for="astable-known-variant">Capacitor C</label>
+                                <div class="numeric-input">
+                                    <input type="text" id="astable-known-variant" class="numeric-input__field" placeholder="e.g., 10n">
+                                    <span class="numeric-input__unit">F</span>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>     
+		
+      <div>
+	 </div>
+      <div>
+        <h3>Variant Name : "monostable"<h3>
+		<!--description--><normal> Calculates the required resistor or capacitor for a 555 timer in monostable (one-shot) mode based on the desired pulse width and one known component. </normal>
+		<!-- vrient 1 html -->
+        <div id="monostable-panel" role="tabpanel" aria-labelledby="tab-monostable" style="display: none;">
+                    <form class="timer-designer__form-grid">
+                        <fieldset class="timer-designer__group">
+                            <legend class="timer-designer__group-title">Inputs</legend>
+                            <div class="timer-designer__form-group">
+                                <label class="timer-designer__label" for="mono-pulse">Pulse Width (T)</label>
+                                <div class="numeric-input">
+                                    <input type="text" id="mono-pulse" class="numeric-input__field" placeholder="e.g., 100ms">
+                                    <span class="numeric-input__unit">s</span>
+                                </div>
+                            </div>
+                             <div class="timer-designer__form-group">
+                                <label class="timer-designer__label" for="mono-resistor">Resistor (R)</label>
+                                <div class="numeric-input">
+                                    <input type="text" id="mono-resistor" class="numeric-input__field" placeholder="e.g., 10k">
+                                    <span class="numeric-input__unit">Ω</span>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <fieldset class="timer-designer__group">
+                            <legend class="timer-designer__group-title">Calculated Component</legend>
+                            <div class="timer-designer__form-group">
+                                <label class="timer-designer__label" for="mono-capacitor">Capacitor (C)</label>
+                                <div class="numeric-input">
+                                    <input type="text" id="mono-capacitor" class="numeric-input__field" readonly>
+                                    <span class="numeric-input__unit">F</span>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>     
+		
+      <div>
+	 </div>
+	
+	</body>
+</html>

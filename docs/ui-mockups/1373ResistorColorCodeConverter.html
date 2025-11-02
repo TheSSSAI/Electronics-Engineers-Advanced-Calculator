@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organism Component: ResistorColorCodeConverter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* 1. DESIGN SYSTEM & BASE STYLES */
+        :root {
+            /* Colors */
+            --color-primary-50: #E3F2FD;
+            --color-primary-100: #BBDEFB;
+            --color-primary-200: #90CAF9;
+            --color-primary-500: #2196F3;
+            --color-primary-600: #1E88E5;
+            --color-primary-700: #1976D2;
+            --color-neutral-100: #F1F3F5;
+            --color-neutral-300: #DEE2E6;
+            --color-neutral-500: #ADB5BD;
+            --color-neutral-700: #495057;
+            --color-neutral-900: #212529;
+            --color-white: #FFFFFF;
+            --color-error: #D32F2F;
+            --color-success: #2E7D32;
+            --color-warning: #ED6C02;
+
+            /* Resistor Colors */
+            --resistor-black: #212529;
+            --resistor-brown: #8B4513;
+            --resistor-red: #D32F2F;
+            --resistor-orange: #ED6C02;
+            --resistor-yellow: #FBC02D;
+            --resistor-green: #2E7D32;
+            --resistor-blue: #1976D2;
+            --resistor-violet: #6A1B9A;
+            --resistor-grey: #616161;
+            --resistor-white: #FAFAFA;
+            --resistor-gold: #FFD700;
+            --resistor-silver: #C0C0C0;
+
+            /* Typography */
+            --font-primary: 'Roboto', sans-serif;
+            --font-monospace: 'Roboto Mono', monospace;
+            --font-size-sm: 14px;
+            --font-size-md: 16px;
+            --font-size-lg: 20px;
+            --font-size-xl: 24px;
+
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+
+            /* Borders */
+            --border-radius: 8px;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background-color: var(--color-neutral-100);
+            color: var(--color-neutral-900);
+            padding: var(--space-lg);
+        }
+
+        /* Showcase Styles */
+        .showcase { max-width: 800px; margin: auto; }
+        .showcase-header { text-align: center; margin-bottom: var(--space-xl); }
+        .showcase-header h1 { font-size: 2.5rem; }
+
+        /* 2. DEPENDENT COMPONENT STYLES */
+        
+        /* NumericInputWithPrefix */
+        .numeric-input { position: relative; display: flex; align-items: center; width: 100%;}
+        .numeric-input__field { font-family: var(--font-primary); font-size: var(--font-size-md); padding: var(--space-md); padding-right: calc(var(--space-md) * 2.5); border: 1px solid var(--color-neutral-500); border-radius: var(--border-radius); width: 100%; transition: all 150ms ease; min-height: 48px;}
+        .numeric-input__field:focus-visible { outline: none; border-color: var(--color-primary-500); box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2); }
+        .numeric-input__unit { position: absolute; right: var(--space-md); color: var(--color-neutral-700); pointer-events: none; }
+        
+        /* ResistorColorBandSelectors & ColorBandSelector */
+        .resistor-selectors { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--space-md); padding: var(--space-md); border-radius: var(--border-radius); }
+        .resistor-selectors__band { display: flex; flex-direction: column; gap: var(--space-sm); align-items: center; }
+        .resistor-selectors__label { font-size: var(--font-size-sm); font-weight: 500; color: var(--color-neutral-700); text-align: center; }
+        .color-selector { position: relative; width: 140px; }
+        .color-selector__button { display: flex; align-items: center; gap: var(--space-sm); width: 100%; padding: var(--space-sm); border: 1px solid var(--color-neutral-500); border-radius: var(--border-radius); background-color: var(--color-white); font-family: var(--font-primary); font-size: var(--font-size-md); cursor: pointer; text-align: left; min-height: 48px; }
+        .color-selector__button:focus-visible { outline: 2px solid var(--color-primary-500); outline-offset: 2px; }
+        .color-selector__swatch { width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); flex-shrink: 0; }
+        .swatch-brown { background-color: var(--resistor-brown); }
+        .swatch-black { background-color: var(--resistor-black); }
+        .swatch-red { background-color: var(--resistor-red); }
+        .swatch-gold { background-color: var(--resistor-gold); }
+        .swatch-yellow { background-color: var(--resistor-yellow); }
+        .swatch-violet { background-color: var(--resistor-violet); }
+        .swatch-orange { background-color: var(--resistor-orange); }
+
+        /* EseriesSuggestion */
+        .eseries-suggestion { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-xs) var(--space-sm); margin-top: var(--space-sm); font-size: var(--font-size-sm); color: var(--color-primary-700); background-color: var(--color-primary-50); border: 1px solid var(--color-primary-100); border-radius: 4px; cursor: pointer; transition: all 150ms ease; }
+        .eseries-suggestion:hover { background-color: var(--color-primary-100); transform: translateY(-1px); }
+        .eseries-suggestion:focus-visible { outline: 2px solid var(--color-primary-500); outline-offset: 2px; }
+        .eseries-suggestion__label { color: var(--color-primary-600); }
+        .eseries-suggestion__value { font-weight: 700; }
+        .eseries-suggestion[hidden] { display: none; }
+        
+        /* 3. ORGANISM COMPONENT: ResistorColorCodeConverter */
+        .resistor-converter {
+            background-color: var(--color-white);
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            overflow: hidden;
+            border: 1px solid var(--color-neutral-300);
+        }
+
+        .resistor-converter__tabs {
+            display: flex;
+            background-color: var(--color-neutral-100);
+            border-bottom: 1px solid var(--color-neutral-300);
+        }
+
+        .resistor-converter__tab {
+            flex: 1;
+            padding: var(--space-md);
+            font-size: var(--font-size-md);
+            font-weight: 500;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: var(--color-neutral-700);
+            border-bottom: 3px solid transparent;
+            transition: color 150ms ease, border-color 150ms ease;
+        }
+
+        .resistor-converter__tab:hover,
+        .resistor-converter__tab:focus-visible {
+            color: var(--color-neutral-900);
+            background-color: rgba(0,0,0,0.02);
+            outline: none;
+        }
+
+        .resistor-converter__tab[aria-selected="true"] {
+            color: var(--color-primary-700);
+            border-bottom-color: var(--color-primary-700);
+        }
+
+        .resistor-converter__panel {
+            padding: var(--space-lg);
+        }
+
+        .resistor-converter__panel[hidden] {
+            display: none;
+        }
+        
+        /* Common section styles */
+        .converter-section {
+            margin-bottom: var(--space-lg);
+        }
+        .converter-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .converter-section__title {
+            font-size: var(--font-size-md);
+            font-weight: 700;
+            color: var(--color-neutral-900);
+            margin-bottom: var(--space-md);
+        }
+
+        /* Results Display */
+        .resistor-converter__results {
+            background-color: var(--color-neutral-100);
+            border-radius: var(--border-radius);
+            padding: var(--space-md);
+            margin-top: var(--space-lg);
+            border: 1px solid var(--color-neutral-300);
+        }
+
+        .resistor-converter__result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: var(--font-size-md);
+        }
+
+        .resistor-converter__result-item:not(:last-child) {
+            margin-bottom: var(--space-sm);
+        }
+
+        .resistor-converter__result-label {
+            color: var(--color-neutral-700);
+        }
+
+        .resistor-converter__result-value {
+            font-weight: 700;
+            font-family: var(--font-monospace);
+            font-size: var(--font-size-lg);
+        }
+
+        /* Radio group for band selection */
+        .radio-group {
+            display: flex;
+            gap: var(--space-md);
+            margin-bottom: var(--space-md);
+        }
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            cursor: pointer;
+        }
+
+        /* Value-to-Color Result (Visual Resistor) */
+        .visual-resistor {
+            background: #F5E0C6;
+            height: 60px;
+            width: 100%;
+            max-width: 350px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            border: 2px solid #D2B48C;
+            position: relative;
+        }
+        .visual-resistor::before, .visual-resistor::after {
+            content: '';
+            position: absolute;
+            height: 100%;
+            width: 15px;
+            background-color: #D2B48C;
+        }
+        .visual-resistor::before { left: -15px; border-top-left-radius: 6px; border-bottom-left-radius: 6px; }
+        .visual-resistor::after { right: -15px; border-top-right-radius: 6px; border-bottom-right-radius: 6px; }
+        .resistor-band {
+            height: 100%;
+            width: 12px;
+        }
+
+
+        /* Responsive Adaptations */
+        @media (max-width: 768px) {
+            body { padding: var(--space-md); }
+            .resistor-converter__tab {
+                font-size: var(--font-size-sm);
+                padding: var(--space-md) var(--space-sm);
+            }
+            .resistor-converter__panel {
+                padding: var(--space-md);
+            }
+            .resistor-selectors {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .resistor-selectors__band .color-selector {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<main class="showcase">
+    <header class="showcase-header">
+        <h1>Resistor Color Code Converter</h1>
+    </header>
+
+    <div class="resistor-converter">
+        <div class="resistor-converter__tabs" role="tablist" aria-label="Resistor Converter Mode">
+            <button id="tab-c2v" class="resistor-converter__tab" role="tab" aria-selected="true" aria-controls="panel-c2v">
+                Color to Value
+            </button>
+            <button id="tab-v2c" class="resistor-converter__tab" role="tab" aria-selected="false" aria-controls="panel-v2c" tabindex="-1">
+                Value to Color
+            </button>
+        </div>
+
+        <div id="panel-c2v" class="resistor-converter__panel" role="tabpanel" tabindex="0" aria-labelledby="tab-c2v">
+            <div class="converter-section">
+                <h3 class="converter-section__title">Number of Bands</h3>
+                <div class="radio-group" role="radiogroup" aria-labelledby="band-select-label">
+                    <span id="band-select-label" class="sr-only">Select number of resistor bands</span>
+                    <label><input type="radio" name="bands" value="4" checked> 4-Band</label>
+                    <label><input type="radio" name="bands" value="5"> 5-Band</label>
+                    <label><input type="radio" name="bands" value="6"> 6-Band</label>
+                </div>
+            </div>
+
+            <div class="converter-section">
+                <h3 class="converter-section__title">Band Colors</h3>
+                <div class="resistor-selectors" aria-label="4-band resistor selectors">
+                    <div class="resistor-selectors__band">
+                        <label id="b1-label" class="resistor-selectors__label">Band 1: Digit</label>
+                        <div class="color-selector">
+                            <button class="color-selector__button" aria-labelledby="b1-label" aria-haspopup="listbox">
+                                <span class="color-selector__swatch swatch-brown"></span>
+                                <span>Brown</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="resistor-selectors__band">
+                        <label id="b2-label" class="resistor-selectors__label">Band 2: Digit</label>
+                        <div class="color-selector">
+                            <button class="color-selector__button" aria-labelledby="b2-label" aria-haspopup="listbox">
+                                <span class="color-selector__swatch swatch-black"></span>
+                                <span>Black</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="resistor-selectors__band">
+                        <label id="b3-label" class="resistor-selectors__label">Band 3: Multiplier</label>
+                        <div class="color-selector">
+                            <button class="color-selector__button" aria-labelledby="b3-label" aria-haspopup="listbox">
+                                <span class="color-selector__swatch swatch-red"></span>
+                                <span>Red</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="resistor-selectors__band">
+                        <label id="b4-label" class="resistor-selectors__label">Band 4: Tolerance</label>
+                        <div class="color-selector">
+                            <button class="color-selector__button" aria-labelledby="b4-label" aria-haspopup="listbox">
+                                <span class="color-selector__swatch swatch-gold"></span>
+                                <span>Gold</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="resistor-converter__results" aria-live="polite">
+                <div class="resistor-converter__result-item">
+                    <span class="resistor-converter__result-label">Resistance</span>
+                    <output class="resistor-converter__result-value">1 kΩ</output>
+                </div>
+                <div class="resistor-converter__result-item">
+                    <span class="resistor-converter__result-label">Tolerance</span>
+                    <output class="resistor-converter__result-value">±5%</output>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-v2c" class="resistor-converter__panel" role="tabpanel" tabindex="0" aria-labelledby="tab-v2c" hidden>
+            <div class="converter-section">
+                <h3 class="converter-section__title">Enter Value</h3>
+                <label for="resistance-input" class="sr-only">Resistance Value</label>
+                <div class="numeric-input">
+                    <input id="resistance-input" type="text" class="numeric-input__field" value="480" aria-describedby="suggestion-1">
+                    <span class="numeric-input__unit">Ω</span>
+                </div>
+                <button class="eseries-suggestion" id="suggestion-1">
+                    <span class="eseries-suggestion__label">Nearest standard value:</span>
+                    <span class="eseries-suggestion__value">470 Ω</span>
+                </button>
+            </div>
+             <div class="converter-section">
+                <h3 class="converter-section__title">Tolerance</h3>
+                <select id="tolerance-select" class="numeric-input__field" aria-label="Select Tolerance">
+                    <option value="5">±5% (E24)</option>
+                    <option value="1">±1% (E96)</option>
+                    <option value="10">±10% (E12)</option>
+                </select>
+             </div>
+
+            <div class="resistor-converter__results">
+                <h3 class="converter-section__title">Resulting Color Code (4-Band)</h3>
+                <div class="visual-resistor" aria-label="Resistor with colors Yellow, Violet, Brown, Gold">
+                    <span class="resistor-band" style="background-color: var(--resistor-yellow);"></span>
+                    <span class="resistor-band" style="background-color: var(--resistor-violet);"></span>
+                    <span class="resistor-band" style="background-color: var(--resistor-brown);"></span>
+                    <span class="resistor-band" style="margin-left: auto; background-color: var(--resistor-gold);"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    // Basic Tab functionality for demonstration
+    const tabList = document.querySelector('[role="tablist"]');
+    const tabs = tabList.querySelectorAll('[role="tab"]');
+    
+    tabList.addEventListener('keydown', (e) => {
+        let tabFocus = 0;
+        tabs.forEach((tab, i) => {
+            if (tab === document.activeElement) {
+                tabFocus = i;
+            }
+        });
+        
+        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+            tabs[tabFocus].setAttribute('tabindex', -1);
+            if (e.key === 'ArrowRight') {
+                tabFocus++;
+                if (tabFocus >= tabs.length) {
+                    tabFocus = 0;
+                }
+            } else if (e.key === 'ArrowLeft') {
+                tabFocus--;
+                if (tabFocus < 0) {
+                    tabFocus = tabs.length - 1;
+                }
+            }
+            tabs[tabFocus].setAttribute('tabindex', 0);
+            tabs[tabFocus].focus();
+        }
+    });
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            const targetPanelId = e.currentTarget.getAttribute('aria-controls');
+            
+            tabs.forEach(t => {
+                t.setAttribute('aria-selected', 'false');
+                t.setAttribute('tabindex', '-1');
+                const panel = document.getElementById(t.getAttribute('aria-controls'));
+                panel.setAttribute('hidden', true);
+            });
+            
+            e.currentTarget.setAttribute('aria-selected', 'true');
+            e.currentTarget.setAttribute('tabindex', '0');
+            
+            const targetPanel = document.getElementById(targetPanelId);
+            targetPanel.removeAttribute('hidden');
+        });
+    });
+</script>
+
+
+	
+	<div> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : "color_to_value"<h3>
+		<!--description--><normal> This variant allows the user to select resistor band colors to calculate the corresponding resistance value and tolerance. It features a band count selector and a dynamic set of `ResistorColorBandSelectors`. </normal>
+		<!-- vrient 1 html -->
+        <div id="panel-c2v" class="resistor-converter__panel" role="tabpanel" tabindex="0" aria-labelledby="tab-c2v">
+            <div class="converter-section">
+                <h3 class="converter-section__title">Number of Bands</h3>
+                <div class="radio-group" role="radiogroup" aria-labelledby="band-select-label">
+                    <span id="band-select-label" class="sr-only">Select number of resistor bands</span>
+                    <label><input type="radio" name="bands" value="4" checked=""> 4-Band</label>
+                    <label><input type="radio" name="bands" value="5"> 5-Band</label>
+                    <label><input type="radio" name="bands" value="6"> 6-Band</label>
+                </div>
+            </div>
+
+            <div class="converter-section">
+                <h3 class="converter-section__title">Band Colors</h3>
+                <div class="resistor-selectors" aria-label="4-band resistor selectors">
+                    <div class="resistor-selectors__band">
+                        <label id="b1-label" class="resistor-selectors__label">Band 1: Digit</label>
+                        <div class="color-selector">
+                            <button class="color-selector__button" aria-labelledby="b1-label" aria-haspopup="listbox">
+                                <span class="color-selector__swatch swatch-brown"></span>
+                                <span>Brown</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="resistor-selectors__band">
+                        <label id="b2-label" class="resistor-selectors__label">Band 2: Digit</label>
+                        <div class="color-selector">
+                            <button class="color-selector__button" aria-labelledby="b2-label" aria-haspopup="listbox">
+                                <span class="color-selector__swatch swatch-black"></span>
+                                <span>Black</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="resistor-selectors__band">
+                        <label id="b3-label" class="resistor-selectors__label">Band 3: Multiplier</label>
+                        <div class="color-selector">
+                            <button class="color-selector__button" aria-labelledby="b3-label" aria-haspopup="listbox">
+                                <span class="color-selector__swatch swatch-red"></span>
+                                <span>Red</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="resistor-selectors__band">
+                        <label id="b4-label" class="resistor-selectors__label">Band 4: Tolerance</label>
+                        <div class="color-selector">
+                            <button class="color-selector__button" aria-labelledby="b4-label" aria-haspopup="listbox">
+                                <span class="color-selector__swatch swatch-gold"></span>
+                                <span>Gold</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="resistor-converter__results" aria-live="polite">
+                <div class="resistor-converter__result-item">
+                    <span class="resistor-converter__result-label">Resistance</span>
+                    <output class="resistor-converter__result-value">1 kΩ</output>
+                </div>
+                <div class="resistor-converter__result-item">
+                    <span class="resistor-converter__result-label">Tolerance</span>
+                    <output class="resistor-converter__result-value">±5%</output>
+                </div>
+            </div>
+        </div>     
+		
+      <div>
+	 </div>
+      <div>
+        <h3>Variant Name : "value_to_color"<h3>
+		<!--description--><normal> This variant allows the user to enter a resistance value and tolerance to see the corresponding color bands. It features a `NumericInputWithPrefix` and an `EseriesSuggestion` component for enhanced usability. </normal>
+		<!-- vrient 1 html -->
+        <div id="panel-v2c" class="resistor-converter__panel" role="tabpanel" tabindex="0" aria-labelledby="tab-v2c" hidden="">
+            <div class="converter-section">
+                <h3 class="converter-section__title">Enter Value</h3>
+                <label for="resistance-input" class="sr-only">Resistance Value</label>
+                <div class="numeric-input">
+                    <input id="resistance-input" type="text" class="numeric-input__field" value="480" aria-describedby="suggestion-1">
+                    <span class="numeric-input__unit">Ω</span>
+                </div>
+                <button class="eseries-suggestion" id="suggestion-1">
+                    <span class="eseries-suggestion__label">Nearest standard value:</span>
+                    <span class="eseries-suggestion__value">470 Ω</span>
+                </button>
+            </div>
+             <div class="converter-section">
+                <h3 class="converter-section__title">Tolerance</h3>
+                <select id="tolerance-select" class="numeric-input__field" aria-label="Select Tolerance">
+                    <option value="5">±5% (E24)</option>
+                    <option value="1">±1% (E96)</option>
+                    <option value="10">±10% (E12)</option>
+                </select>
+             </div>
+
+            <div class="resistor-converter__results">
+                <h3 class="converter-section__title">Resulting Color Code (4-Band)</h3>
+                <div class="visual-resistor" aria-label="Resistor with colors Yellow, Violet, Brown, Gold">
+                    <span class="resistor-band" style="background-color: var(--resistor-yellow);"></span>
+                    <span class="resistor-band" style="background-color: var(--resistor-violet);"></span>
+                    <span class="resistor-band" style="background-color: var(--resistor-brown);"></span>
+                    <span class="resistor-band" style="margin-left: auto; background-color: var(--resistor-gold);"></span>
+                </div>
+            </div>
+        </div>     
+		
+      <div>
+	 </div>    
+	
+	</body>
+</html>

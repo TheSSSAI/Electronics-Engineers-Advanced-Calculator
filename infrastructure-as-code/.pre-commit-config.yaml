@@ -1,0 +1,36 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+    -   id: trailing-whitespace
+    -   id: end-of-file-fixer
+    -   id: check-yaml
+    -   id: check-json
+    -   id: check-merge-conflict
+
+-   repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.83.0
+    hooks:
+    -   id: terraform_fmt
+        args:
+        - --args=-recursive
+    -   id: terraform_validate
+    -   id: terraform_tflint
+        args:
+        - --args=--config=__GIT_WORKING_DIR__/.tflint.hcl
+    -   id: terraform_tfsec # Or checkov
+        # tfsec is being retired. Consider switching to trivy or checkov in the future.
+        # https://github.com/aquasecurity/tfsec/discussions/1974
+        args:
+        - --args=--config-file=__GIT_WORKING_DIR__/tfsec.yaml
+
+-   repo: https://github.com/gruntwork-io/pre-commit
+    rev: v0.1.23
+    hooks:
+    -   id: terragrunt-hcl-fmt
+
+# Placeholder for tfsec.yaml if needed for custom configurations.
+# For now, we will create a basic one inside the repo or assume defaults.
+# This pre-commit config assumes a tfsec.yaml might exist.

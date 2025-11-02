@@ -1,0 +1,42 @@
+sequenceDiagram
+    actor "Client SPA" as ClientSPA
+    participant "API Gateway" as APIGateway
+    actor "User & Data Service" as UserDataService
+    participant "PostgreSQL DB" as PostgreSQLDB
+
+    activate ClientSPA
+    ClientSPA->>ClientSPA: 1. 1. [Opt: Offline] User performs data modification (e.g., save variable 'myVar' = 123)
+    ClientSPA->>ClientSPA: 2. 1.1. Intercept API call; detect offline status (navigator.onLine === false)
+    ClientSPA-->>ClientSPA: isOffline: true
+    ClientSPA->>ClientSPA: 3. 1.2. Queue modification request in IndexedDB
+    ClientSPA-->>ClientSPA: Promise<IDBValidKey>
+    ClientSPA->>ClientSPA: 4. 2. [Loop: While Online & Queue Not Empty] Detect network restoration
+    ClientSPA->>ClientSPA: 5. 2.1. Read next 'pending' request from IndexedDB queue
+    ClientSPA-->>ClientSPA: Promise<queuedRequest>
+    activate APIGateway
+    ClientSPA->>APIGateway: 6. 2.2. POST /api/v1/variables
+    APIGateway-->>ClientSPA: 200 OK or 409 Conflict
+    activate UserDataService
+    APIGateway->>UserDataService: 7. 2.3. Forward request to User & Data Service
+    UserDataService-->>APIGateway: Service response
+    activate PostgreSQLDB
+    UserDataService->>PostgreSQLDB: 8. 2.4. [Alt: Conflict Resolution] BEGIN TRANSACTION; SELECT FOR UPDATE
+    PostgreSQLDB-->>UserDataService: Existing record or NULL
+    UserDataService->>UserDataService: 9. 2.4.1. [If record exists AND clientTimestamp <= record.updatedAt] Conflict detected, server state wins
+    UserDataService-->>UserDataService: Abort update, return 409 Conflict
+    UserDataService->>PostgreSQLDB: 10. 2.4.2. [Else] INSERT or UPDATE record
+    PostgreSQLDB-->>UserDataService: Write result
+    UserDataService->>PostgreSQLDB: 11. 2.4.3. COMMIT TRANSACTION
+    PostgreSQLDB-->>UserDataService: Commit success
+    ClientSPA->>ClientSPA: 12. 2.5. [If sync success] Remove request from IndexedDB queue
+    ClientSPA-->>ClientSPA: Promise<void>
+    ClientSPA->>ClientSPA: 13. 2.6. [Else if sync failure (4xx)] Mark request as 'failed' in IndexedDB
+    ClientSPA-->>ClientSPA: Promise<IDBValidKey>
+
+    note over ClientSPA: Offline detection relies on the browser's navigator.onLine API, which indicates connection to a n...
+    note over UserDataService: The 'last-write-wins' (LWW) logic is implemented by comparing the client's modification timestamp...
+
+    deactivate PostgreSQLDB
+    deactivate UserDataService
+    deactivate APIGateway
+    deactivate ClientSPA

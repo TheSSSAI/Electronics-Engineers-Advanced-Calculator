@@ -1,0 +1,34 @@
+stateDiagram-v2
+    direction LR
+
+    [*] --> Unchecked
+
+    Unchecked --> Checked : "User interacts (click / space)"
+    Checked --> Unchecked : "User interacts (click / space)"
+
+    Unchecked --> DisabledUnchecked : "System sets disabled=true"
+    DisabledUnchecked --> Unchecked : "System sets disabled=false"
+
+    Checked --> DisabledChecked : "System sets disabled=true"
+    DisabledChecked --> Checked : "System sets disabled=false"
+
+    note left of Unchecked
+        **Default State**
+        Can transition to:
+        - Checked (interaction)
+        - DisabledUnchecked (system)
+    end note
+
+    note right of Checked
+        **Selected State**
+        Can transition to:
+        - Unchecked (interaction)
+        - DisabledChecked (system)
+    end note
+
+    note right of DisabledUnchecked
+      **Non-interactive States**
+      User interactions are ignored.
+      Only the system can change state
+      by re-enabling the component.
+    end note

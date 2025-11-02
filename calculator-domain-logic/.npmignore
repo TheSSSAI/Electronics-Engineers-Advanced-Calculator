@@ -1,0 +1,19 @@
+# Source files
+/src
+
+# Config files
+.vscode
+.editorconfig
+.eslintrc.js
+.gitignore
+.prettierrc.js
+jest.config.js
+tsconfig.json
+.nvmrc
+
+# Tests
+/tests
+/__tests__
+
+# Coverage reports
+/coverage

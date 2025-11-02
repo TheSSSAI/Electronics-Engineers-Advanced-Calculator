@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Molecular Component: ResistorColorBandSelectors</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* 1. CSS Reset & Base Styles */
+    *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* 2. Design System Tokens (CSS Custom Properties) */
+    :root {
+        /* Color Palette */
+        --color-primary-500: #2196F3;
+        --color-neutral-100: #F1F3F5;
+        --color-neutral-300: #DEE2E6;
+        --color-neutral-500: #ADB5BD;
+        --color-neutral-700: #495057;
+        --color-neutral-900: #212529;
+        --color-white: #FFFFFF;
+        --color-error: #D32F2F;
+
+        /* Typography */
+        --font-primary: 'Roboto', sans-serif;
+        --font-size-sm: 14px;
+        --font-size-md: 16px;
+
+        /* Spacing */
+        --space-xs: 4px;
+        --space-sm: 8px;
+        --space-md: 16px;
+        --space-lg: 24px;
+        --space-xl: 32px;
+
+        /* Borders */
+        --border-radius: 4px;
+
+        /* Resistor Colors */
+        --resistor-black: #212529;
+        --resistor-brown: #8B4513;
+        --resistor-red: #D32F2F;
+        --resistor-orange: #ED6C02;
+        --resistor-yellow: #FBC02D;
+        --resistor-green: #2E7D32;
+        --resistor-blue: #1976D2;
+        --resistor-violet: #6A1B9A;
+        --resistor-grey: #616161;
+        --resistor-white: #FAFAFA;
+        --resistor-gold: #FFD700;
+        --resistor-silver: #C0C0C0;
+    }
+
+    body {
+        font-family: var(--font-primary);
+        background-color: var(--color-neutral-100);
+        color: var(--color-neutral-900);
+        line-height: 1.6;
+        padding: var(--space-lg);
+    }
+
+    /* 3. Showcase Layout */
+    .showcase {
+        max-width: 960px;
+        margin: 0 auto;
+        background-color: var(--color-white);
+        padding: var(--space-xl);
+        border-radius: var(--border-radius);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .showcase__header {
+        border-bottom: 1px solid var(--color-neutral-300);
+        padding-bottom: var(--space-md);
+        margin-bottom: var(--space-xl);
+    }
+
+    .showcase__header h1 {
+        font-size: 2rem;
+        margin-bottom: var(--space-sm);
+    }
+
+    .component-group {
+        margin-bottom: var(--space-lg);
+        padding: var(--space-md);
+        border: 1px solid var(--color-neutral-300);
+        border-radius: var(--border-radius);
+    }
+
+    .component-group h3 {
+        font-size: 1.25rem;
+        margin-bottom: var(--space-sm);
+    }
+
+    /* 4. ATOMIC DEPENDENCY: ColorBandSelector CSS */
+    .color-selector {
+        position: relative;
+        width: 150px;
+    }
+
+    .color-selector__button {
+        display: flex;
+        align-items: center;
+        gap: var(--space-sm);
+        width: 100%;
+        padding: var(--space-sm);
+        border: 1px solid var(--color-neutral-500);
+        border-radius: var(--border-radius);
+        background-color: var(--color-white);
+        font-family: var(--font-primary);
+        font-size: var(--font-size-md);
+        cursor: pointer;
+        text-align: left;
+    }
+
+    .color-selector__button:focus-visible {
+        outline: none;
+        border-color: var(--color-primary-500);
+        box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+    }
+
+    .color-selector__button:disabled {
+        background-color: var(--color-neutral-100);
+        cursor: not-allowed;
+    }
+
+    .color-selector__swatch {
+        flex-shrink: 0;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    /* Color Swatch Colors */
+    .swatch-black { background-color: var(--resistor-black); color: var(--color-white); }
+    .swatch-brown { background-color: var(--resistor-brown); color: var(--color-white); }
+    .swatch-red { background-color: var(--resistor-red); color: var(--color-white); }
+    .swatch-orange { background-color: var(--resistor-orange); color: var(--color-neutral-900); }
+    .swatch-yellow { background-color: var(--resistor-yellow); color: var(--color-neutral-900); }
+    .swatch-green { background-color: var(--resistor-green); color: var(--color-white); }
+    .swatch-blue { background-color: var(--resistor-blue); color: var(--color-white); }
+    .swatch-violet { background-color: var(--resistor-violet); color: var(--color-white); }
+    .swatch-grey { background-color: var(--resistor-grey); color: var(--color-white); }
+    .swatch-white { background-color: var(--resistor-white); color: var(--color-neutral-900); }
+    .swatch-gold { background-color: var(--resistor-gold); color: var(--color-neutral-900); }
+    .swatch-silver { background-color: var(--resistor-silver); color: var(--color-neutral-900); }
+
+    /* 5. MOLECULAR COMPONENT: ResistorColorBandSelectors CSS */
+    .resistor-selectors {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: var(--space-md);
+        padding: var(--space-md);
+        border: 1px solid transparent;
+        border-radius: var(--border-radius);
+        transition: background-color 150ms ease-in-out, border-color 150ms ease-in-out;
+    }
+
+    .resistor-selectors__band {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+
+    .resistor-selectors__label {
+        font-size: var(--font-size-sm);
+        font-weight: 500;
+        color: var(--color-neutral-700);
+        text-align: center;
+    }
+
+    /* State: Error */
+    .resistor-selectors--error {
+        border-color: var(--color-error);
+        background-color: #fdeded;
+    }
+
+    .resistor-selectors__error-msg {
+        font-size: var(--font-size-sm);
+        color: var(--color-error);
+        width: 100%;
+        text-align: left;
+        margin-top: var(--space-sm);
+        padding: 0 var(--space-md);
+    }
+
+    /* Responsive Adaptations */
+    @media (max-width: 768px) {
+        .resistor-selectors {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .resistor-selectors__band .color-selector {
+            width: 100%;
+        }
+    }
+  </style>
+</head>
+<body>
+  <div class="showcase">
+    <header class="showcase__header">
+        <h1>Molecular Component: ResistorColorBandSelectors</h1>
+        <p>A group of color band selectors for defining a resistor's properties. The number of bands is configurable.</p>
+    </header>
+
+    <main>
+      <section class="component-section">
+          <h2>Variants</h2>
+          <div class="component-group">
+              <h3>3-Band Variant</h3>
+              <div class="resistor-selectors" aria-label="3-band resistor selectors">
+                  <div class="resistor-selectors__band">
+                      <label id="band1-3-label" class="resistor-selectors__label">Band 1: Digit</label>
+                      <div class="color-selector">
+                          <button class="color-selector__button" aria-labelledby="band1-3-label" aria-haspopup="listbox">
+                              <span class="color-selector__swatch swatch-brown"></span>
+                              <span>Brown</span>
+                          </button>
+                      </div>
+                  </div>
+                  <div class="resistor-selectors__band">
+                      <label id="band2-3-label" class="resistor-selectors__label">Band 2: Digit</label>
+                      <div class="color-selector">
+                          <button class="color-selector__button" aria-labelledby="band2-3-label" aria-haspopup="listbox">
+                              <span class="color-selector__swatch swatch-black"></span>
+                              <span>Black</span>
+                          </button>
+                      </div>
+                  </div>
+                  <div class="resistor-selectors__band">
+                      <label id="band3-3-label" class="resistor-selectors__label">Band 3: Multiplier</label>
+                      <div class="color-selector">
+                          <button class="color-selector__button" aria-labelledby="band3-3-label" aria-haspopup="listbox">
+                              <span class="color-selector__swatch swatch-red"></span>
+                              <span>Red</span>
+                          </button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <div class="component-group">
+              <h3>4-Band Variant</h3>
+              <div class="resistor-selectors" aria-label="4-band resistor selectors">
+                  <!-- Band 1 -->
+                  <div class="resistor-selectors__band">
+                      <label id="band1-4-label" class="resistor-selectors__label">Band 1: Digit</label>
+                      <div class="color-selector">
+                          <button class="color-selector__button" aria-labelledby="band1-4-label" aria-haspopup="listbox">
+                              <span class="color-selector__swatch swatch-yellow"></span>
+                              <span>Yellow</span>
+                          </button>
+                      </div>
+                  </div>
+                  <!-- Band 2 -->
+                  <div class="resistor-selectors__band">
+                      <label id="band2-4-label" class="resistor-selectors__label">Band 2: Digit</label>
+                      <div class="color-selector">
+                          <button class="color-selector__button" aria-labelledby="band2-4-label" aria-haspopup="listbox">
+                              <span class="color-selector__swatch swatch-violet"></span>
+                              <span>Violet</span>
+                          </button>
+                      </div>
+                  </div>
+                  <!-- Band 3 -->
+                  <div class="resistor-selectors__band">
+                      <label id="band3-4-label" class="resistor-selectors__label">Band 3: Multiplier</label>
+                      <div class="color-selector">
+                          <button class="color-selector__button" aria-labelledby="band3-4-label" aria-haspopup="listbox">
+                              <span class="color-selector__swatch swatch-orange"></span>
+                              <span>Orange</span>
+                          </button>
+                      </div>
+                  </div>
+                  <!-- Band 4 -->
+                  <div class="resistor-selectors__band">
+                      <label id="band4-4-label" class="resistor-selectors__label">Band 4: Tolerance</label>
+                      <div class="color-selector">
+                          <button class="color-selector__button" aria-labelledby="band4-4-label" aria-haspopup="listbox">
+                              <span class="color-selector__swatch swatch-gold"></span>
+                              <span>Gold</span>
+                          </button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <div class="component-group">
+              <h3>5-Band Variant</h3>
+              <div class="resistor-selectors" aria-label="5-band resistor selectors">
+                  <div class="resistor-selectors__band"><label class="resistor-selectors__label">Band 1</label><div class="color-selector"><button class="color-selector__button"><span class="color-selector__swatch swatch-orange"></span><span>Orange</span></button></div></div>
+                  <div class="resistor-selectors__band"><label class="resistor-selectors__label">Band 2</label><div class="color-selector"><button class="color-selector__button"><span class="color-selector__swatch swatch-orange"></span><span>Orange</span></button></div></div>
+                  <div class="resistor-selectors__band"><label class="resistor-selectors__label">Band 3</label><div class="color-selector"><button class="color-selector__button"><span class="color-selector__swatch swatch-black"></span><span>Black</span></button></div></div>
+                  <div class="resistor-selectors__band"><label class="resistor-selectors__label">Multiplier</label><div class="color-selector"><button class="color-selector__button"><span class="color-selector__swatch swatch-brown"></span><span>Brown</span></button></div></div>
+                  <div class="resistor-selectors__band"><label class="resistor-selectors__label">Tolerance</label><div class="color-selector"><button class="color-selector__button"><span class="color-selector__swatch swatch-brown"></span><span>Brown</span></button></div></div>
+              </div>
+          </div>
+          
+          <div class="component-group">
+              <h3>6-Band Variant</h3>
+              <div class="resistor-selectors" aria-label="6-band resistor selectors">
+                  <div class="resistor-selectors__band"><label class="resistor-selectors__label">Band 1</label><div class="color-selector"><button class="color-selector__button"><span class="color-selector__swatch swatch-red"></span><span>Red</span></button></div></div>
+                  <div class="resistor-selectors__band"><label class="resistor-selectors__label">Band 2</label><div class="color-selector"><button class="color-selector__button"><span class="color-selector__swatch swatch-violet"></span><span>Violet</span></button></div></div>
+                  <div class="resistor-selectors__band"><label class="resistor-selectors__label">Band 3</label><div class="color-selector"><button class="color-selector__button"><span class="color-selector__swatch swatch-green"></span><span>Green</span></button></div></div>
+                  <div class="resistor-selectors__band"><label class="resistor-selectors__label">Multiplier</label><div class="color-selector"><button class="color-selector__button"><span class="color-selector__swatch swatch-orange"></span><span>Orange</span></button></div></div>
+                  <div class="resistor-selectors__band"><label class="resistor-selectors__label">Tolerance</label><div class="color-selector"><button class="color-selector__button"><span class="color-selector__swatch swatch-gold"></span><span>Gold</span></button></div></div>
+                  <div class="resistor-selectors__band"><label class="resistor-selectors__label">TempCo</label><div class="color-selector"><button class="color-selector__button"><span class="color-selector__swatch swatch-brown"></span><span>Brown</span></button></div></div>
+              </div>
+          </div>
+      </section>
+
+      <section class="component-section">
+          <h2>States</h2>
+          <div class="component-group">
+              <h3>Error State</h3>
+              <div class="resistor-selectors resistor-selectors--error" aria-label="4-band resistor selectors with error" aria-describedby="selector-error-msg">
+                  <div class="resistor-selectors__band"><label class="resistor-selectors__label">Band 1</label><div class="color-selector"><button class="color-selector__button"><span class="color-selector__swatch swatch-gold"></span><span>Gold</span></button></div></div>
+                  <div class="resistor-selectors__band"><label class="resistor-selectors__label">Band 2</label><div class="color-selector"><button class="color-selector__button"><span class="color-selector__swatch swatch-black"></span><span>Black</span></button></div></div>
+                  <div class="resistor-selectors__band"><label class="resistor-selectors__label">Multiplier</label><div class="color-selector"><button class="color-selector__button"><span class="color-selector__swatch swatch-red"></span><span>Red</span></button></div></div>
+                  <div class="resistor-selectors__band"><label class="resistor-selectors__label">Tolerance</label><div class="color-selector"><button class="color-selector__button"><span class="color-selector__swatch swatch-gold"></span><span>Gold</span></button></div></div>
+                  <div id="selector-error-msg" class="resistor-selectors__error-msg">Error: 'Gold' is not a valid color for Band 1.</div>
+              </div>
+          </div>
+      </section>
+
+    </main>
+  </div>
+</body>
+</html>

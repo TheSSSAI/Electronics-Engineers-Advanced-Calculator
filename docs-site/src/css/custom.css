@@ -1,0 +1,66 @@
+/**
+ * Any CSS you write here will be Webpacked into the final CSS file.
+ * You can import other CSS files from here, but remember that a separate
+ * CSS file will be created for each entry point.
+ *
+ * Docusaurus uses the Infima CSS framework.
+ * For more information, see: https://infima.dev/docs/
+ */
+
+/* You can override the default Infima variables here. */
+:root {
+  --ifm-color-primary: #25c2a0;
+  --ifm-color-primary-dark: #21af90;
+  --ifm-color-primary-darker: #1fa588;
+  --ifm-color-primary-darkest: #1a8870;
+  --ifm-color-primary-light: #29d5b0;
+  --ifm-color-primary-lighter: #32d8b6;
+  --ifm-color-primary-lightest: #4fddc3;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+/* For readability concerns, you can tweak the line height
+   and font size of the docs' content */
+.markdown {
+  --ifm-leading: 1.65;
+  font-size: 1.05rem;
+}
+
+/* For users that prefer reduced motion, toggle off transitions */
+@media (prefers-reduced-motion: reduce) {
+  html:not(.docs-wrapper--no-transitions) .docs-wrapper {
+    transition: none;
+  }
+}
+
+html[data-theme='dark'] {
+  --ifm-color-primary: #25c2a0;
+  --ifm-color-primary-dark: #21af90;
+  --ifm-color-primary-darker: #1fa588;
+  --ifm-color-primary-darkest: #1a8870;
+  --ifm-color-primary-light: #29d5b0;
+  --ifm-color-primary-lighter: #32d8b6;
+  --ifm-color-primary-lightest: #4fddc3;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* Custom styles for accessibility focus rings on keyboard navigation */
+/* REQ-1-034: Ensure all interactive elements are fully operable via keyboard */
+*:focus-visible {
+  outline: 3px solid var(--ifm-color-primary-light);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Custom component styles can be added here */
+.kbd-shortcut {
+  background-color: var(--ifm-code-background);
+  border: 1px solid var(--ifm-toc-border-color);
+  border-radius: 4px;
+  padding: 0.1em 0.4em;
+  font-size: 0.9em;
+  font-family: var(--ifm-font-family-monospace);
+  margin: 0 0.2em;
+  white-space: nowrap;
+}

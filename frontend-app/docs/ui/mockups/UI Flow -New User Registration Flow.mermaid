@@ -1,0 +1,43 @@
+sequenceDiagram
+    actor "Client: React SPA" as Client
+    participant "IdP: AWS Cognito" as Cognito
+    participant "Trigger: PostConfirmation Lambda" as Lambda
+    actor "Service: User & Data" as Service
+    participant "DB: PostgreSQL" as DB
+
+    Client->>Client: 1. User fills registration form and submits
+    Client->>Cognito: 2. signUp(email, password, {termsAccepted: 'true'})
+
+    activate Cognito
+    Cognito->>Cognito: 3. Validate request (password policy, check if user exists)
+
+    alt Validation Fails
+        Cognito-->>Client: 4a. Return Error (e.g., UsernameExistsException)
+        Client->>Client: 5a. Display error message to user
+    else Successful Validation
+        Cognito->>Cognito: 4b. Create user in User Pool (UNCONFIRMED state)
+        note right of Cognito: Cognito sends confirmation email to user. The user clicks the link to confirm.
+        Cognito->>Lambda: 5b. [On Confirmation] Invoke PostConfirmation Trigger
+        deactivate Cognito
+
+        activate Lambda
+        Lambda->>Service: 6. POST /internal/users (with Cognito user details)
+        activate Service
+        Service->>DB: 7. INSERT INTO users (auth_provider_id, email, terms_accepted_at)
+        activate DB
+        DB-->>Service: 8. Return new user record
+        deactivate DB
+        Service-->>Lambda: 9. Return 201 Created
+        deactivate Service
+        Lambda-->>Cognito: 10. Return success to Cognito
+        deactivate Lambda
+        
+        note over Client: The user is now confirmed and can log in. The UI redirects to the login page.
+        
+        Client->>Cognito: 11. [Auto-Login Flow] signIn(email, password)
+        activate Cognito
+        Cognito-->>Client: 12. Return JWTs (ID, Access, Refresh Tokens)
+        deactivate Cognito
+
+        Client->>Client: 13. Store tokens, set authenticated state, and redirect to main app
+    end

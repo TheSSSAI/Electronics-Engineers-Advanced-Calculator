@@ -1,0 +1,270 @@
+
+{
+  "component_inventory": {
+    "atomic_components": [
+      {
+        "component_name": "NumericInputWithPrefix",
+        "category": "form_controls",
+        "variants": ["default", "read_only"],
+        "states": ["default", "focus", "error", "disabled", "with_unit"],
+        "responsive_needs": "Font size and padding adapted for mobile touch targets",
+        "dependencies": [],
+        "complexity_level": "medium",
+        "implementation_priority": 1,
+        "estimated_effort": "6-8 hours"
+      },
+      {
+        "component_name": "ColorBandSelector",
+        "category": "form_controls",
+        "variants": ["significant_digit", "multiplier", "tolerance", "tempco"],
+        "states": ["default", "open", "focus", "disabled"],
+        "responsive_needs": "Dropdown/picker must be mobile-friendly",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 2,
+        "estimated_effort": "4-6 hours"
+      },
+      {
+        "component_name": "WarningIconWithTooltip",
+        "category": "feedback",
+        "variants": ["default"],
+        "states": ["visible", "hidden"],
+        "responsive_needs": "Tooltip positioning adapts to screen edges",
+        "dependencies": ["Icon", "Tooltip"],
+        "complexity_level": "low",
+        "implementation_priority": 2,
+        "estimated_effort": "2-3 hours"
+      },
+      {
+        "component_name": "FormulaEditor",
+        "category": "form_controls",
+        "variants": ["with_syntax_highlighting"],
+        "states": ["default", "focus", "valid", "error"],
+        "responsive_needs": "Ensure readability and usability on mobile keyboards",
+        "dependencies": [],
+        "complexity_level": "high",
+        "implementation_priority": 3,
+        "estimated_effort": "12-16 hours"
+      },
+      {
+        "component_name": "VariableListItem",
+        "category": "data_display",
+        "variants": ["input_variable", "output_variable"],
+        "states": ["read_only", "editing"],
+        "responsive_needs": "Actions (edit/delete) may collapse into a menu on mobile",
+        "dependencies": ["Button", "Icon", "TextInput"],
+        "complexity_level": "medium",
+        "implementation_priority": 4,
+        "estimated_effort": "4-6 hours"
+      }
+    ],
+    "molecular_components": [
+      {
+        "component_name": "ResistorValueList",
+        "category": "form_controls",
+        "variants": ["default"],
+        "states": ["empty", "populated", "editing_item"],
+        "responsive_needs": "List items should be easily tappable on mobile",
+        "dependencies": ["NumericInputWithPrefix", "Button", "Icon"],
+        "complexity_level": "medium",
+        "implementation_priority": 2,
+        "estimated_effort": "6-8 hours"
+      },
+      {
+        "component_name": "ResistorColorBandSelectors",
+        "category": "form_controls",
+        "variants": ["3-band", "4-band", "5-band", "6-band"],
+        "states": ["default", "error"],
+        "responsive_needs": "Selectors may stack vertically on mobile",
+        "dependencies": ["ColorBandSelector"],
+        "complexity_level": "medium",
+        "implementation_priority": 2,
+        "estimated_effort": "5-7 hours"
+      },
+      {
+        "component_name": "EseriesSuggestion",
+        "category": "feedback",
+        "variants": ["default"],
+        "states": ["visible", "hidden"],
+        "responsive_needs": "Text must wrap gracefully on small screens",
+        "dependencies": ["Button"],
+        "complexity_level": "low",
+        "implementation_priority": 3,
+        "estimated_effort": "2-4 hours"
+      },
+      {
+        "component_name": "WizardStep",
+        "category": "layout",
+        "variants": ["default"],
+        "states": ["active", "inactive", "complete"],
+        "responsive_needs": "Content area must be scrollable on mobile",
+        "dependencies": ["Button"],
+        "complexity_level": "medium",
+        "implementation_priority": 3,
+        "estimated_effort": "4-6 hours"
+      },
+      {
+        "component_name": "VariableListManager",
+        "category": "form_controls",
+        "variants": ["inputs", "outputs"],
+        "states": ["default", "editing", "error"],
+        "responsive_needs": "Full-width on mobile",
+        "dependencies": ["VariableListItem", "Button"],
+        "complexity_level": "medium",
+        "implementation_priority": 4,
+        "estimated_effort": "6-10 hours"
+      }
+    ],
+    "organism_components": [
+      {
+        "component_name": "OhmsLawCalculator",
+        "category": "specialized_calculator",
+        "variants": ["default"],
+        "states": ["insufficient_input", "calculating", "calculated", "error"],
+        "responsive_needs": "Inputs stack vertically in a single column on mobile",
+        "dependencies": ["NumericInputWithPrefix", "WarningIconWithTooltip"],
+        "complexity_level": "medium",
+        "implementation_priority": 3,
+        "estimated_effort": "8-12 hours"
+      },
+      {
+        "component_name": "ResistorCombinationCalculator",
+        "category": "specialized_calculator",
+        "variants": ["default"],
+        "states": ["default", "calculated"],
+        "responsive_needs": "Layout adapts to single-column view on mobile",
+        "dependencies": ["ResistorValueList", "Button"],
+        "complexity_level": "medium",
+        "implementation_priority": 3,
+        "estimated_effort": "6-10 hours"
+      },
+      {
+        "component_name": "ResistorColorCodeConverter",
+        "category": "specialized_calculator",
+        "variants": ["color_to_value", "value_to_color"],
+        "states": ["default", "calculated", "suggestion_visible"],
+        "responsive_needs": "Layout reflows for mobile, potentially using tabs for variants",
+        "dependencies": ["ResistorColorBandSelectors", "NumericInputWithPrefix", "EseriesSuggestion"],
+        "complexity_level": "medium",
+        "implementation_priority": 3,
+        "estimated_effort": "10-14 hours"
+      },
+      {
+        "component_name": "Timer555Designer",
+        "category": "specialized_calculator",
+        "variants": ["astable", "monostable"],
+        "states": ["insufficient_input", "calculating", "calculated", "error", "warning"],
+        "responsive_needs": "Single-column layout on mobile",
+        "dependencies": ["NumericInputWithPrefix", "WarningIconWithTooltip"],
+        "complexity_level": "medium",
+        "implementation_priority": 3,
+        "estimated_effort": "10-14 hours"
+      },
+      {
+        "component_name": "CustomModeWizard",
+        "category": "workflow",
+        "variants": ["create", "edit"],
+        "states": ["step_1_info", "step_2_variables", "step_3_formulas", "saving", "error"],
+        "responsive_needs": "Wizard steps should be easily navigable on a mobile viewport",
+        "dependencies": ["WizardStep", "TextInput", "VariableListManager", "FormulaEditor", "Button"],
+        "complexity_level": "high",
+        "implementation_priority": 4,
+        "estimated_effort": "24-40 hours"
+      }
+    ]
+  },
+  "screen_inventory": [
+    {
+      "screen_name": "Storybook: OhmsLawCalculator",
+      "screen_type": "component_showcase",
+      "variants": ["desktop", "mobile"],
+      "states": ["default", "insufficient_input", "calculated", "error"],
+      "required_components": ["OhmsLawCalculator"],
+      "platform_optimizations": "Demonstrate responsive behavior using Storybook's viewport addon",
+      "implementation_priority": 3,
+      "estimated_effort": "2-4 hours",
+      "user_flow_criticality": "high"
+    },
+    {
+      "screen_name": "Storybook: ResistorCombinationCalculator",
+      "screen_type": "component_showcase",
+      "variants": ["desktop", "mobile"],
+      "states": ["empty", "populated", "calculated"],
+      "required_components": ["ResistorCombinationCalculator"],
+      "platform_optimizations": "Demonstrate responsive behavior of the list management UI",
+      "implementation_priority": 3,
+      "estimated_effort": "2-4 hours",
+      "user_flow_criticality": "high"
+    },
+    {
+      "screen_name": "Storybook: ResistorColorCodeConverter",
+      "screen_type": "component_showcase",
+      "variants": ["desktop", "mobile"],
+      "states": ["color_to_value", "value_to_color", "value_to_color_with_suggestion"],
+      "required_components": ["ResistorColorCodeConverter"],
+      "platform_optimizations": "Demonstrate responsive behavior of the tabbed interface",
+      "implementation_priority": 3,
+      "estimated_effort": "2-4 hours",
+      "user_flow_criticality": "high"
+    },
+    {
+      "screen_name": "Storybook: Timer555Designer",
+      "screen_type": "component_showcase",
+      "variants": ["desktop", "mobile"],
+      "states": ["astable", "monostable", "warning"],
+      "required_components": ["Timer555Designer"],
+      "platform_optimizations": "Demonstrate responsive behavior of the input groups",
+      "implementation_priority": 3,
+      "estimated_effort": "2-4 hours",
+      "user_flow_criticality": "high"
+    },
+    {
+      "screen_name": "Storybook: CustomModeWizard",
+      "screen_type": "component_showcase",
+      "variants": ["create_flow", "edit_flow"],
+      "states": ["step_1", "step_2", "step_3_valid", "step_3_error"],
+      "required_components": ["CustomModeWizard"],
+      "platform_optimizations": "Demonstrate the multi-step flow and responsive behavior of each step",
+      "implementation_priority": 4,
+      "estimated_effort": "4-8 hours",
+      "user_flow_criticality": "high"
+    }
+  ],
+  "implementation_plan": {
+    "phase_1_foundation": {
+      "components": ["Project Setup (React, MUI, Storybook, TypeScript)", "NumericInputWithPrefix", "WarningIconWithTooltip"],
+      "rationale": "Establish the library's development environment and build the most fundamental, widely-reused atomic component for all electronics modes.",
+      "estimated_duration": "3-5 days"
+    },
+    "phase_2_building_blocks": {
+      "components": ["ResistorValueList", "ColorBandSelector", "ResistorColorBandSelectors", "EseriesSuggestion"],
+      "rationale": "Build the molecular components required for the resistor-based calculators. These are self-contained and prepare for the organism-level assembly.",
+      "estimated_duration": "4-6 days"
+    },
+    "phase_3_complex_components": {
+      "components": ["OhmsLawCalculator", "ResistorCombinationCalculator", "ResistorColorCodeConverter", "Timer555Designer"],
+      "rationale": "Assemble the atomic and molecular components into the complete, exportable electronics mode calculators. This phase delivers the first major set of library features.",
+      "estimated_duration": "7-10 days"
+    },
+    "phase_4_screens": {
+      "screens": ["VariableListItem", "VariableListManager", "FormulaEditor", "WizardStep", "CustomModeWizard"],
+      "rationale": "Build the most complex feature, the Custom Mode Wizard, by constructing its constituent parts and assembling them into the final organism. This is the final major library feature.",
+      "estimated_duration": "8-12 days"
+    }
+  },
+  "platform_implementation_strategy": {
+    "target_platform": "React Web Component Library (for consumption by a web app)",
+    "implementation_approach": "mobile_first",
+    "responsive_strategy": "Components are designed to be intrinsically responsive, using flexible layouts and container-relative units where possible, ensuring they adapt to any container in the consuming application.",
+    "progressive_enhancement": "Core component logic and structure are primary, with advanced interactions (e.g., syntax highlighting, animations) layered on top. Components respect `prefers-reduced-motion`.",
+    "browser_support": "Latest stable versions of Chrome, Firefox, Safari, and Edge.",
+    "accessibility_integration": "WCAG 2.1 AA compliance is a requirement for every exported component, enforced through design, development, and testing within Storybook."
+  },
+  "quality_assurance_plan": {
+    "component_testing": "Each component will have comprehensive unit and integration tests using Jest and React Testing Library. Logic-heavy components will have >90% test coverage. All components will be developed in isolation in Storybook.",
+    "integration_testing": "Storybook will be used to test the composition of atomic and molecular components into larger organisms, verifying props and event handlers work as expected.",
+    "responsive_testing": "Storybook's Viewport addon will be used to test each component at standard mobile, tablet, and desktop breakpoints.",
+    "accessibility_testing": "Storybook's Accessibility addon (Axe-core) will be used for automated checks. Manual keyboard navigation and screen reader testing (NVDA/VoiceOver) will be performed on all interactive components.",
+    "performance_testing": "Interaction responsiveness (<50ms UI updates) will be manually verified during development. Bundle size analysis will be part of the CI pipeline to prevent bloat."
+  }
+}

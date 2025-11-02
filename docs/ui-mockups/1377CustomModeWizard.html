@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organism: CustomModeWizard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* 1. DESIGN SYSTEM & BASE STYLES */
+        :root {
+            /* Colors */
+            --color-primary-50: #E3F2FD;
+            --color-primary-500: #2196F3;
+            --color-primary-700: #1976D2;
+            --color-primary-800: #1565C0;
+            --color-neutral-100: #F1F3F5;
+            --color-neutral-300: #DEE2E6;
+            --color-neutral-500: #ADB5BD;
+            --color-neutral-700: #495057;
+            --color-neutral-900: #212529;
+            --color-white: #FFFFFF;
+            --color-success: #2E7D32;
+            --color-error: #D32F2F;
+            --color-error-bg: #FDEDED;
+            /* Typography */
+            --font-primary: 'Roboto', sans-serif;
+            --font-monospace: 'Roboto Mono', monospace;
+            --font-size-sm: 14px;
+            --font-size-md: 16px;
+            --font-size-lg: 1.125rem;
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            /* Borders */
+            --border-radius: 4px;
+            --border-radius-lg: 8px;
+            --border-radius-xl: 16px;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background-color: var(--color-neutral-100);
+            color: var(--color-neutral-900);
+            line-height: 1.6;
+            padding: var(--space-xl);
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        .showcase {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .showcase h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: var(--space-xl);
+        }
+
+        .showcase-group {
+            margin-bottom: var(--space-xl);
+        }
+        
+        .showcase-group h2 {
+            font-size: 1.5rem;
+            margin-bottom: var(--space-md);
+        }
+        
+        /* 2. DEPENDENT COMPONENT STYLES */
+
+        /* Button */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            padding: 10px 22px;
+            border: 1px solid transparent;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            font-size: var(--font-size-md);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 150ms ease-in-out;
+            min-height: 44px;
+        }
+
+        .btn:focus-visible {
+            outline: 2px solid var(--color-primary-700);
+            outline-offset: 2px;
+        }
+
+        .btn:disabled {
+            background-color: var(--color-neutral-300) !important;
+            color: var(--color-neutral-500) !important;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn--primary {
+            background-color: var(--color-primary-700);
+            color: var(--color-white);
+        }
+
+        .btn--primary:hover:not(:disabled) {
+            background-color: var(--color-primary-800);
+        }
+        
+        .btn--secondary {
+            background-color: var(--color-white);
+            color: var(--color-neutral-900);
+            border-color: var(--color-neutral-300);
+        }
+
+        .btn--secondary:hover:not(:disabled) {
+            background-color: var(--color-neutral-100);
+        }
+
+        .btn--danger {
+            background-color: var(--color-error);
+            color: var(--color-white);
+        }
+
+        /* TextInput */
+        .form-group {
+            margin-bottom: var(--space-lg);
+        }
+        .form-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: var(--space-sm);
+        }
+        .text-input, .text-area {
+            font-family: var(--font-primary);
+            font-size: var(--font-size-md);
+            padding: var(--space-sm) var(--space-md);
+            border: 1px solid var(--color-neutral-500);
+            border-radius: var(--border-radius);
+            width: 100%;
+            min-height: 44px;
+        }
+        .text-area {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .text-input:focus, .text-area:focus {
+            outline: none;
+            border-color: var(--color-primary-500);
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+        }
+
+        /* WizardStep (Molecular) */
+        .wizard-stepper {
+            display: flex;
+            list-style: none;
+            position: relative;
+        }
+        .wizard-stepper::before {
+            content: ''; position: absolute; top: 15px; left: 0; right: 0;
+            height: 2px; background-color: var(--color-neutral-300); z-index: 1;
+        }
+        .wizard-step {
+            position: relative; z-index: 2; display: flex; flex-direction: column;
+            align-items: center; text-align: center; flex: 1;
+        }
+        .wizard-step__indicator {
+            width: 32px; height: 32px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; font-weight: 700;
+            margin-bottom: var(--space-sm); transition: all 150ms ease-in-out;
+        }
+        .wizard-step__label { font-size: var(--font-size-sm); font-weight: 500; }
+        .wizard-step--inactive .wizard-step__indicator { background-color: var(--color-white); border: 2px solid var(--color-neutral-300); color: var(--color-neutral-500); }
+        .wizard-step--inactive .wizard-step__label { color: var(--color-neutral-500); }
+        .wizard-step--active .wizard-step__indicator { background-color: var(--color-primary-700); border: 2px solid var(--color-primary-700); color: var(--color-white); transform: scale(1.1); box-shadow: 0 0 0 4px var(--color-primary-50); }
+        .wizard-step--active .wizard-step__label { color: var(--color-primary-700); font-weight: 700; }
+        .wizard-step--complete .wizard-step__indicator { background-color: var(--color-white); border: 2px solid var(--color-primary-700); color: var(--color-primary-700); cursor: pointer; }
+        .wizard-step--complete .wizard-step__indicator .icon-check { display: block; }
+        .wizard-step--complete .wizard-step__indicator .step-number { display: none; }
+        .wizard-step--complete:hover .wizard-step__indicator { background-color: var(--color-primary-50); }
+        .wizard-step--complete .wizard-step__label { color: var(--color-neutral-900); }
+        
+        /* VariableListManager & FormulaEditor (Faked for showcase) */
+        .variable-list-manager, .formula-editor-placeholder {
+            border: 1px solid var(--color-neutral-300); border-radius: var(--border-radius-lg);
+            background-color: var(--color-neutral-100); padding: var(--space-md);
+        }
+        .variable-list-manager h4, .formula-editor-placeholder h4 { margin-bottom: var(--space-md); }
+        .variable-list-manager-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg); }
+
+        /* Spinner */
+        .spinner {
+            width: 48px; height: 48px; border: 5px solid var(--color-primary-50);
+            border-bottom-color: var(--color-primary-700); border-radius: 50%;
+            display: inline-block; animation: rotation 1s linear infinite;
+        }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* 3. ORGANISM: CustomModeWizard */
+        .wizard {
+            background-color: var(--color-white);
+            border-radius: var(--border-radius-xl);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--color-neutral-300);
+        }
+        .wizard__header {
+            padding: var(--space-lg) var(--space-xl);
+            border-bottom: 1px solid var(--color-neutral-300);
+            flex-shrink: 0;
+        }
+        .wizard__title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--color-neutral-900);
+        }
+        .wizard__body {
+            padding: var(--space-xl);
+            position: relative;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        .wizard__step-content {
+             /* In a real app, only one would be visible at a time */
+        }
+        .wizard__footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-lg) var(--space-xl);
+            background-color: var(--color-neutral-100);
+            border-top: 1px solid var(--color-neutral-300);
+            flex-shrink: 0;
+        }
+        .wizard__global-error {
+            color: var(--color-error);
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+        }
+        /* Saving State Overlay */
+        .wizard--saving .wizard__body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-color: rgba(255, 255, 255, 0.7);
+            z-index: 10;
+        }
+        .wizard--saving .wizard__spinner {
+            display: block;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 11;
+        }
+        .wizard__spinner {
+            display: none;
+        }
+        /* Responsive */
+        @media (max-width: 768px) {
+            body { padding: 0; }
+            .showcase { max-width: 100%; }
+            .wizard {
+                border-radius: 0;
+                height: 100vh;
+                border: none;
+            }
+            .wizard__header,
+            .wizard__body,
+            .wizard__footer {
+                padding: var(--space-md);
+            }
+            .wizard__title { font-size: 1.25rem; }
+            .wizard-step__label { display: none; }
+            .variable-list-manager-grid { grid-template-columns: 1fr; gap: var(--space-md); }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="showcase">
+        <h1>Organism: CustomModeWizard</h1>
+
+        <div class="showcase-group">
+            <h2>Create Variant</h2>
+            <p>Demonstrates the full wizard flow for creating a new custom mode.</p>
+            
+            <!-- STEP 1: Info -->
+            <div class="wizard">
+                <header class="wizard__header">
+                    <h2 class="wizard__title">Create New Mode</h2>
+                </header>
+                <div class="wizard__body">
+                    <nav aria-label="Custom Mode Creation Steps">
+                        <ol class="wizard-stepper">
+                            <li class="wizard-step wizard-step--active">
+                                <div class="wizard-step__indicator" aria-current="step"><span class="step-number">1</span></div>
+                                <span class="wizard-step__label">Basic Information</span>
+                            </li>
+                            <li class="wizard-step wizard-step--inactive">
+                                <div class="wizard-step__indicator"><span class="step-number">2</span></div>
+                                <span class="wizard-step__label">Define Variables</span>
+                            </li>
+                            <li class="wizard-step wizard-step--inactive">
+                                <div class="wizard-step__indicator"><span class="step-number">3</span></div>
+                                <span class="wizard-step__label">Write Formulas</span>
+                            </li>
+                        </ol>
+                    </nav>
+                    <div class="wizard__step-content">
+                        <h3>Step 1: Basic Information</h3>
+                        <p>Give your new calculation mode a unique name and an optional description.</p>
+                        <form onsubmit="event.preventDefault();">
+                            <div class="form-group">
+                                <label for="mode-name" class="form-label">Mode Name</label>
+                                <input id="mode-name" type="text" class="text-input" placeholder="e.g., Voltage Divider Calculator" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="mode-desc" class="form-label">Description (Optional)</label>
+                                <textarea id="mode-desc" class="text-area" placeholder="e.g., Calculates Vout for a resistive voltage divider."></textarea>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <footer class="wizard__footer">
+                    <button type="button" class="btn btn--secondary">Cancel</button>
+                    <button type="button" class="btn btn--primary">Next: Define Variables</button>
+                </footer>
+            </div>
+            
+            <!-- STEP 2: Variables -->
+            <div class="wizard" style="margin-top: 2rem;">
+                <header class="wizard__header"><h2 class="wizard__title">Create New Mode</h2></header>
+                <div class="wizard__body">
+                    <nav aria-label="Custom Mode Creation Steps">
+                        <ol class="wizard-stepper">
+                            <li class="wizard-step wizard-step--complete"><button class="wizard-step__indicator"><span class="sr-only">Step 1, Complete</span><svg class="icon-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg><span class="step-number">1</span></button><span class="wizard-step__label">Basic Information</span></li>
+                            <li class="wizard-step wizard-step--active"><div class="wizard-step__indicator" aria-current="step"><span class="step-number">2</span></div><span class="wizard-step__label">Define Variables</span></li>
+                            <li class="wizard-step wizard-step--inactive"><div class="wizard-step__indicator"><span class="step-number">3</span></div><span class="wizard-step__label">Write Formulas</span></li>
+                        </ol>
+                    </nav>
+                    <div class="wizard__step-content">
+                        <h3>Step 2: Define Variables</h3>
+                        <p>Add the inputs and outputs for your calculation.</p>
+                        <div class="variable-list-manager-grid">
+                            <div class="variable-list-manager"><h4>Input Variables</h4><p>No inputs defined.</p></div>
+                            <div class="variable-list-manager"><h4>Output Variables</h4><p>No outputs defined.</p></div>
+                        </div>
+                    </div>
+                </div>
+                <footer class="wizard__footer">
+                    <button type="button" class="btn btn--secondary">Back</button>
+                    <button type="button" class="btn btn--primary" disabled>Next: Write Formulas</button>
+                </footer>
+            </div>
+
+            <!-- STEP 3: Formulas -->
+            <div class="wizard" style="margin-top: 2rem;">
+                <header class="wizard__header"><h2 class="wizard__title">Create New Mode</h2></header>
+                <div class="wizard__body">
+                    <nav aria-label="Custom Mode Creation Steps">
+                        <ol class="wizard-stepper">
+                             <li class="wizard-step wizard-step--complete"><button class="wizard-step__indicator"><span class="sr-only">Step 1, Complete</span><svg class="icon-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg><span class="step-number">1</span></button><span class="wizard-step__label">Basic Information</span></li>
+                             <li class="wizard-step wizard-step--complete"><button class="wizard-step__indicator"><span class="sr-only">Step 2, Complete</span><svg class="icon-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg><span class="step-number">2</span></button><span class="wizard-step__label">Define Variables</span></li>
+                             <li class="wizard-step wizard-step--active"><div class="wizard-step__indicator" aria-current="step"><span class="step-number">3</span></div><span class="wizard-step__label">Write Formulas</span></li>
+                        </ol>
+                    </nav>
+                     <div class="wizard__step-content">
+                        <h3>Step 3: Write Formulas</h3>
+                        <p>Connect your inputs and outputs using mathematical expressions.</p>
+                        <div class="formula-editor-placeholder">
+                           <h4>Formula Editor</h4>
+                           <p>Content for the formula editor goes here...</p>
+                        </div>
+                    </div>
+                </div>
+                <footer class="wizard__footer">
+                    <button type="button" class="btn btn--secondary">Back</button>
+                    <button type="button" class="btn btn--primary">Save Mode</button>
+                </footer>
+            </div>
+        </div>
+
+        <div class="showcase-group">
+            <h2>States</h2>
+
+            <!-- Saving State -->
+            <div class="wizard wizard--saving" style="margin-top: 2rem;">
+                <header class="wizard__header"><h2 class="wizard__title">Create New Mode</h2></header>
+                <div class="wizard__body">
+                     <div class="wizard__spinner"><div class="spinner"></div></div>
+                    <nav aria-label="Custom Mode Creation Steps"><ol class="wizard-stepper"><!-- Stepper --></ol></nav>
+                     <div class="wizard__step-content">
+                        <h3>Step 3: Write Formulas</h3>
+                        <p>Content for Step 3...</p>
+                    </div>
+                </div>
+                <footer class="wizard__footer">
+                    <button type="button" class="btn btn--secondary" disabled>Back</button>
+                    <button type="button" class="btn btn--primary" disabled>Saving...</button>
+                </footer>
+            </div>
+            
+            <!-- Error State -->
+            <div class="wizard" style="margin-top: 2rem;">
+                <header class="wizard__header"><h2 class="wizard__title">Create New Mode</h2></header>
+                <div class="wizard__body"><!-- Content --></div>
+                <footer class="wizard__footer">
+                    <div class="wizard__global-error">
+                        API Error: Could not save the mode. Please try again.
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn--secondary">Back</button>
+                        <button type="button" class="btn btn--primary">Save Mode</button>
+                    </div>
+                </footer>
+            </div>
+        </div>
+
+        <div class="showcase-group">
+             <h2>Edit Variant</h2>
+            <p>Demonstrates the wizard when editing an existing mode. Fields are pre-populated.</p>
+             <div class="wizard">
+                <header class="wizard__header">
+                    <h2 class="wizard__title">Edit 'Voltage Divider'</h2>
+                </header>
+                <div class="wizard__body">
+                    <nav aria-label="Custom Mode Creation Steps">
+                        <ol class="wizard-stepper">
+                            <li class="wizard-step wizard-step--active">
+                                <div class="wizard-step__indicator" aria-current="step"><span class="step-number">1</span></div>
+                                <span class="wizard-step__label">Basic Information</span>
+                            </li>
+                            <li class="wizard-step wizard-step--inactive">
+                                <div class="wizard-step__indicator"><span class="step-number">2</span></div>
+                                <span class="wizard-step__label">Define Variables</span>
+                            </li>
+                            <li class="wizard-step wizard-step--inactive">
+                                <div class="wizard-step__indicator"><span class="step-number">3</span></div>
+                                <span class="wizard-step__label">Write Formulas</span>
+                            </li>
+                        </ol>
+                    </nav>
+                    <div class="wizard__step-content">
+                        <h3>Step 1: Basic Information</h3>
+                        <form onsubmit="event.preventDefault();">
+                            <div class="form-group">
+                                <label for="mode-name-edit" class="form-label">Mode Name</label>
+                                <input id="mode-name-edit" type="text" class="text-input" value="Voltage Divider" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="mode-desc-edit" class="form-label">Description (Optional)</label>
+                                <textarea id="mode-desc-edit" class="text-area">Calculates Vout for a resistive voltage divider.</textarea>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <footer class="wizard__footer">
+                    <button type="button" class="btn btn--secondary">Cancel</button>
+                    <button type="button" class="btn btn--primary">Next: Define Variables</button>
+                </footer>
+            </div>
+        </div>
+
+    </div>
+    <div>
+        <h2> Component Variations</h2>
+        <div>
+            <h3>Variant Name : "create"</h3>
+            <normal> Used when a user is creating a new custom mode from scratch. The wizard starts with empty fields. The final save button is labeled "Save Mode". </normal>
+            
+            <div class="wizard">
+                <header class="wizard__header">
+                    <h2 class="wizard__title">Create New Mode</h2>
+                </header>
+                <div class="wizard__body">
+                    <!-- ... content of first step ... -->
+                </div>
+                <footer class="wizard__footer">
+                    <button type="button" class="btn btn--secondary">Cancel</button>
+                    <button type="button" class="btn btn--primary">Next...</button>
+                </footer>
+            </div>
+        </div>
+        <div>
+            <h3>Variant Name : "edit"</h3>
+            <normal> Used when modifying an existing custom mode. The wizard loads pre-populated with the existing data for the mode. The final save button is labeled "Save Changes". </normal>
+            
+            <div class="wizard">
+                <header class="wizard__header">
+                    <h2 class="wizard__title">Edit 'My Existing Mode'</h2>
+                </header>
+                <div class="wizard__body">
+                     <div class="form-group">
+                        <label for="mode-name-edit-var" class="form-label">Mode Name</label>
+                        <input id="mode-name-edit-var" type="text" class="text-input" value="My Existing Mode" required>
+                    </div>
+                </div>
+                <footer class="wizard__footer">
+                    <button type="button" class="btn btn--secondary">Cancel</button>
+                    <button type="button" class="btn btn--primary">Save Changes</button>
+                </footer>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

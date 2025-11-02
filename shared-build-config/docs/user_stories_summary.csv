@@ -1,0 +1,2 @@
+"total_stories","total_story_points","must_have_stories","should_have_stories","could_have_stories","epics_identified","estimated_sprints","key_dependencies"
+"12","64","8","2","0","[""Core Calculator & UI Framework"",""User Account & Data Persistence"",""Built-in Electronics Modes"",""User-Extensible Custom Modes"",""Documentation & User Support""]","5","[""User authentication (US-053) is a blocker for all data persistence features."",""The custom mode wizard (US-041) is a blocker for using custom modes.""]"

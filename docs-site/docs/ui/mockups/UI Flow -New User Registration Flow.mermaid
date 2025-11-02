@@ -1,0 +1,53 @@
+sequenceDiagram
+    actor User
+    participant ClientSPA as "Client: React SPA"
+    participant Cognito as "IdP: AWS Cognito"
+    participant UserDataService as "Service: User & Data"
+    participant Database as "DB: PostgreSQL"
+
+    User->>ClientSPA: 1. Fills out registration form (email, password, accepts ToS)
+    ClientSPA->>ClientSPA: 2. Perform client-side validation (format, match, required)
+
+    alt Client-side validation fails
+        ClientSPA-->>User: Display inline validation errors
+    else Client-side validation passes
+        activate Cognito
+        ClientSPA->>Cognito: 3. `signUp(email, password)`
+        Cognito->>Cognito: 4. Validate request against User Pool (email uniqueness, password policy)
+        
+        alt Cognito validation fails (e.g., email exists)
+            Cognito-->>ClientSPA: Return error (e.g., UsernameExistsException)
+            ClientSPA-->>User: Display user-friendly server error (e.g., "Email already in use")
+        else Cognito validation succeeds
+            deactivate Cognito
+            Cognito->>Cognito: 5. Create user in User Pool (status: UNCONFIRMED or CONFIRMED)
+            
+            note right of Cognito: Assumes email confirmation is handled separately or auto-confirmed.
+
+            Cognito-->>ClientSPA: 6. Return `signUp` success response
+            
+            %% Automatic Login Flow after Registration
+            activate ClientSPA
+            ClientSPA->>ClientSPA: 7. Initiate automatic login for new user
+            ClientSPA->>Cognito: 8. `signIn(email, password)`
+            activate Cognito
+            Cognito-->>ClientSPA: 9. Return JWTs (ID, Access, Refresh Tokens)
+            deactivate Cognito
+
+            %% Create the user profile in our own database
+            activate UserDataService
+            ClientSPA->>UserDataService: 10. POST /api/v1/users/me (with new JWT)
+            UserDataService->>UserDataService: 11. [First Login Trigger] Validate JWT, extract user details (sub, email)
+            
+            activate Database
+            UserDataService->>Database: 12. INSERT INTO users (auth_provider_id, email, terms_accepted_at) VALUES (...)
+            Database-->>UserDataService: 13. Return new user record
+            deactivate Database
+            
+            UserDataService-->>ClientSPA: 14. Return 201 Created with user profile
+            deactivate UserDataService
+
+            ClientSPA-->>User: 15. Redirect to main app, show 'Welcome!' message
+            deactivate ClientSPA
+        end
+    end

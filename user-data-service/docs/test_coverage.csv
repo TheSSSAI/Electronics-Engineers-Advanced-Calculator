@@ -1,0 +1,4 @@
+"component_name","business_criticality","technical_complexity","change_frequency","test_types_required","unit_test_coverage","integration_test_coverage","e2e_test_coverage","automation_percentage","manual_test_effort","automated_test_effort","total_test_cases","risk_mitigation_score","quality_confidence","maintenance_overhead","tool_compatibility","team_skill_alignment"
+"User & Data Service (Backend)","Critical","High","Medium","[""Unit"",""Integration"",""Security"",""Performance""]","90","95","70","95","10","120","150","0.95","High","Medium","Excellent","Good"
+"Formula Execution Service (Lambda)","Critical","High","Low","[""Unit"",""Integration"",""Security"",""Performance""]","95","90","80","98","4","60","40","0.98","Very High","Low","Excellent","Excellent"
+"Core Calculator UI (Frontend)","High","Medium","High","[""Unit"",""E2E"",""Accessibility"",""Compatibility""]","85","70","90","80","20","100","180","0.9","High","Medium","Excellent","Good"

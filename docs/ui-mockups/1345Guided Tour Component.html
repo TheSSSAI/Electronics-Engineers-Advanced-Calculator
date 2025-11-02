@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guided Tour Component</title>
+  <style>
+    /* CSS Reset */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    button { font-family: inherit; font-size: 100%; border: none; background: none; cursor: pointer; }
+
+    /* Design System Tokens */
+    :root {
+      /* Typography */
+      --font-primary: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      --font-size-body: 16px;
+      --font-size-caption: 14px;
+      --font-weight-normal: 400;
+      --font-weight-bold: 600;
+
+      /* Colors */
+      --color-primary-600: #1E88E5;
+      --color-primary-700: #1976D2;
+      --color-primary-800: #1565C0;
+      --color-neutrals-white: #FFFFFF;
+      --color-neutrals-gray-100: #F1F3F5;
+      --color-neutrals-gray-500: #ADB5BD;
+      --color-neutrals-gray-700: #495057;
+      --color-neutrals-gray-800: #343A40;
+      --color-neutrals-gray-900: #212529;
+
+      /* Spacing */
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+
+      /* Borders & Shadows */
+      --border-radius-main: 8px;
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+      /* Positioning variables for demonstration */
+      --highlight-top: 50px;
+      --highlight-left: 50px;
+      --highlight-width: 200px;
+      --highlight-height: 48px;
+    }
+
+    body {
+      font-family: var(--font-primary);
+      background-color: var(--color-neutrals-gray-100);
+      color: var(--color-neutrals-gray-800);
+      line-height: 1.6;
+    }
+
+    /* Mock Application UI for context */
+    .mock-app-container {
+      padding: var(--spacing-lg);
+    }
+    .mock-app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--spacing-md);
+      background-color: var(--color-neutrals-white);
+      border-radius: var(--border-radius-main);
+      box-shadow: var(--shadow-lg);
+      margin-bottom: var(--spacing-lg);
+    }
+    .mock-app-header h1 {
+      font-size: 20px;
+    }
+    .mock-app-header .mock-button {
+        padding: var(--spacing-sm) var(--spacing-md);
+        border: 1px solid var(--color-neutrals-gray-500);
+        border-radius: 4px;
+    }
+    .mock-app-content {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: var(--spacing-lg);
+    }
+    .mock-app-content > div {
+        background-color: var(--color-neutrals-white);
+        padding: var(--spacing-lg);
+        border-radius: var(--border-radius-main);
+    }
+    .mock-app-content h2 {
+        margin-bottom: var(--spacing-md);
+    }
+    .mock-app-content p {
+        margin-bottom: var(--spacing-md);
+    }
+    .mock-input {
+      width: 100%;
+      padding: var(--spacing-sm) var(--spacing-md);
+      border: 1px solid var(--color-neutrals-gray-500);
+      border-radius: 4px;
+      font-size: var(--font-size-body);
+    }
+
+    /* Guided Tour Component Styles */
+    .guided-tour {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+    }
+
+    .guided-tour-backdrop {
+      position: absolute;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .guided-tour-highlight {
+      position: absolute;
+      top: var(--highlight-top);
+      left: var(--highlight-left);
+      width: var(--highlight-width);
+      height: var(--highlight-height);
+      border-radius: var(--border-radius-main);
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+      transition: all 300ms ease-in-out;
+    }
+    
+    .guided-tour-popover {
+      position: absolute;
+      top: calc(var(--highlight-top) + var(--highlight-height) + var(--spacing-md));
+      left: var(--highlight-left);
+      width: 300px;
+      max-width: calc(100vw - 32px);
+      background-color: var(--color-neutrals-white);
+      border-radius: var(--border-radius-main);
+      box-shadow: var(--shadow-lg);
+      padding: var(--spacing-lg);
+      z-index: 1001;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+      transition: all 300ms ease-in-out;
+    }
+
+    .guided-tour-popover__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .guided-tour-popover__step-counter {
+      font-size: var(--font-size-caption);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-neutrals-gray-700);
+    }
+    
+    .guided-tour-popover__close-btn {
+      width: 24px;
+      height: 24px;
+      color: var(--color-neutrals-gray-500);
+      transition: color 150ms ease;
+    }
+
+    .guided-tour-popover__close-btn:hover,
+    .guided-tour-popover__close-btn:focus-visible {
+      color: var(--color-neutrals-gray-900);
+    }
+    .guided-tour-popover__close-btn:focus-visible {
+        outline: 2px solid var(--color-primary-600);
+        outline-offset: 2px;
+        border-radius: 2px;
+    }
+
+    .guided-tour-popover__body {
+      font-size: var(--font-size-body);
+      color: var(--color-neutrals-gray-800);
+    }
+
+    .guided-tour-popover__footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: var(--spacing-sm);
+    }
+    
+    /* Button Styles */
+    .btn {
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-weight: var(--font-weight-bold);
+        transition: all 150ms ease;
+    }
+    .btn:focus-visible {
+        outline: 2px solid var(--color-primary-700);
+        outline-offset: 2px;
+    }
+
+    .btn--primary {
+        background-color: var(--color-primary-600);
+        color: var(--color-neutrals-white);
+    }
+    .btn--primary:hover { background-color: var(--color-primary-700); }
+    .btn--primary:active { background-color: var(--color-primary-800); transform: scale(0.98); }
+
+    .btn--secondary {
+        background-color: transparent;
+        color: var(--color-primary-600);
+    }
+    .btn--secondary:hover { background-color: var(--color-neutrals-gray-100); }
+    
+    .btn--secondary.is-hidden {
+        visibility: hidden;
+    }
+
+    /* Screen Variations Wrapper */
+    .screen-variations {
+      margin-top: 40px;
+      padding: var(--spacing-lg);
+      background-color: #e0e0e0;
+    }
+    .variation-group {
+      position: relative;
+      border: 2px dashed var(--color-neutrals-gray-500);
+      padding: var(--spacing-lg);
+      margin-top: var(--spacing-lg);
+      min-height: 400px;
+      overflow: hidden;
+    }
+    .variation-group h3 {
+      position: absolute;
+      top: -16px;
+      left: 16px;
+      background-color: #e0e0e0;
+      padding: 0 8px;
+      font-size: 18px;
+    }
+    .variation-group normal {
+        display: block;
+        font-style: italic;
+        color: var(--color-neutrals-gray-700);
+        margin-bottom: var(--spacing-md);
+    }
+
+    /* Popover positioning variants */
+    .popover-pos--bottom-left {
+        top: calc(var(--highlight-top) + var(--highlight-height) + var(--spacing-md));
+        left: var(--highlight-left);
+    }
+    .popover-pos--top-left {
+        bottom: calc(100% - var(--highlight-top) + var(--spacing-md));
+        left: var(--highlight-left);
+        top: auto;
+    }
+    .popover-pos--right-top {
+        left: calc(var(--highlight-left) + var(--highlight-width) + var(--spacing-md));
+        top: var(--highlight-top);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="screen-variations">
+    <h2>Guided Tour Component Variations</h2>
+    
+    <div class="variation-group">
+      <h3>Variant: "First-Time User Tour" - Step 1 of 3</h3>
+      <normal>Introduces a core UI element. Note the "Previous" button is hidden.</normal>
+      <div class="mock-app-container">
+        <header class="mock-app-header">
+          <h1>My Calculator</h1>
+          <button class="mock-button" id="mock-mode-switcher">Mode: Scientific</button>
+        </header>
+        <div class="mock-app-content">
+            <div><h2>Main Content</h2><p>Some content here...</p></div>
+            <div><h2>History</h2><p>...</p></div>
+        </div>
+      </div>
+      <div class="guided-tour" style="--highlight-top: 36px; --highlight-left: 198px; --highlight-width: 154px; --highlight-height: 42px;">
+        <div class="guided-tour-highlight"></div>
+        <div class="guided-tour-popover popover-pos--bottom-left" role="dialog" aria-modal="true" aria-labelledby="tour-title-1" aria-describedby="tour-body-1">
+          <header class="guided-tour-popover__header">
+            <span id="tour-title-1" class="guided-tour-popover__step-counter">Step 1 of 3</span>
+            <button class="guided-tour-popover__close-btn" aria-label="Close tour">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+            </button>
+          </header>
+          <div id="tour-body-1" class="guided-tour-popover__body">
+            This is the **Mode Switcher**. Click here to access specialized calculators like Ohm's Law or the 555 Timer designer.
+          </div>
+          <footer class="guided-tour-popover__footer">
+            <button class="btn btn--secondary is-hidden">Previous</button>
+            <button class="btn btn--primary">Next</button>
+          </footer>
+        </div>
+      </div>
+    </div>
+    
+    <div class="variation-group">
+      <h3>Variant: "Custom Mode Creation Tour" - Step 2 of 4</h3>
+      <normal>Guides the user through a complex creation wizard. Both "Previous" and "Next" are visible.</normal>
+      <div class="mock-app-container">
+        <header class="mock-app-header"><h1>Create Custom Mode</h1></header>
+        <div class="mock-app-content">
+            <div style="grid-column: 1 / -1;">
+                <h2>Step 3: Define Formulas</h2>
+                <p>Use the variables you defined to write your equations.</p>
+                <textarea class="mock-input" id="mock-formula-input" rows="4">area = pi * radius^2</textarea>
+            </div>
+        </div>
+      </div>
+      <div class="guided-tour" style="--highlight-top: 212px; --highlight-left: 24px; --highlight-width: 692px; --highlight-height: 105px;">
+        <div class="guided-tour-highlight"></div>
+        <div class="guided-tour-popover popover-pos--top-left" role="dialog" aria-modal="true" aria-labelledby="tour-title-2" aria-describedby="tour-body-2" style="--highlight-top: 212px;">
+          <header class="guided-tour-popover__header">
+            <span id="tour-title-2" class="guided-tour-popover__step-counter">Step 2 of 4</span>
+            <button class="guided-tour-popover__close-btn" aria-label="Close tour">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+            </button>
+          </header>
+          <div id="tour-body-2" class="guided-tour-popover__body">
+            This is the **Formula Editor**. Write your equations here using the input and output variables you defined in the previous step.
+          </div>
+          <footer class="guided-tour-popover__footer">
+            <button class="btn btn--secondary">Previous</button>
+            <button class="btn btn--primary">Next</button>
+          </footer>
+        </div>
+      </div>
+    </div>
+
+    <div class="variation-group">
+      <h3>Variant: "First-Time User Tour" - Step 3 of 3 (Last Step)</h3>
+      <normal>Concludes the tour. Note the "Next" button has changed to "Finish".</normal>
+      <div class="mock-app-container">
+        <header class="mock-app-header">
+          <h1>My Calculator</h1>
+          <button class="mock-button" id="mock-help-button">?</button>
+        </header>
+        <div class="mock-app-content">
+            <div><h2>Main Content</h2><p>Some content here...</p></div>
+            <div><h2>History</h2><p>...</p></div>
+        </div>
+      </div>
+      <div class="guided-tour" style="--highlight-top: 24px; --highlight-left: 676px; --highlight-width: 48px; --highlight-height: 48px;">
+        <div class="guided-tour-highlight" style="border-radius: 50%;"></div>
+        <div class="guided-tour-popover popover-pos--right-top" role="dialog" aria-modal="true" aria-labelledby="tour-title-3" aria-describedby="tour-body-3" style="--highlight-left: 676px; --highlight-top: 24px;">
+          <header class="guided-tour-popover__header">
+            <span id="tour-title-3" class="guided-tour-popover__step-counter">Step 3 of 3</span>
+            <button class="guided-tour-popover__close-btn" aria-label="Close tour">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+            </button>
+          </header>
+          <div id="tour-body-3" class="guided-tour-popover__body">
+            If you ever get stuck, click the **Help** icon to access our comprehensive documentation.
+          </div>
+          <footer class="guided-tour-popover__footer">
+            <button class="btn btn--secondary">Previous</button>
+            <button class="btn btn--primary">Finish</button>
+          </footer>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

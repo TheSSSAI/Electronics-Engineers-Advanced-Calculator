@@ -1,0 +1,668 @@
+# 1 Overview
+
+## 1.1 Diagram Id
+
+SEQ-OPS-003
+
+## 1.2 Name
+
+Critical Performance Alert Notification
+
+## 1.3 Description
+
+A key performance metric, such as API latency or server error rate, breaches a predefined threshold in Amazon CloudWatch. This automatically triggers an alarm that sends a notification to the development team via SNS, enabling a rapid response to production issues.
+
+## 1.4 Type
+
+🔹 OperationalFlow
+
+## 1.5 Purpose
+
+To provide automated, real-time monitoring of system health and adherence to NFRs, minimizing Mean Time to Detect (MTTD) for production incidents.
+
+## 1.6 Complexity
+
+Medium
+
+## 1.7 Priority
+
+🚨 Critical
+
+## 1.8 Frequency
+
+OnDemand
+
+## 1.9 Participants
+
+- REPO-API-GATEWAY
+- REPO-MONITORING-CLOUDWATCH
+- REPO-NOTIFICATIONS-SNS
+
+## 1.10 Key Interactions
+
+- An AWS service (e.g., API Gateway) continuously emits metrics to CloudWatch.
+- A CloudWatch Alarm is configured to monitor a specific metric (e.g., P99 Latency) against a static threshold (e.g., > 1 second for 5 minutes).
+- The metric's value breaches the threshold for the defined period.
+- The CloudWatch Alarm transitions to the 'ALARM' state.
+- The state change triggers an associated action: publishing a message to an SNS topic.
+- The SNS topic relays the message to all its subscribers, such as an email distribution list, a Slack webhook, or a PagerDuty service.
+
+## 1.11 Triggers
+
+- A monitored metric breaches its alarm threshold.
+
+## 1.12 Outcomes
+
+- The on-call engineering team is immediately notified of a potential production issue.
+
+## 1.13 Business Rules
+
+- Alarm thresholds must be aligned with the NFRs defined in the SRS (e.g., REQ-NFP-001).
+
+## 1.14 Error Scenarios
+
+- Misconfigured alarm thresholds lead to 'alert fatigue' (false positives) or missed incidents (false negatives).
+
+## 1.15 Integration Points
+
+- Amazon CloudWatch
+- Amazon SNS
+
+# 2.0 Details
+
+## 2.1 Diagram Id
+
+SEQ-OPS-003-IMPL
+
+## 2.2 Name
+
+Implementation: Critical Performance Alert Notification via CloudWatch Alarm
+
+## 2.3 Description
+
+A detailed sequence for the automated operational flow where a monitored AWS service metric breaches a predefined threshold, triggering a CloudWatch Alarm. The alarm's state change invokes an action to publish a detailed notification to an SNS topic, which then distributes the alert to subscribed on-call engineering endpoints.
+
+## 2.4 Participants
+
+### 2.4.1 AWS Managed Service
+
+#### 2.4.1.1 Repository Id
+
+aws-monitored-service
+
+#### 2.4.1.2 Display Name
+
+System Under Monitoring (e.g., API Gateway)
+
+#### 2.4.1.3 Type
+
+🔹 AWS Managed Service
+
+#### 2.4.1.4 Technology
+
+Amazon API Gateway / ECS / Lambda / RDS
+
+#### 2.4.1.5 Order
+
+1
+
+#### 2.4.1.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #1E88E5 |
+| Stereotype | Metric Source |
+
+### 2.4.2.0 Monitoring & Alarming Service
+
+#### 2.4.2.1 Repository Id
+
+REPO-MONITORING-CLOUDWATCH
+
+#### 2.4.2.2 Display Name
+
+Amazon CloudWatch
+
+#### 2.4.2.3 Type
+
+🔹 Monitoring & Alarming Service
+
+#### 2.4.2.4 Technology
+
+CloudWatch Metrics & Alarms
+
+#### 2.4.2.5 Order
+
+2
+
+#### 2.4.2.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | participant |
+| Color | #FF9900 |
+| Stereotype | SRE/Observability |
+
+### 2.4.3.0 Notification Service
+
+#### 2.4.3.1 Repository Id
+
+REPO-NOTIFICATIONS-SNS
+
+#### 2.4.3.2 Display Name
+
+Amazon SNS
+
+#### 2.4.3.3 Type
+
+🔹 Notification Service
+
+#### 2.4.3.4 Technology
+
+SNS Topics & Subscriptions
+
+#### 2.4.3.5 Order
+
+3
+
+#### 2.4.3.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | participant |
+| Color | #D82C27 |
+| Stereotype | Notification |
+
+### 2.4.4.0 Subscriber
+
+#### 2.4.4.1 Repository Id
+
+on-call-engineer-endpoint
+
+#### 2.4.4.2 Display Name
+
+On-Call Engineer Endpoint
+
+#### 2.4.4.3 Type
+
+🔹 Subscriber
+
+#### 2.4.4.4 Technology
+
+PagerDuty / Slack / Email
+
+#### 2.4.4.5 Order
+
+4
+
+#### 2.4.4.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #232F3E |
+| Stereotype | Recipient |
+
+## 2.5.0.0 Interactions
+
+### 2.5.1.0 Metric Ingestion
+
+#### 2.5.1.1 Source Id
+
+aws-monitored-service
+
+#### 2.5.1.2 Target Id
+
+REPO-MONITORING-CLOUDWATCH
+
+#### 2.5.1.3 Message
+
+Emit Performance Metric Data Point
+
+#### 2.5.1.4 Sequence Number
+
+1
+
+#### 2.5.1.5 Type
+
+🔹 Metric Ingestion
+
+#### 2.5.1.6 Is Synchronous
+
+❌ No
+
+#### 2.5.1.7 Return Message
+
+
+
+#### 2.5.1.8 Has Return
+
+❌ No
+
+#### 2.5.1.9 Is Activation
+
+✅ Yes
+
+#### 2.5.1.10 Technical Details
+
+##### 2.5.1.10.1 Protocol
+
+AWS Internal API / CloudWatch EMF
+
+##### 2.5.1.10.2 Method
+
+PutMetricData
+
+##### 2.5.1.10.3 Parameters
+
+- { Namespace: 'AWS/ApiGateway', MetricName: 'Latency', Dimensions: [{ Name: 'ApiName', Value: 'calculator-api' }], Value: 1250, Unit: 'Milliseconds', Timestamp: '...' }
+
+##### 2.5.1.10.4 Authentication
+
+Implicit via AWS Service IAM Role
+
+##### 2.5.1.10.5 Error Handling
+
+Handled by AWS service internals. Failures are rare and indicate a regional AWS issue.
+
+##### 2.5.1.10.6 Performance
+
+High-throughput, low-latency ingestion managed by AWS.
+
+### 2.5.2.0.0 Alarm Evaluation
+
+#### 2.5.2.1.0 Source Id
+
+REPO-MONITORING-CLOUDWATCH
+
+#### 2.5.2.2.0 Target Id
+
+REPO-MONITORING-CLOUDWATCH
+
+#### 2.5.2.3.0 Message
+
+Evaluate 'API_Performance_Degraded_Latency' Alarm
+
+#### 2.5.2.4.0 Sequence Number
+
+2
+
+#### 2.5.2.5.0 Type
+
+🔹 Alarm Evaluation
+
+#### 2.5.2.6.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.2.7.0 Return Message
+
+Evaluation Result: Threshold Breached
+
+#### 2.5.2.8.0 Has Return
+
+✅ Yes
+
+#### 2.5.2.9.0 Is Activation
+
+✅ Yes
+
+#### 2.5.2.10.0 Technical Details
+
+##### 2.5.2.10.1 Protocol
+
+Internal CloudWatch Process
+
+##### 2.5.2.10.2 Method
+
+Metric Aggregation & Comparison
+
+##### 2.5.2.10.3 Parameters
+
+- Metric: 'Latency'
+- Statistic: 'p99'
+- Threshold: '> 1000' Milliseconds
+- Period: '60' seconds
+- Evaluation Periods: '5'
+- Datapoints to Alarm: '5'
+
+##### 2.5.2.10.4 Authentication
+
+N/A
+
+##### 2.5.2.10.5 Error Handling
+
+Insufficient data will keep the alarm in INSUFFICIENT_DATA state. Misconfiguration is the primary risk.
+
+##### 2.5.2.10.6 Performance
+
+Evaluation occurs automatically every minute for standard resolution metrics.
+
+### 2.5.3.0.0 State Change
+
+#### 2.5.3.1.0 Source Id
+
+REPO-MONITORING-CLOUDWATCH
+
+#### 2.5.3.2.0 Target Id
+
+REPO-MONITORING-CLOUDWATCH
+
+#### 2.5.3.3.0 Message
+
+Threshold Breached: Transition State from 'OK' to 'ALARM'
+
+#### 2.5.3.4.0 Sequence Number
+
+3
+
+#### 2.5.3.5.0 Type
+
+🔹 State Change
+
+#### 2.5.3.6.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.3.7.0 Return Message
+
+
+
+#### 2.5.3.8.0 Has Return
+
+❌ No
+
+#### 2.5.3.9.0 Is Activation
+
+❌ No
+
+#### 2.5.3.10.0 Technical Details
+
+##### 2.5.3.10.1 Protocol
+
+Internal CloudWatch State Machine
+
+##### 2.5.3.10.2 Method
+
+UpdateAlarmState
+
+##### 2.5.3.10.3 Parameters
+
+- AlarmName: 'API_Performance_Degraded_Latency'
+- NewStateValue: 'ALARM'
+- NewStateReason: 'Threshold Crossed: 5 datapoints were greater than the threshold(1000.0).'
+
+##### 2.5.3.10.4 Authentication
+
+N/A
+
+##### 2.5.3.10.5 Error Handling
+
+State change failures are extremely rare and indicate an AWS control plane issue.
+
+##### 2.5.3.10.6 Performance
+
+Near-instantaneous.
+
+### 2.5.4.0.0 API Call
+
+#### 2.5.4.1.0 Source Id
+
+REPO-MONITORING-CLOUDWATCH
+
+#### 2.5.4.2.0 Target Id
+
+REPO-NOTIFICATIONS-SNS
+
+#### 2.5.4.3.0 Message
+
+Invoke Alarm Action: Publish Notification
+
+#### 2.5.4.4.0 Sequence Number
+
+4
+
+#### 2.5.4.5.0 Type
+
+🔹 API Call
+
+#### 2.5.4.6.0 Is Synchronous
+
+❌ No
+
+#### 2.5.4.7.0 Return Message
+
+
+
+#### 2.5.4.8.0 Has Return
+
+❌ No
+
+#### 2.5.4.9.0 Is Activation
+
+✅ Yes
+
+#### 2.5.4.10.0 Technical Details
+
+##### 2.5.4.10.1 Protocol
+
+AWS SDK
+
+##### 2.5.4.10.2 Method
+
+SNS:Publish
+
+##### 2.5.4.10.3 Parameters
+
+- TopicArn: 'arn:aws:sns:...'
+- Message: 'JSON payload with alarm details (AlarmName, State, Metric, Threshold, Timestamp, etc.)'
+- Subject: 'ALARM: "API_Performance_Degraded_Latency" in us-east-1'
+
+##### 2.5.4.10.4 Authentication
+
+CloudWatch Service IAM Role with 'sns:Publish' permission for the target TopicArn.
+
+##### 2.5.4.10.5 Error Handling
+
+Failures are logged in CloudWatch metrics (e.g., NumberOfNotificationsFailed). Ensure IAM permissions are correct.
+
+##### 2.5.4.10.6 Performance
+
+Low latency API call within the AWS network.
+
+### 2.5.5.0.0 Message Distribution
+
+#### 2.5.5.1.0 Source Id
+
+REPO-NOTIFICATIONS-SNS
+
+#### 2.5.5.2.0 Target Id
+
+REPO-NOTIFICATIONS-SNS
+
+#### 2.5.5.3.0 Message
+
+Fan-out Message to All Topic Subscribers
+
+#### 2.5.5.4.0 Sequence Number
+
+5
+
+#### 2.5.5.5.0 Type
+
+🔹 Message Distribution
+
+#### 2.5.5.6.0 Is Synchronous
+
+❌ No
+
+#### 2.5.5.7.0 Return Message
+
+
+
+#### 2.5.5.8.0 Has Return
+
+❌ No
+
+#### 2.5.5.9.0 Is Activation
+
+❌ No
+
+#### 2.5.5.10.0 Technical Details
+
+##### 2.5.5.10.1 Protocol
+
+Internal SNS Process
+
+##### 2.5.5.10.2 Method
+
+Message Fan-out
+
+##### 2.5.5.10.3 Parameters
+
+- Identifies all confirmed subscriptions for the topic.
+
+##### 2.5.5.10.4 Authentication
+
+N/A
+
+##### 2.5.5.10.5 Error Handling
+
+SNS internally manages the fan-out process.
+
+##### 2.5.5.10.6 Performance
+
+Highly parallelized and scalable distribution.
+
+### 2.5.6.0.0 Notification Delivery
+
+#### 2.5.6.1.0 Source Id
+
+REPO-NOTIFICATIONS-SNS
+
+#### 2.5.6.2.0 Target Id
+
+on-call-engineer-endpoint
+
+#### 2.5.6.3.0 Message
+
+Deliver Alert Notification via Subscriber Protocol
+
+#### 2.5.6.4.0 Sequence Number
+
+6
+
+#### 2.5.6.5.0 Type
+
+🔹 Notification Delivery
+
+#### 2.5.6.6.0 Is Synchronous
+
+❌ No
+
+#### 2.5.6.7.0 Return Message
+
+
+
+#### 2.5.6.8.0 Has Return
+
+❌ No
+
+#### 2.5.6.9.0 Is Activation
+
+❌ No
+
+#### 2.5.6.10.0 Technical Details
+
+##### 2.5.6.10.1 Protocol
+
+HTTPS (for PagerDuty/Slack), SMTP (for Email), SMS
+
+##### 2.5.6.10.2 Method
+
+Varies by protocol (e.g., HTTP POST for webhooks)
+
+##### 2.5.6.10.3 Parameters
+
+- Payload is the formatted SNS message.
+
+##### 2.5.6.10.4 Authentication
+
+For HTTPS, can use endpoint authentication if configured.
+
+##### 2.5.6.10.5 Error Handling
+
+SNS has built-in retry policies for delivery failures to endpoints like HTTPS. A Dead-Letter Queue (DLQ) should be configured on the subscription to capture messages that fail repeatedly.
+
+##### 2.5.6.10.6 Performance
+
+Delivery time is dependent on the endpoint's responsiveness.
+
+## 2.6.0.0.0 Notes
+
+### 2.6.1.0.0 Content
+
+#### 2.6.1.1.0 Content
+
+The entire alarm definition, including metric, threshold, and SNS action, MUST be defined as Infrastructure as Code (IaC) using Terraform (`aws_cloudwatch_metric_alarm` resource) to ensure consistency across environments and enable version control.
+
+#### 2.6.1.2.0 Position
+
+Top
+
+#### 2.6.1.3.0 Participant Id
+
+*Not specified*
+
+#### 2.6.1.4.0 Sequence Number
+
+*Not specified*
+
+### 2.6.2.0.0 Content
+
+#### 2.6.2.1.0 Content
+
+Alarm thresholds are not arbitrary; they are derived directly from the Non-Functional Requirements, specifically REQ-NFP-001 (Performance Requirements), to create a meaningful Service Level Objective (SLO).
+
+#### 2.6.2.2.0 Position
+
+Bottom
+
+#### 2.6.2.3.0 Participant Id
+
+REPO-MONITORING-CLOUDWATCH
+
+#### 2.6.2.4.0 Sequence Number
+
+2
+
+### 2.6.3.0.0 Content
+
+#### 2.6.3.1.0 Content
+
+A DLQ (SQS Queue) should be configured on the SNS subscription to capture failed deliveries. This is critical for ensuring no alerts are lost if a webhook endpoint is down.
+
+#### 2.6.3.2.0 Position
+
+Right
+
+#### 2.6.3.3.0 Participant Id
+
+REPO-NOTIFICATIONS-SNS
+
+#### 2.6.3.4.0 Sequence Number
+
+6
+
+## 2.7.0.0.0 Implementation Guidance
+
+| Property | Value |
+|----------|-------|
+| Security Requirements | 1. The IAM Role used by CloudWatch Alarms must hav... |
+| Performance Targets | The end-to-end alert delivery time (from metric br... |
+| Error Handling Strategy | 1. **False Positives (Alert Fatigue):** Continuous... |
+| Testing Considerations | 1. **Unit Test (IaC):** Use `terraform plan` and s... |
+| Monitoring Requirements | 1. **Meta-Monitoring:** Monitor the health of the ... |
+| Deployment Considerations | Alarms are critical infrastructure and must be dep... |
+

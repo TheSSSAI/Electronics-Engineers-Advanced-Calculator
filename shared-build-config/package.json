@@ -1,0 +1,57 @@
+{
+  "name": "@calculator/shared-build-config",
+  "version": "1.0.0",
+  "description": "Shared build, linting, and formatting configurations for the Calculator project.",
+  "private": true,
+  "license": "UNLICENSED",
+  "author": "Calculator Engineering Team",
+  "main": "eslint.base.js",
+  "files": [
+    "prettier.config.js",
+    "eslint.base.js",
+    "eslint.react.js",
+    "eslint.node.js",
+    "tsconfig.base.json",
+    "tsconfig.react.json",
+    "tsconfig.node.json"
+  ],
+  "scripts": {
+    "format:check": "prettier --check .",
+    "format:write": "prettier --write .",
+    "lint": "eslint ."
+  },
+  "peerDependencies": {
+    "@types/react": ">=18.0.0",
+    "eslint": ">=8.0.0",
+    "prettier": ">=3.0.0",
+    "react": ">=18.0.0",
+    "typescript": ">=5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "@types/react": "^18.3.3",
+    "@typescript-eslint/eslint-plugin": "^7.11.0",
+    "@typescript-eslint/parser": "^7.11.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
+    "eslint-plugin-react": "^7.34.2",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-security": "^3.0.1",
+    "prettier": "^3.2.5",
+    "react": "^18.3.1",
+    "typescript": "^5.4.5"
+  },
+  "exports": {
+    "./prettier": "./prettier.config.js",
+    "./eslint/base": "./eslint.base.js",
+    "./eslint/react": "./eslint.react.js",
+    "./eslint/node": "./eslint.node.js",
+    "./tsconfig/base": "./tsconfig.base.json",
+    "./tsconfig/react": "./tsconfig.react.json",
+    "./tsconfig/node": "./tsconfig.node.json"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  }
+}

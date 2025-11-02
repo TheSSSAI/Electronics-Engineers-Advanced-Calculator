@@ -1,0 +1,15 @@
+sequenceDiagram
+    actor "Client SPA" as ClientSPA
+    participant "API Gateway" as APIGateway
+
+    activate APIGateway
+    ClientSPA->>APIGateway: 1. Makes Nth+1 API Request, exceeding the configured rate limit
+    APIGateway-->>ClientSPA: HTTP/1.1 429 Too Many Requests
+    APIGateway->>APIGateway: 2. Evaluate Request against Usage Plan
+    APIGateway-->>APIGateway: Decision: Rate Limit Exceeded
+    ClientSPA->>ClientSPA: 3. Handle 429 Error and Initiate Backoff
+
+    note over APIGateway: Security Policy: The API Gateway must have a 'Usage Plan' configured with a specific rate limit (...
+    note over ClientSPA: Client Resilience: The client's responsibility is to respect the 429 response. A naive client tha...
+
+    deactivate APIGateway

@@ -1,0 +1,37 @@
+flowchart TD
+    subgraph Frontend SPA
+        A[User navigates to Registration Page] --> B[User fills Email, Password, Confirms Password, and checks ToS]
+        B --> C{Client-side Validation}
+        C -->|Invalid| D[Show inline error messages<br/>e.g., 'Passwords do not match']
+        D --> B
+    end
+
+    subgraph Backend (AWS Cognito)
+        E[Submit registration data] --> F{Process Request}
+        F -->|Email already exists| G[Return 'Email in use' error]
+        F -->|Password policy failed| H[Return 'Weak password' error]
+        F -->|Success| I[Create user in Cognito User Pool]
+    end
+    
+    subgraph Frontend SPA
+        J[Receive API Response] --> K{Success?}
+        K -->|No| L[Show specific server error to user]
+        L --> B
+        K -->|Yes| M[Store JWT & Set Auth State]
+        M --> N[Redirect to Main Calculator]
+        N --> O[Show 'Welcome!' notification]
+    end
+
+    C -->|Valid| E
+    I --> J
+    G --> J
+    H --> J
+
+    %% Styling
+    classDef errorNode fill:#ffebee,stroke:#d32f2f,color:#000
+    classDef successNode fill:#e8f5e9,stroke:#4caf50,color:#000
+    classDef processNode fill:#e3f2fd,stroke:#2196f3,color:#000
+
+    class D,G,H,L errorNode
+    class I,M,N,O successNode
+    class B,E,F processNode

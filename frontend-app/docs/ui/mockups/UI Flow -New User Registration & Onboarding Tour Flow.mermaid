@@ -1,0 +1,46 @@
+flowchart TD
+    subgraph "Phase 1: Registration"
+        A[Unauthenticated User visits app] --> B(Clicks 'Register')
+        B --> C[Registration Page]
+        C --> D{Fill Registration Form<br/>(Email, Password, Accept ToS)}
+        D --> E{Client-side Validation}
+        E -->|Invalid| F[Show inline errors]
+        F --> D
+        E -->|Valid| G[Submit to AWS Cognito]
+    end
+
+    subgraph "Phase 2: Account Creation & Login"
+        G --> H{Cognito: Validate Credentials<br/>(Unique email, password policy)}
+        H -->|Error| I[API returns error]
+        I --> J[Frontend shows specific error message<br/>'Email in use' or 'Password too weak']
+        J --> C
+        H -->|Success| K(Cognito creates user)
+        K --> L[Backend: Create user record in DB]
+        L --> M[Frontend: Auto-login & receive JWT]
+    end
+
+    subgraph "Phase 3: First-Time Onboarding"
+        M --> N[Redirect to Main Calculator View]
+        N --> O{System checks: Is this the user's first login?}
+        O -->|Yes| P[Start Guided Tour]
+        P --> Q[Tour highlights key UI elements:<br/>- Main Display<br/>- Mode Switcher<br/>- Help Icon]
+        Q --> R{User completes or skips tour}
+        R --> S[Save tour status to user profile]
+        S --> T(User is authenticated & free to use app)
+        O -->|No| T
+    end
+
+    %% Styling
+    classDef userAction fill:#f3e5f5,stroke:#8e24aa,color:#000
+    classDef process fill:#e3f2fd,stroke:#1976d2,color:#000
+    classDef decision fill:#fff9c4,stroke:#f57f17,color:#000
+    classDef error fill:#ffebee,stroke:#c62828,color:#000
+    classDef success fill:#e8f5e9,stroke:#2e7d32,color:#000
+    classDef finalState fill:#dcedc8,stroke:#558b2f,color:#000
+
+    class A,B userAction
+    class C,D,F,J process
+    class E,H,O,R decision
+    class I error
+    class G,K,L,M,N,P,Q,S process
+    class T finalState

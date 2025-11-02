@@ -1,0 +1,104 @@
+
+{
+  "component_inventory": {
+    "atomic_components": [
+      {
+        "component_name": "NumberParser",
+        "category": "parsing_utility",
+        "variants": ["default"],
+        "states": ["valid_input", "invalid_input"],
+        "responsive_needs": "Not Applicable (Non-UI)",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 1,
+        "estimated_effort": "4-6 hours"
+      },
+      {
+        "component_name": "NumberFormatter",
+        "category": "formatting_utility",
+        "variants": ["engineering_notation", "significant_figures"],
+        "states": ["default"],
+        "responsive_needs": "Not Applicable (Non-UI)",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 1,
+        "estimated_effort": "4-6 hours"
+      },
+      {
+        "component_name": "Logger",
+        "category": "developer_utility",
+        "variants": ["console_output"],
+        "states": ["enabled", "disabled"],
+        "responsive_needs": "Not Applicable (Non-UI)",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 2,
+        "estimated_effort": "2-3 hours"
+      }
+    ],
+    "molecular_components": [
+      {
+        "component_name": "IndexedDBWrapper",
+        "category": "storage_service",
+        "variants": ["default"],
+        "states": ["initializing", "open", "error", "closed"],
+        "responsive_needs": "Not Applicable (Non-UI)",
+        "dependencies": [],
+        "complexity_level": "medium",
+        "implementation_priority": 2,
+        "estimated_effort": "8-12 hours"
+      }
+    ],
+    "organism_components": [
+      {
+        "component_name": "OfflineSyncManager",
+        "category": "data_synchronization_service",
+        "variants": ["append_only_strategy", "last_write_wins_strategy"],
+        "states": ["idle", "offline_queuing", "syncing", "error"],
+        "responsive_needs": "Not Applicable (Non-UI)",
+        "dependencies": ["IndexedDBWrapper", "Logger"],
+        "complexity_level": "high",
+        "implementation_priority": 3,
+        "estimated_effort": "24-32 hours"
+      }
+    ]
+  },
+  "screen_inventory": [],
+  "implementation_plan": {
+    "phase_1_foundation": {
+      "components": ["Project Setup (TypeScript, Jest, ESLint, Prettier)", "NumberParser", "NumberFormatter"],
+      "rationale": "Establish the project structure, tooling, and build the core, standalone utility functions that have no external dependencies.",
+      "estimated_duration": "2-3 days"
+    },
+    "phase_2_building_blocks": {
+      "components": ["Logger", "IndexedDBWrapper"],
+      "rationale": "Develop the foundational components for debugging and local persistence. The IndexedDB wrapper is a critical dependency for the main service.",
+      "estimated_duration": "3-4 days"
+    },
+    "phase_3_complex_components": {
+      "components": ["OfflineSyncManager"],
+      "rationale": "Implement the primary service of the library, integrating the IndexedDB wrapper and handling the complex logic of queuing, network status detection, and synchronization strategies.",
+      "estimated_duration": "5-7 days"
+    },
+    "phase_4_screens": {
+      "screens": ["API Documentation & Packaging"],
+      "rationale": "Finalize the public API of the library, generate comprehensive TSDoc/JSDoc documentation, and configure the packaging process (e.g., for NPM) for consumption by the main frontend application.",
+      "estimated_duration": "2-3 days"
+    }
+  },
+  "platform_implementation_strategy": {
+    "target_platform": "Modern Web Browsers supporting IndexedDB and the Network Information API.",
+    "implementation_approach": "API-first, test-driven development (TDD).",
+    "responsive_strategy": "Not Applicable (Non-UI Library)",
+    "progressive_enhancement": "The library itself is a progressive enhancement. The main application can function without it, but offline capabilities are enabled when the library is loaded and the browser supports its required APIs.",
+    "browser_support": "Latest stable versions of Chrome, Firefox, Safari, and Edge.",
+    "accessibility_integration": "Not Applicable (Non-UI Library). The library provides no user interface; accessibility is the responsibility of the consuming application."
+  },
+  "quality_assurance_plan": {
+    "component_testing": "Extensive unit testing for all exported functions and class methods using Jest. Test coverage must exceed 90% for core logic.",
+    "integration_testing": "Integration tests will simulate the browser environment (using JSDOM and IndexedDB mocks) to test the OfflineSyncManager's interaction with storage and network events.",
+    "responsive_testing": "Not Applicable (Non-UI Library)",
+    "accessibility_testing": "Not Applicable (Non-UI Library)",
+    "performance_testing": "Benchmarking key asynchronous operations to ensure they are non-blocking and efficient. Memory usage will be monitored to prevent leaks."
+  }
+}

@@ -1,0 +1,18 @@
+sequenceDiagram
+    actor "Client SPA" as ClientSPA
+    participant "API Gateway" as APIGateway
+    actor "User & Data Service" as UserDataService
+    participant "Domain Logic Library" as DomainLogicLibrary
+
+    ClientSPA->>ClientSPA: 1. User inputs two values (e.g., V=12, I=2). Client-side logic immediately calculates and displays derived values (R=6, P=24) for UI responsiveness.
+    ClientSPA-->>ClientSPA: UI is updated with calculated results.
+    activate APIGateway
+    ClientSPA->>APIGateway: 2. Send user inputs for authoritative validation.
+    APIGateway-->>ClientSPA: HTTP 200 OK (Validation Success) or HTTP 400 Bad Request (Validation Failure).
+    activate UserDataService
+    APIGateway->>UserDataService: 3. Validate JWT (if present), add Correlation-ID header, and forward request.
+    UserDataService-->>APIGateway: Forwarded HTTP response from service.
+
+
+    deactivate UserDataService
+    deactivate APIGateway

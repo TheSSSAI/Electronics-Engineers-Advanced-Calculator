@@ -1,0 +1,6 @@
+"component_name","business_criticality","technical_complexity","change_frequency","test_types_required","unit_test_coverage","integration_test_coverage","e2e_test_coverage","automation_percentage","manual_test_effort","automated_test_effort","total_test_cases","risk_mitigation_score","quality_confidence","maintenance_overhead","tool_compatibility","team_skill_alignment"
+"User Authentication Module","Critical","High","Low","[""Unit"",""Integration"",""E2E"",""Security"",""Performance""]","90","95","100","95","4","60","40","0.98","High","Low","Excellent","Good"
+"Core Calculation Engine (Client)","High","Medium","Medium","[""Unit"",""Integration"",""E2E"",""Accessibility""]","95","80","85","100","","50","150","0.95","High","Medium","Excellent","Excellent"
+"Custom Mode CRUD API (Backend)","High","Medium","Medium","[""Unit"",""Integration"",""Security""]","90","100","90","100","","45","60","0.96","High","Low","Excellent","Excellent"
+"Secure Formula Execution Service (Lambda)","Critical","High","Low","[""Unit"",""Integration"",""Security"",""Performance""]","85","95","80","90","8","40","35","0.92","High","Medium","Good","Medium"
+"Offline Sync Service (Client)","High","High","Low","[""Unit"",""E2E"",""Data Integrity""]","80","","95","90","10","30","20","0.9","Medium","High","Good","Medium"

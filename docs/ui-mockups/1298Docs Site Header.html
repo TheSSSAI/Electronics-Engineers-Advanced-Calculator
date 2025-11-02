@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organism: Docs Site Header</title>
+  <style>
+    /* --- CSS Reset and Basic Setup --- */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* --- Design System Tokens --- */
+    :root {
+      /* Colors */
+      --color-primary-500: #2196F3;
+      --color-white: #FFFFFF;
+      --color-gray-50: #F8F9FA;
+      --color-gray-100: #F1F3F5;
+      --color-gray-200: #E9ECEF;
+      --color-gray-400: #CED4DA;
+      --color-gray-500: #ADB5BD;
+      --color-gray-700: #495057;
+      --color-gray-800: #343A40;
+      --color-gray-900: #212529;
+      
+      /* Typography */
+      --font-family-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      --font-size-body: 16px;
+      --font-size-lg: 20px;
+      --font-weight-semibold: 600;
+
+      /* Spacing */
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+
+      /* Borders & Shadows */
+      --border-radius-main: 8px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
+      --focus-shadow: 0 0 0 3px rgba(33, 150, 243, 0.25);
+    }
+
+    /* --- Showcase Page Styles --- */
+    body {
+      font-family: var(--font-family-sans);
+      background-color: var(--color-gray-50);
+      color: var(--color-gray-800);
+    }
+    .showcase {
+      padding: var(--space-xl);
+    }
+    .showcase h1 {
+      font-size: 2rem;
+      margin-bottom: var(--space-md);
+    }
+    .showcase h2 {
+        margin-top: var(--space-xl);
+        margin-bottom: var(--space-md);
+    }
+    .mobile-frame {
+        max-width: 420px;
+        border: 8px solid #333;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+    }
+
+
+    /* --- Component Styles: Docs Site Header --- */
+
+    /* Component Base */
+    .docs-header {
+      background-color: var(--color-white);
+      border-bottom: 1px solid var(--color-gray-200);
+      padding: var(--space-sm) var(--space-md);
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      z-index: 10;
+    }
+
+    .docs-header__container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-md);
+      width: 100%;
+      margin: 0 auto;
+      max-width: 1280px;
+    }
+
+    .docs-header__left, .docs-header__right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    
+    .docs-header__right {
+        justify-content: flex-end;
+    }
+
+    /* Hamburger Menu (Mobile Only) */
+    .docs-header__hamburger {
+      background: none;
+      border: none;
+      padding: var(--space-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background-color 0.2s ease;
+    }
+
+    .docs-header__hamburger:hover {
+      background-color: var(--color-gray-100);
+    }
+
+    .docs-header__hamburger:focus-visible {
+      outline: none;
+      box-shadow: var(--focus-shadow);
+    }
+
+    .docs-header__hamburger .icon {
+      width: 24px;
+      height: 24px;
+      color: var(--color-gray-700);
+      stroke-width: 2.5;
+    }
+
+    /* Logo/Title */
+    .docs-header__logo {
+      display: none; /* Hidden by default (mobile-first) */
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-gray-900);
+      text-decoration: none;
+    }
+
+    .docs-header__logo span {
+      color: var(--color-primary-500);
+    }
+
+
+    /* Search Bar Placeholder Styles */
+    .search-bar--desktop {
+      display: none; /* Hidden by default (mobile-first) */
+    }
+
+    .search-bar--mobile-trigger {
+      display: inline-flex;
+      background: none;
+      border: none;
+      padding: var(--space-sm);
+      cursor: pointer;
+      border-radius: 50%;
+      transition: background-color 0.2s ease;
+    }
+
+    .search-bar--mobile-trigger:hover {
+      background-color: var(--color-gray-100);
+    }
+
+    .search-bar--mobile-trigger:focus-visible {
+      outline: none;
+      box-shadow: var(--focus-shadow);
+    }
+
+    .search-bar--mobile-trigger .icon {
+      width: 24px;
+      height: 24px;
+      color: var(--color-gray-700);
+      stroke-width: 2;
+    }
+
+    .search-bar-placeholder {
+        display: flex;
+        align-items: center;
+        gap: var(--space-sm);
+        border: 1px solid var(--color-gray-400);
+        border-radius: var(--border-radius-main);
+        padding: 10px 16px;
+        width: 250px;
+        color: var(--color-gray-500);
+        font-size: var(--font-size-body);
+    }
+
+    .search-bar-placeholder .icon {
+        width: 20px;
+        height: 20px;
+    }
+
+
+    /* Responsive Adaptations */
+    @media (min-width: 768px) {
+      .docs-header {
+        padding: var(--space-md) var(--space-lg);
+      }
+      
+      .docs-header__left {
+        gap: var(--space-md);
+      }
+
+      .docs-header__hamburger {
+        display: none; /* Hide hamburger on desktop */
+      }
+
+      .docs-header__logo {
+        display: block; /* Show logo on desktop */
+      }
+
+      .search-bar--mobile-trigger {
+        display: none; /* Hide search icon on desktop */
+      }
+
+      .search-bar--desktop {
+        display: block; /* Show full search bar on desktop */
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="showcase">
+    <h1>Organism: Docs Site Header</h1>
+
+    <h2>Default State (Desktop View)</h2>
+    <p>On screens wider than 768px, the hamburger menu is hidden, and the logo and full search bar are visible.</p>
+    <header class="docs-header">
+      <div class="docs-header__container">
+        <div class="docs-header__left">
+          <!-- Hidden on this view, but shown for context -->
+          <button class="docs-header__hamburger" aria-label="Toggle navigation menu">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
+          <a href="#" class="docs-header__logo">Calc<span>Docs</span></a>
+        </div>
+        <div class="docs-header__right">
+          <div class="search-bar--desktop">
+            <div class="search-bar-placeholder">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <span>Search documentation...</span>
+            </div>
+          </div>
+          <!-- Hidden on this view, but shown for context -->
+          <button class="search-bar--mobile-trigger" aria-label="Open search">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <h2>Mobile Collapsed State (Mobile View)</h2>
+    <p>On screens smaller than 768px, the hamburger menu and search icon are shown.</p>
+    <div class="mobile-frame">
+      <header class="docs-header">
+        <div class="docs-header__container">
+          <div class="docs-header__left">
+            <button class="docs-header__hamburger" aria-label="Toggle navigation menu">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+            <a href="#" class="docs-header__logo">Calc<span>Docs</span></a>
+          </div>
+          <div class="docs-header__right">
+            <div class="search-bar--desktop">
+              <div class="search-bar-placeholder">
+                 <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                 <span>Search documentation...</span>
+              </div>
+            </div>
+            <button class="search-bar--mobile-trigger" aria-label="Open search">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </button>
+          </div>
+        </div>
+      </header>
+    </div>
+
+  </div>
+  
+  <div style="padding: var(--space-xl)">
+    <h2>Component Variations</h2>
+    <div>
+        <h3>Default</h3>
+        <p>The standard header component. Its appearance changes based on the viewport width.</p>
+        <header class="docs-header">
+          <div class="docs-header__container">
+            <div class="docs-header__left">
+              <button class="docs-header__hamburger" aria-label="Toggle navigation menu">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+              </button>
+              <a href="#" class="docs-header__logo">Calc<span>Docs</span></a>
+            </div>
+            <div class="docs-header__right">
+              <div class="search-bar--desktop">
+                <div class="search-bar-placeholder">
+                  <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                  <span>Search documentation...</span>
+                </div>
+              </div>
+              <button class="search-bar--mobile-trigger" aria-label="Open search">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              </button>
+            </div>
+          </div>
+        </header>
+    </div>
+  </div>
+
+</body>
+</html>

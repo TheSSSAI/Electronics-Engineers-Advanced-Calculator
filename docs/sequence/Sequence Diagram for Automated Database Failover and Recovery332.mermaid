@@ -1,0 +1,33 @@
+sequenceDiagram
+    actor "User & Data Service" as UserDataService
+    participant "Primary DB (AZ-A)" as PrimaryDBAZA
+    participant "Standby DB (AZ-B)" as StandbyDBAZB
+    participant "AWS RDS Control Plane" as AWSRDSControlPlane
+    participant "AWS Route 53" as AWSRoute53
+
+    activate PrimaryDBAZA
+    UserDataService->>PrimaryDBAZA: 1. Execute SQL Query (e.g., SELECT, INSERT)
+    PrimaryDBAZA-->>UserDataService: Query Result / Success Ack
+    PrimaryDBAZA->>PrimaryDBAZA: 2. Failure Event Occurs (e.g., hardware failure, instance crash)
+    AWSRDSControlPlane->>PrimaryDBAZA: 3. Health Check Failure Detected
+    PrimaryDBAZA-->>AWSRDSControlPlane: No Response / Unhealthy Status
+    activate AWSRoute53
+    AWSRDSControlPlane->>AWSRoute53: 4. Update DNS CNAME Record
+    AWSRoute53-->>AWSRDSControlPlane: DNS Update Acknowledged
+    activate StandbyDBAZB
+    AWSRDSControlPlane->>StandbyDBAZB: 5. Promote to Primary
+    StandbyDBAZB-->>AWSRDSControlPlane: Promotion Successful
+    UserDataService->>PrimaryDBAZA: 6. Attempt SQL Query (fails)
+    PrimaryDBAZA-->>UserDataService: ConnectionRefusedError / TimeoutException
+    UserDataService->>UserDataService: 7. Enter Connection Retry Loop
+    UserDataService->>StandbyDBAZB: 8. Attempt to establish new connection (resolves to new Primary via updated DNS)
+    StandbyDBAZB-->>UserDataService: Connection Established
+    UserDataService->>StandbyDBAZB: 9. Execute SQL Query (succeeds)
+    StandbyDBAZB-->>UserDataService: Query Result / Success Ack
+
+    note over StandbyDBAZB: The RPO (Recovery Point Objective) is effectively zero because Multi-AZ uses synchronous replicat...
+    note over UserDataService: Application's connection pool (TypeORM) is critical. It must be configured with a robust retry st...
+
+    deactivate StandbyDBAZB
+    deactivate AWSRoute53
+    deactivate PrimaryDBAZA

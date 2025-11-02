@@ -1,0 +1,25 @@
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <g clip-path="url(#clip0_1_2)">
+    <rect width="100" height="100" rx="20" fill="#2E3440"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M25 20H75V30H25V20Z" fill="#88C0D0"/>
+    <rect x="25" y="38" width="50" height="18" rx="2" fill="#3B4252"/>
+    <text x="30" y="52" font-family="monospace" font-size="14" fill="#D8DEE9">3.14159</text>
+    <rect x="25" y="64" width="14" height="8" rx="2" fill="#4C566A"/>
+    <rect x="43" y="64" width="14" height="8" rx="2" fill="#4C566A"/>
+    <rect x="61" y="64" width="14" height="8" rx="2" fill="#4C566A"/>
+    <rect x="25" y="76" width="14" height="8" rx="2" fill="#4C566A"/>
+    <rect x="43" y="76" width="14" height="8" rx="2" fill="#4C566A"/>
+    <rect x="61" y="76" width="14" height="8" rx="2" fill="#4C566A"/>
+    <text x="30" y="72" font-family="monospace" font-size="8" fill="#ECEFF4">+</text>
+    <text x="48" y="72" font-family="monospace" font-size="8" fill="#ECEFF4">-</text>
+    <text x="66" y="72" font-family="monospace" font-size="8" fill="#ECEFF4">x</text>
+    <text x="30" y="84" font-family="monospace" font-size="8" fill="#ECEFF4">7</text>
+    <text x="48" y="84" font-family="monospace" font-size="8" fill="#ECEFF4">8</text>
+    <text x="66" y="84" font-family="monospace" font-size="8" fill="#ECEFF4">9</text>
+  </g>
+  <defs>
+    <clipPath id="clip0_1_2">
+      <rect width="100" height="100" rx="20" fill="white"/>
+    </clipPath>
+  </defs>
+</svg>

@@ -1,0 +1,884 @@
+# 1 Overview
+
+## 1.1 Diagram Id
+
+SEQ-SEC-001
+
+## 1.2 Name
+
+Execute a Custom Formula (Secure Sandbox)
+
+## 1.3 Description
+
+A user interacts with a custom-defined calculation mode. The client sends the formula definition and input values to the Formula Execution Service (AWS Lambda). This service executes the untrusted user formula in an isolated V8 sandbox via 'isolated-vm' with no network or filesystem access and strict resource limits.
+
+## 1.4 Type
+
+🔹 SecurityFlow
+
+## 1.5 Purpose
+
+To safely execute untrusted, user-defined code to perform custom calculations without compromising the security or stability of the backend infrastructure, as mandated by REQ-CON-001 and REQ-FRX-001.
+
+## 1.6 Complexity
+
+High
+
+## 1.7 Priority
+
+🚨 Critical
+
+## 1.8 Frequency
+
+OnDemand
+
+## 1.9 Participants
+
+- REPO-SPA-CLIENT
+- REPO-API-GATEWAY
+- REPO-APP-FORMULA-EXEC
+
+## 1.10 Key Interactions
+
+- User enters input values into a custom mode on the Client SPA.
+- Client sends an authenticated API request to the '/execute' endpoint on the API Gateway.
+- API Gateway routes the request to the Formula Execution Service (AWS Lambda).
+- The Lambda function creates a secure, isolated V8 environment using `isolated-vm`.
+- The user's formula is executed within the sandbox with strict memory, timeout, and CPU limits.
+- The sandbox environment provides an explicit allow-list of math functions and constants.
+- The calculated result is returned to the client.
+
+## 1.11 Triggers
+
+- User interacts with a custom calculation mode, triggering a calculation.
+
+## 1.12 Outcomes
+
+- The custom calculation is performed securely.
+- The result is returned and displayed in the client UI.
+
+## 1.13 Business Rules
+
+- Formula execution must not exceed defined resource limits (timeout, memory).
+- Formulas can only access functions and constants on the predefined allow-list (REQ-FRX-001).
+- Sandbox must have no network or filesystem access.
+
+## 1.14 Error Scenarios
+
+- Formula contains a syntax error.
+- Formula execution exceeds the timeout limit.
+- Formula attempts to use a disallowed function.
+- Formula execution runs out of memory.
+
+## 1.15 Integration Points
+
+- The `isolated-vm` library is a key technology integration point.
+
+# 2.0 Details
+
+## 2.1 Diagram Id
+
+SEQ-SEC-001
+
+## 2.2 Name
+
+Execute a Custom Formula in a Secure V8 Sandbox
+
+## 2.3 Description
+
+Implementation sequence for securely executing untrusted, user-defined formulas. The flow leverages a multi-layered security approach: API Gateway for authentication, an ephemeral AWS Lambda for execution environment isolation, and the 'isolated-vm' library for fine-grained V8 sandbox control. This design strictly adheres to the security constraints outlined in REQ-CON-001 and the functional requirements for user-extensible calculations in REQ-FRX-001.
+
+## 2.4 Participants
+
+### 2.4.1 FrontendApplication
+
+#### 2.4.1.1 Repository Id
+
+REPO-SPA-CLIENT
+
+#### 2.4.1.2 Display Name
+
+Client SPA
+
+#### 2.4.1.3 Type
+
+🔹 FrontendApplication
+
+#### 2.4.1.4 Technology
+
+React 18+, TypeScript
+
+#### 2.4.1.5 Order
+
+1
+
+#### 2.4.1.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #4285F4 |
+| Stereotype | User Interface |
+
+### 2.4.2.0 APIGateway
+
+#### 2.4.2.1 Repository Id
+
+REPO-API-GATEWAY
+
+#### 2.4.2.2 Display Name
+
+API Gateway
+
+#### 2.4.2.3 Type
+
+🔹 APIGateway
+
+#### 2.4.2.4 Technology
+
+Amazon API Gateway
+
+#### 2.4.2.5 Order
+
+2
+
+#### 2.4.2.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | boundary |
+| Color | #FF9900 |
+| Stereotype | Security & Routing |
+
+### 2.4.3.0 ServerlessFunction
+
+#### 2.4.3.1 Repository Id
+
+REPO-APP-FORMULA-EXEC
+
+#### 2.4.3.2 Display Name
+
+Formula Execution Service
+
+#### 2.4.3.3 Type
+
+🔹 ServerlessFunction
+
+#### 2.4.3.4 Technology
+
+AWS Lambda (Node.js LTS)
+
+#### 2.4.3.5 Order
+
+3
+
+#### 2.4.3.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | control |
+| Color | #D4524D |
+| Stereotype | Secure Sandbox |
+
+## 2.5.0.0 Interactions
+
+### 2.5.1.0 Request
+
+#### 2.5.1.1 Source Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.1.2 Target Id
+
+REPO-API-GATEWAY
+
+#### 2.5.1.3 Message
+
+Sends formula execution request.
+
+#### 2.5.1.4 Sequence Number
+
+1
+
+#### 2.5.1.5 Type
+
+🔹 Request
+
+#### 2.5.1.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.1.7 Return Message
+
+Receives calculation result or structured error.
+
+#### 2.5.1.8 Has Return
+
+✅ Yes
+
+#### 2.5.1.9 Is Activation
+
+❌ No
+
+#### 2.5.1.10 Technical Details
+
+##### 2.5.1.10.1 Protocol
+
+HTTPS/REST
+
+##### 2.5.1.10.2 Method
+
+POST /api/v1/execute-formula
+
+##### 2.5.1.10.3 Parameters
+
+| Property | Value |
+|----------|-------|
+| Headers | {'Authorization': 'Bearer <JWT_from_Cognito>', 'Content-Type': 'application/json', 'X-Correlation-ID': '<UUID>'} |
+| Body | {'schema': {'formula': 'string', 'inputs': 'Record<string, number>'}} |
+
+##### 2.5.1.10.4 Authentication
+
+OAuth 2.0 Bearer Token (JWT) issued by AWS Cognito.
+
+##### 2.5.1.10.5 Error Handling
+
+Client-side logic to handle 4xx/5xx responses. Implements retry-with-backoff for 503 Service Unavailable or transient network errors.
+
+##### 2.5.1.10.6 Performance
+
+Request must be initiated and sent within 50ms of user action.
+
+### 2.5.2.0.0 SecurityCheckpoint
+
+#### 2.5.2.1.0 Source Id
+
+REPO-API-GATEWAY
+
+#### 2.5.2.2.0 Target Id
+
+REPO-API-GATEWAY
+
+#### 2.5.2.3.0 Message
+
+Validates JWT and authorizes request.
+
+#### 2.5.2.4.0 Sequence Number
+
+2
+
+#### 2.5.2.5.0 Type
+
+🔹 SecurityCheckpoint
+
+#### 2.5.2.6.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.2.7.0 Return Message
+
+Token valid or invalid.
+
+#### 2.5.2.8.0 Has Return
+
+✅ Yes
+
+#### 2.5.2.9.0 Is Activation
+
+❌ No
+
+#### 2.5.2.10.0 Technical Details
+
+##### 2.5.2.10.1 Protocol
+
+Internal
+
+##### 2.5.2.10.2 Method
+
+Cognito JWT Authorizer Invocation
+
+##### 2.5.2.10.3 Parameters
+
+| Property | Value |
+|----------|-------|
+| Token | JWT from Authorization header |
+
+##### 2.5.2.10.4 Authentication
+
+Integrated AWS IAM role for authorizer.
+
+##### 2.5.2.10.5 Error Handling
+
+If token is invalid, expired, or signature fails, rejects request with HTTP 401 Unauthorized. Logs failed attempt.
+
+##### 2.5.2.10.6 Performance
+
+Validation should complete in < 50ms.
+
+### 2.5.3.0.0 Invocation
+
+#### 2.5.3.1.0 Source Id
+
+REPO-API-GATEWAY
+
+#### 2.5.3.2.0 Target Id
+
+REPO-APP-FORMULA-EXEC
+
+#### 2.5.3.3.0 Message
+
+Invokes Lambda function with request payload.
+
+#### 2.5.3.4.0 Sequence Number
+
+3
+
+#### 2.5.3.5.0 Type
+
+🔹 Invocation
+
+#### 2.5.3.6.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.3.7.0 Return Message
+
+Receives JSON response from Lambda.
+
+#### 2.5.3.8.0 Has Return
+
+✅ Yes
+
+#### 2.5.3.9.0 Is Activation
+
+✅ Yes
+
+#### 2.5.3.10.0 Technical Details
+
+##### 2.5.3.10.1 Protocol
+
+AWS Lambda Invoke API
+
+##### 2.5.3.10.2 Method
+
+Invoke
+
+##### 2.5.3.10.3 Parameters
+
+| Property | Value |
+|----------|-------|
+| Payload | Mapped event object containing request body, heade... |
+
+##### 2.5.3.10.4 Authentication
+
+IAM role assumed by API Gateway with `lambda:InvokeFunction` permission.
+
+##### 2.5.3.10.5 Error Handling
+
+Maps Lambda function errors (e.g., unhandled exceptions, timeouts) to HTTP 500-level responses. Configured with a circuit breaker for repeated backend failures.
+
+##### 2.5.3.10.6 Performance
+
+Latency is subject to Lambda cold starts. Target P95 invocation overhead < 100ms.
+
+### 2.5.4.0.0 Processing
+
+#### 2.5.4.1.0 Source Id
+
+REPO-APP-FORMULA-EXEC
+
+#### 2.5.4.2.0 Target Id
+
+REPO-APP-FORMULA-EXEC
+
+#### 2.5.4.3.0 Message
+
+Executes formula in secure V8 sandbox.
+
+#### 2.5.4.4.0 Sequence Number
+
+4
+
+#### 2.5.4.5.0 Type
+
+🔹 Processing
+
+#### 2.5.4.6.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.4.7.0 Return Message
+
+Returns calculated value or an execution error.
+
+#### 2.5.4.8.0 Has Return
+
+✅ Yes
+
+#### 2.5.4.9.0 Is Activation
+
+❌ No
+
+#### 2.5.4.10.0 Technical Details
+
+##### 2.5.4.10.1 Protocol
+
+Internal/In-Process
+
+##### 2.5.4.10.2 Method
+
+sandbox.execute(formula, inputs)
+
+##### 2.5.4.10.3 Parameters
+
+*No data available*
+
+##### 2.5.4.10.4 Authentication
+
+N/A
+
+##### 2.5.4.10.5 Error Handling
+
+A comprehensive try/catch/finally block captures specific errors from `isolated-vm` (timeout, memory limit) and general script errors (syntax, runtime).
+
+##### 2.5.4.10.6 Performance
+
+Total execution, including sandbox setup and teardown, must adhere to P95 < 500ms as per REQ-NFP-001.
+
+#### 2.5.4.11.0 Nested Interactions
+
+##### 2.5.4.11.1 Validation
+
+###### 2.5.4.11.1.1 Source Id
+
+REPO-APP-FORMULA-EXEC
+
+###### 2.5.4.11.1.2 Target Id
+
+REPO-APP-FORMULA-EXEC
+
+###### 2.5.4.11.1.3 Message
+
+1. Validate and parse request payload.
+
+###### 2.5.4.11.1.4 Sequence Number
+
+4.1
+
+###### 2.5.4.11.1.5 Type
+
+🔹 Validation
+
+###### 2.5.4.11.1.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.4.11.1.7 Has Return
+
+❌ No
+
+##### 2.5.4.11.2.0 ResourceAllocation
+
+###### 2.5.4.11.2.1 Source Id
+
+REPO-APP-FORMULA-EXEC
+
+###### 2.5.4.11.2.2 Target Id
+
+REPO-APP-FORMULA-EXEC
+
+###### 2.5.4.11.2.3 Message
+
+2. Create V8 Isolate with strict resource limits.
+
+###### 2.5.4.11.2.4 Sequence Number
+
+4.2
+
+###### 2.5.4.11.2.5 Type
+
+🔹 ResourceAllocation
+
+###### 2.5.4.11.2.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.4.11.2.7 Has Return
+
+❌ No
+
+###### 2.5.4.11.2.8 Technical Details
+
+####### 2.5.4.11.2.8.1 Method
+
+new ivm.Isolate({ memoryLimit: 64 })
+
+####### 2.5.4.11.2.8.2 Error Handling
+
+Catches potential allocation failures.
+
+##### 2.5.4.11.3.0.0 ContextCreation
+
+###### 2.5.4.11.3.1.0 Source Id
+
+REPO-APP-FORMULA-EXEC
+
+###### 2.5.4.11.3.2.0 Target Id
+
+REPO-APP-FORMULA-EXEC
+
+###### 2.5.4.11.3.3.0 Message
+
+3. Create isolated context.
+
+###### 2.5.4.11.3.4.0 Sequence Number
+
+4.3
+
+###### 2.5.4.11.3.5.0 Type
+
+🔹 ContextCreation
+
+###### 2.5.4.11.3.6.0 Is Synchronous
+
+✅ Yes
+
+###### 2.5.4.11.3.7.0 Has Return
+
+❌ No
+
+###### 2.5.4.11.3.8.0 Technical Details
+
+####### 2.5.4.11.3.8.1 Method
+
+isolate.createContextSync()
+
+##### 2.5.4.11.4.0.0 SecurityPolicyEnforcement
+
+###### 2.5.4.11.4.1.0 Source Id
+
+REPO-APP-FORMULA-EXEC
+
+###### 2.5.4.11.4.2.0 Target Id
+
+REPO-APP-FORMULA-EXEC
+
+###### 2.5.4.11.4.3.0 Message
+
+4. Inject allow-listed functions and constants into context global.
+
+###### 2.5.4.11.4.4.0 Sequence Number
+
+4.4
+
+###### 2.5.4.11.4.5.0 Type
+
+🔹 SecurityPolicyEnforcement
+
+###### 2.5.4.11.4.6.0 Is Synchronous
+
+✅ Yes
+
+###### 2.5.4.11.4.7.0 Has Return
+
+❌ No
+
+###### 2.5.4.11.4.8.0 Technical Details
+
+####### 2.5.4.11.4.8.1 Method
+
+context.global.setSync('sin', new ivm.Reference(Math.sin))
+
+####### 2.5.4.11.4.8.2 Parameters
+
+Injects only functions and constants specified in REQ-FRX-001 allow-list. Prohibits access to Node.js globals like `process` or `require`.
+
+##### 2.5.4.11.5.0.0 DataInjection
+
+###### 2.5.4.11.5.1.0 Source Id
+
+REPO-APP-FORMULA-EXEC
+
+###### 2.5.4.11.5.2.0 Target Id
+
+REPO-APP-FORMULA-EXEC
+
+###### 2.5.4.11.5.3.0 Message
+
+5. Inject user input variables into context.
+
+###### 2.5.4.11.5.4.0 Sequence Number
+
+4.5
+
+###### 2.5.4.11.5.5.0 Type
+
+🔹 DataInjection
+
+###### 2.5.4.11.5.6.0 Is Synchronous
+
+✅ Yes
+
+###### 2.5.4.11.5.7.0 Has Return
+
+❌ No
+
+###### 2.5.4.11.5.8.0 Technical Details
+
+####### 2.5.4.11.5.8.1 Method
+
+context.global.setSync('userInputVar', inputs.userInputVar)
+
+##### 2.5.4.11.6.0.0 UntrustedCodeExecution
+
+###### 2.5.4.11.6.1.0 Source Id
+
+REPO-APP-FORMULA-EXEC
+
+###### 2.5.4.11.6.2.0 Target Id
+
+REPO-APP-FORMULA-EXEC
+
+###### 2.5.4.11.6.3.0 Message
+
+6. Compile and run user script with timeout.
+
+###### 2.5.4.11.6.4.0 Sequence Number
+
+4.6
+
+###### 2.5.4.11.6.5.0 Type
+
+🔹 UntrustedCodeExecution
+
+###### 2.5.4.11.6.6.0 Is Synchronous
+
+✅ Yes
+
+###### 2.5.4.11.6.7.0 Has Return
+
+❌ No
+
+###### 2.5.4.11.6.8.0 Technical Details
+
+####### 2.5.4.11.6.8.1 Method
+
+isolate.compileScriptSync(formula).runSync(context, { timeout: 400 })
+
+####### 2.5.4.11.6.8.2 Error Handling
+
+The surrounding try/catch block will specifically catch 'Script execution timed out' errors from `isolated-vm`.
+
+##### 2.5.4.11.7.0.0 ResultHandling
+
+###### 2.5.4.11.7.1.0 Source Id
+
+REPO-APP-FORMULA-EXEC
+
+###### 2.5.4.11.7.2.0 Target Id
+
+REPO-APP-FORMULA-EXEC
+
+###### 2.5.4.11.7.3.0 Message
+
+7. Capture result or format execution error.
+
+###### 2.5.4.11.7.4.0 Sequence Number
+
+4.7
+
+###### 2.5.4.11.7.5.0 Type
+
+🔹 ResultHandling
+
+###### 2.5.4.11.7.6.0 Is Synchronous
+
+✅ Yes
+
+###### 2.5.4.11.7.7.0 Has Return
+
+❌ No
+
+###### 2.5.4.11.7.8.0 Technical Details
+
+####### 2.5.4.11.7.8.1 Error Handling
+
+Maps internal exceptions to user-friendly error objects, e.g., `{ type: 'TimeoutError', message: '...' }`.
+
+##### 2.5.4.11.8.0.0 ResourceCleanup
+
+###### 2.5.4.11.8.1.0 Source Id
+
+REPO-APP-FORMULA-EXEC
+
+###### 2.5.4.11.8.2.0 Target Id
+
+REPO-APP-FORMULA-EXEC
+
+###### 2.5.4.11.8.3.0 Message
+
+8. Dispose of Isolate to release all resources.
+
+###### 2.5.4.11.8.4.0 Sequence Number
+
+4.8
+
+###### 2.5.4.11.8.5.0 Type
+
+🔹 ResourceCleanup
+
+###### 2.5.4.11.8.6.0 Is Synchronous
+
+✅ Yes
+
+###### 2.5.4.11.8.7.0 Has Return
+
+❌ No
+
+###### 2.5.4.11.8.8.0 Technical Details
+
+####### 2.5.4.11.8.8.1 Method
+
+isolate.dispose()
+
+####### 2.5.4.11.8.8.2 Parameters
+
+Called within a `finally` block to guarantee execution and prevent memory leaks, even if errors occur.
+
+### 2.5.5.0.0.0.0 Response
+
+#### 2.5.5.1.0.0.0 Source Id
+
+REPO-APP-FORMULA-EXEC
+
+#### 2.5.5.2.0.0.0 Target Id
+
+REPO-API-GATEWAY
+
+#### 2.5.5.3.0.0.0 Message
+
+Returns structured JSON response.
+
+#### 2.5.5.4.0.0.0 Sequence Number
+
+5
+
+#### 2.5.5.5.0.0.0 Type
+
+🔹 Response
+
+#### 2.5.5.6.0.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.5.7.0.0.0 Has Return
+
+❌ No
+
+#### 2.5.5.8.0.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.5.9.0.0.0 Technical Details
+
+##### 2.5.5.9.1.0.0 Protocol
+
+AWS Lambda Proxy Integration
+
+##### 2.5.5.9.2.0.0 Method
+
+N/A
+
+##### 2.5.5.9.3.0.0 Parameters
+
+| Property | Value |
+|----------|-------|
+| Response | {'statusCode': '200 | 400 | 500', 'body': 'JSON string of success or error object.'} |
+
+##### 2.5.5.9.4.0.0 Authentication
+
+N/A
+
+##### 2.5.5.9.5.0.0 Error Handling
+
+Lambda returns a 400 status for user errors (e.g., syntax) and 500 for internal errors.
+
+##### 2.5.5.9.6.0.0 Performance
+
+N/A
+
+## 2.6.0.0.0.0.0 Notes
+
+### 2.6.1.0.0.0.0 Content
+
+#### 2.6.1.1.0.0.0 Content
+
+Zero Trust Principle: The user-provided 'formula' string is treated as untrusted and potentially malicious at all times. The entire purpose of this flow is to execute it without granting any trust or privileges.
+
+#### 2.6.1.2.0.0.0 Position
+
+top
+
+#### 2.6.1.3.0.0.0 Participant Id
+
+REPO-APP-FORMULA-EXEC
+
+#### 2.6.1.4.0.0.0 Sequence Number
+
+4
+
+### 2.6.2.0.0.0.0 Content
+
+#### 2.6.2.1.0.0.0 Content
+
+
+
+```
+Defense in Depth: 
+1. AuthN/AuthZ at Gateway.
+2. Ephemeral Lambda runtime.
+3. 'isolated-vm' V8 sandbox with strict resource limits.
+4. No network/filesystem access granted via Lambda execution role.
+```
+
+#### 2.6.2.2.0.0.0 Position
+
+bottom
+
+#### 2.6.2.3.0.0.0 Participant Id
+
+*Not specified*
+
+#### 2.6.2.4.0.0.0 Sequence Number
+
+*Not specified*
+
+### 2.6.3.0.0.0.0 Content
+
+#### 2.6.3.1.0.0.0 Content
+
+REQ-CON-001 explicitly forbids `vm2` due to critical vulnerabilities. `isolated-vm` is the mandated, more secure alternative.
+
+#### 2.6.3.2.0.0.0 Position
+
+right
+
+#### 2.6.3.3.0.0.0 Participant Id
+
+REPO-APP-FORMULA-EXEC
+
+#### 2.6.3.4.0.0.0 Sequence Number
+
+4.2
+
+## 2.7.0.0.0.0.0 Implementation Guidance
+
+| Property | Value |
+|----------|-------|
+| Security Requirements | The Lambda execution role MUST NOT have any permis... |
+| Performance Targets | The P95 end-to-end latency for this entire flow mu... |
+| Error Handling Strategy | The client should receive distinct, machine-readab... |
+| Testing Considerations | Unit tests must cover the sandbox setup and inject... |
+| Monitoring Requirements | Create a CloudWatch Dashboard for the Formula Exec... |
+| Deployment Considerations | The `isolated-vm` library has native C++ component... |
+

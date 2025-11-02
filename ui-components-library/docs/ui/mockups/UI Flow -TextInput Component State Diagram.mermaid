@@ -1,0 +1,70 @@
+stateDiagram-v2
+    direction LR
+
+    [*] --> Empty_Default: Component Initialized
+
+    state Empty_Default {
+        note right of Empty_Default
+            No value, not focused.
+            - border: 1px solid gray_400
+        end note
+    }
+
+    state Empty_Focus {
+        note right of Empty_Focus
+            No value, is focused.
+            - border: 2px solid primary_500
+        end note
+    }
+
+    state WithValue_Default {
+        note right of WithValue_Default
+            Has value, not focused.
+            - border: 1px solid gray_400
+        end note
+    }
+
+    state WithValue_Focus {
+        note right of WithValue_Focus
+            Has value, is focused.
+            - border: 2px solid primary_500
+        end note
+    }
+
+    state Error {
+        note right of Error
+            Has invalid value.
+            - border: 2px solid error
+        end note
+    }
+
+    state Disabled {
+        note right of Disabled
+            Component is not interactive.
+            - background: gray_100
+            - cursor: not-allowed
+        end note
+    }
+
+    Empty_Default --> Empty_Focus: User Focuses
+    Empty_Default --> Disabled: Disable Event
+
+    Empty_Focus --> Empty_Default: User Blurs
+    Empty_Focus --> WithValue_Focus: User Inputs Text
+    Empty_Focus --> Error: Validation Fails
+    Empty_Focus --> Disabled: Disable Event
+
+    WithValue_Default --> WithValue_Focus: User Focuses
+    WithValue_Default --> Disabled: Disable Event
+
+    WithValue_Focus --> WithValue_Default: User Blurs
+    WithValue_Focus --> Error: Validation Fails
+    WithValue_Focus --> Empty_Focus: User Clears Input
+    WithValue_Focus --> Disabled: Disable Event
+
+    Error --> WithValue_Focus: User Focuses & Corrects
+    Error --> Empty_Focus: User Focuses & Clears
+    Error --> Disabled: Disable Event
+
+    Disabled --> Empty_Default: Enable Event (if empty)
+    Disabled --> WithValue_Default: Enable Event (if has value)

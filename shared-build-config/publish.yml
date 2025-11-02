@@ -1,0 +1,68 @@
+# This GitHub Actions workflow automates the process of publishing the shared-build-config package
+# to the GitHub Packages NPM registry. It is triggered on every push to the 'main' branch,
+# ensuring that the latest stable version of the configuration is always available to consuming repositories.
+
+name: Publish to GitHub Packages
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish-npm:
+    # Use the latest Ubuntu runner
+    runs-on: ubuntu-latest
+
+    # Define permissions for the GITHUB_TOKEN.
+    # 'contents: read' is required to checkout the repository.
+    # 'packages: write' is required to publish packages to the GitHub Packages registry.
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      # Step 1: Checkout the repository code
+      # This action checks out your repository under $GITHUB_WORKSPACE, so your job can access it.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Node.js environment
+      # This action installs a Node.js version and configures the .npmrc file for publishing to GitHub Packages.
+      # It sets the registry URL for the '@calculator' scope, ensuring that any npm commands for this scope
+      # are directed to the GitHub Packages registry.
+      - name: Set up Node.js for GitHub Packages
+        uses: actions/setup-node@v4
+        with:
+          # Use a specific LTS version of Node.js for consistency
+          node-version: '20.x'
+          # Define the registry URL for GitHub Packages
+          registry-url: 'https://npm.pkg.github.com/'
+          # Scope the registry to the organization/user account. This matches the package name in package.json.
+          scope: '@calculator'
+
+      # Step 3: Install dependencies
+      # 'npm ci' is used instead of 'npm install' for CI environments. It provides faster, more reliable
+      # builds by installing dependencies exactly as defined in the package-lock.json file.
+      - name: Install dependencies
+        run: npm ci
+
+      # Step 4: Run Lint Check as a Quality Gate
+      # Before publishing, run the lint script defined in package.json to ensure the code
+      # adheres to the project's coding standards. If this step fails, the workflow will stop,
+      # preventing a non-compliant package from being published.
+      - name: Run Lint Check
+        run: npm run lint
+
+      # Step 5: Publish the package to GitHub Packages
+      # This command publishes the package to the registry configured in the previous 'setup-node' step.
+      # The NODE_AUTH_TOKEN is automatically provided by the 'setup-node' action using the GITHUB_TOKEN secret,
+      # which is securely managed by GitHub Actions. This token has the necessary permissions because of
+      # the 'permissions' block defined at the job level. The workflow will fail if a package with the
+      # same version already exists in the registry, which is the desired behavior to enforce version bumps.
+      - name: Publish to GitHub Packages Registry
+        run: npm publish
+        env:
+          # The NODE_AUTH_TOKEN is required for authentication with the NPM registry.
+          # GITHUB_TOKEN is a special secret automatically created by GitHub for each workflow run.
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

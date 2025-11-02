@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organism Component: OfflineSyncManager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* OfflineSyncManager Showcase CSS */
+
+        /* Design System Tokens */
+        :root {
+            --color-primary-500: #2196F3;
+            --color-primary-600: #1E88E5;
+            --color-primary-700: #1976D2;
+            --color-neutrals-white: #FFFFFF;
+            --color-neutrals-gray-50: #F8F9FA;
+            --color-neutrals-gray-100: #F1F3F5;
+            --color-neutrals-gray-200: #E9ECEF;
+            --color-neutrals-gray-500: #ADB5BD;
+            --color-neutrals-gray-700: #495057;
+            --color-neutrals-gray-900: #212529;
+            --color-semantic-success: #2E7D32;
+            --color-semantic-warning: #ED6C02;
+            --color-semantic-error: #D32F2F;
+            --color-semantic-info: #0288D1;
+
+            --font-family-primary: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            --font-family-monospace: 'Roboto Mono', 'Fira Code', 'Courier New', monospace;
+
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+
+            --border-radius-md: 8px;
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Base & Showcase Layout */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family-primary);
+            background-color: var(--color-neutrals-gray-100);
+            color: var(--color-neutrals-gray-900);
+            padding: var(--spacing-xl);
+        }
+
+        .showcase {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .showcase-header {
+            margin-bottom: var(--spacing-xl);
+            text-align: center;
+        }
+
+        .showcase-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .showcase-header p {
+            font-size: 1.125rem;
+            color: var(--color-neutrals-gray-700);
+            max-width: 80ch;
+            margin: auto;
+        }
+
+        .showcase-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: var(--spacing-xl);
+        }
+
+        /* --- Button Styles (from Design System) --- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 18px;
+            border: 0;
+            border-radius: var(--border-radius-md);
+            font-weight: 500;
+            font-family: var(--font-family-primary);
+            font-size: 0.9rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            min-height: 44px;
+        }
+        .btn:disabled {
+            background-color: var(--color-neutrals-gray-200);
+            color: var(--color-neutrals-gray-500);
+            cursor: not-allowed;
+        }
+
+        .btn:focus-visible {
+            outline: 2px solid var(--color-primary-700);
+            outline-offset: 2px;
+        }
+
+        .btn--primary {
+            background: var(--color-primary-600);
+            color: var(--color-neutrals-white);
+        }
+        .btn--primary:hover:not(:disabled) { background: var(--color-primary-700); }
+        .btn--primary:active:not(:disabled) { transform: scale(0.98); }
+
+
+        /* Component Test Harness Styles */
+        .sync-harness {
+            background-color: var(--color-neutrals-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            border-top: 4px solid var(--color-neutrals-gray-500);
+            transition: border-color 0.3s ease;
+        }
+
+        .sync-harness__header {
+            padding: var(--spacing-md) var(--spacing-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--color-neutrals-gray-200);
+        }
+
+        .sync-harness__title {
+            font-size: 1.25rem;
+            font-weight: 500;
+        }
+
+        .sync-harness__status {
+            font-family: var(--font-family-monospace);
+            font-weight: 700;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: 999px;
+            color: var(--color-neutrals-white);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.8rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .sync-harness__body {
+            padding: var(--spacing-lg);
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--spacing-lg);
+        }
+
+        .sync-harness__section-title {
+            font-weight: 500;
+            margin-bottom: var(--spacing-md);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 1px solid var(--color-neutrals-gray-200);
+        }
+
+        .sync-harness__actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: var(--spacing-sm);
+        }
+
+        .sync-harness__queue {
+            background-color: var(--color-neutrals-gray-50);
+            border: 1px solid var(--color-neutrals-gray-200);
+            border-radius: 4px;
+            padding: var(--spacing-md);
+            min-height: 120px;
+        }
+
+        .sync-harness__queue-item {
+            font-family: var(--font-family-monospace);
+            font-size: 0.875rem;
+            padding: var(--spacing-sm);
+            border-bottom: 1px dashed var(--color-neutrals-gray-200);
+            color: var(--color-neutrals-gray-700);
+        }
+        .sync-harness__queue-item span {
+            color: var(--color-primary-600);
+            font-weight: bold;
+        }
+
+        .sync-harness__queue-item:last-child {
+            border-bottom: none;
+        }
+
+        .sync-harness__queue--empty::before {
+            content: 'Queue is empty.';
+            color: var(--color-neutrals-gray-500);
+            font-style: italic;
+        }
+
+        .sync-harness__log {
+            background-color: var(--color-neutrals-gray-900);
+            color: var(--color-neutrals-gray-100);
+            font-family: var(--font-family-monospace);
+            font-size: 0.875rem;
+            padding: var(--spacing-md);
+            border-radius: 4px;
+            min-height: 120px;
+            white-space: pre-wrap;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+        .log-line--info { color: #81D4FA; }
+        .log-line--warn { color: #FFD54F; }
+        .log-line--error { color: #EF9A9A; }
+        .log-line--success { color: #A5D6A7; }
+
+        /* Component States */
+        .sync-harness--idle {
+            border-top-color: var(--color-neutrals-gray-500);
+        }
+        .sync-harness--idle .sync-harness__status {
+            background-color: var(--color-neutrals-gray-500);
+        }
+
+        .sync-harness--queuing {
+            border-top-color: var(--color-semantic-info);
+        }
+        .sync-harness--queuing .sync-harness__status {
+            background-color: var(--color-semantic-info);
+        }
+
+        .sync-harness--syncing {
+            border-top-color: var(--color-semantic-warning);
+        }
+        .sync-harness--syncing .sync-harness__status {
+            background-color: var(--color-semantic-warning);
+        }
+
+        .sync-harness--error {
+            border-top-color: var(--color-semantic-error);
+        }
+        .sync-harness--error .sync-harness__status {
+            background-color: var(--color-semantic-error);
+        }
+        
+        /* Variations Section */
+        .variations-section {
+            margin-top: var(--spacing-xl);
+            background-color: var(--color-neutrals-white);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-lg);
+        }
+        .variations-section h2 {
+             margin-bottom: var(--spacing-md);
+        }
+        .variant-card {
+            margin-top: var(--spacing-md);
+            border: 1px solid var(--color-neutrals-gray-200);
+            border-radius: 4px;
+            padding: var(--spacing-md);
+        }
+        .variant-card h3 {
+             margin-bottom: var(--spacing-sm);
+             color: var(--color-primary-700);
+        }
+         .variant-card p {
+             color: var(--color-neutrals-gray-700);
+             font-size: 0.9rem;
+        }
+
+    </style>
+</head>
+<body>
+    <main class="showcase">
+        <header class="showcase-header">
+            <h1>Organism Component: OfflineSyncManager</h1>
+            <p>This is a visual test harness to demonstrate the internal states of the non-visual <strong>OfflineSyncManager</strong> service. The component itself is a JavaScript class that orchestrates offline data queuing and synchronization.</p>
+        </header>
+
+        <div class="showcase-grid">
+
+            <!-- State: Idle -->
+            <div class="sync-harness sync-harness--idle">
+                <header class="sync-harness__header">
+                    <h2 class="sync-harness__title">State: Idle (Online)</h2>
+                    <div class="sync-harness__status" aria-live="polite">Idle</div>
+                </header>
+                <div class="sync-harness__body">
+                    <section>
+                        <h3 class="sync-harness__section-title">Simulate Actions</h3>
+                        <div class="sync-harness__actions">
+                            <button class="btn btn--primary" type="button">Go Offline</button>
+                            <button class="btn btn--primary" type="button" disabled>Queue Item</button>
+                        </div>
+                        <h3 class="sync-harness__section-title">Offline Queue</h3>
+                        <div class="sync-harness__queue sync-harness__queue--empty"></div>
+                    </section>
+                    <section>
+                        <h3 class="sync-harness__section-title">Log</h3>
+                        <div class="sync-harness__log">
+<span class="log-line--info">[INFO] SyncManager initialized.</span>
+<span class="log-line--info">[INFO] Network status: online.</span>
+<span class="log-line--info">[INFO] State changed to IDLE.</span>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- State: Offline Queuing -->
+            <div class="sync-harness sync-harness--queuing">
+                <header class="sync-harness__header">
+                    <h2 class="sync-harness__title">State: Offline Queuing</h2>
+                    <div class="sync-harness__status" aria-live="polite">Queuing</div>
+                </header>
+                <div class="sync-harness__body">
+                    <section>
+                        <h3 class="sync-harness__section-title">Simulate Actions</h3>
+                        <div class="sync-harness__actions">
+                            <button class="btn btn--primary" type="button">Go Online</button>
+                            <button class="btn btn--primary" type="button">Queue Item</button>
+                        </div>
+                        <h3 class="sync-harness__section-title">Offline Queue</h3>
+                        <div class="sync-harness__queue">
+                            <div class="sync-harness__queue-item"><span>[LWW]</span> UPDATE /vars/myVar</div>
+                            <div class="sync-harness__queue-item"><span>[APPEND]</span> POST /history</div>
+                        </div>
+                    </section>
+                    <section>
+                        <h3 class="sync-harness__section-title">Log</h3>
+                        <div class="sync-harness__log">
+<span class="log-line--info">[INFO] Network status: offline.</span>
+<span class="log-line--info">[INFO] State changed to OFFLINE_QUEUING.</span>
+<span class="log-line--info">[INFO] Queued request: UPDATE /vars/myVar</span>
+<span class="log-line--info">[INFO] Queued request: POST /history</span>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- State: Syncing -->
+            <div class="sync-harness sync-harness--syncing">
+                <header class="sync-harness__header">
+                    <h2 class="sync-harness__title">State: Syncing</h2>
+                    <div class="sync-harness__status" aria-live="polite">Syncing</div>
+                </header>
+                <div class="sync-harness__body">
+                    <section>
+                        <h3 class="sync-harness__section-title">Simulate Actions</h3>
+                        <div class="sync-harness__actions">
+                            <button class="btn btn--primary" type="button" disabled>Go Online</button>
+                            <button class="btn btn--primary" type="button" disabled>Queue Item</button>
+                        </div>
+                        <h3 class="sync-harness__section-title">Offline Queue</h3>
+                        <div class="sync-harness__queue">
+                             <div class="sync-harness__queue-item"><span>[LWW]</span> UPDATE /vars/myVar</div>
+                            <div class="sync-harness__queue-item"><span>[APPEND]</span> POST /history</div>
+                        </div>
+                    </section>
+                    <section>
+                        <h3 class="sync-harness__section-title">Log</h3>
+                        <div class="sync-harness__log">
+<span class="log-line--info">[INFO] Network status: online.</span>
+<span class="log-line--warn">[WARN] Pending items in queue. Starting sync...</span>
+<span class="log-line--info">[INFO] State changed to SYNCING.</span>
+<span class="log-line--info">[INFO] Sending request 1/2: UPDATE /vars/myVar</span>
+<span class="log-line--success">[SUCCESS] Request 1/2 successful (200 OK).</span>
+<span class="log-line--info">[INFO] Sending request 2/2: POST /history</span>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            
+            <!-- State: Error -->
+            <div class="sync-harness sync-harness--error">
+                <header class="sync-harness__header">
+                    <h2 class="sync-harness__title">State: Error</h2>
+                    <div class="sync-harness__status" aria-live="polite">Error</div>
+                </header>
+                <div class="sync-harness__body">
+                     <section>
+                        <h3 class="sync-harness__section-title">Simulate Actions</h3>
+                        <div class="sync-harness__actions">
+                            <button class="btn btn--primary" type="button">Retry Sync</button>
+                        </div>
+                        <h3 class="sync-harness__section-title">Offline Queue</h3>
+                        <div class="sync-harness__queue">
+                            <div class="sync-harness__queue-item"><span>[APPEND]</span> POST /history</div>
+                        </div>
+                    </section>
+                    <section>
+                        <h3 class="sync-harness__section-title">Log</h3>
+                        <div class="sync-harness__log">
+<span class="log-line--info">[INFO] State changed to SYNCING.</span>
+<span class="log-line--info">[INFO] Sending request 1/1: POST /history</span>
+<span class="log-line--error">[ERROR] Request 1/1 failed (503 Service Unavailable).</span>
+<span class="log-line--error">[ERROR] State changed to ERROR.</span>
+<span class="log-line--warn">[WARN] Will retry in 5 seconds...</span>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+
+        <div class="variations-section">
+            <h2>Component Variations</h2>
+            <div class="variant-card">
+                <h3>Variant Name : "Append-Only Strategy"</h3>
+                <p>This strategy is used for data types where new offline entries should be added to the server's list without overwriting existing data. It's ideal for append-only logs like calculation history. The service simply POSTs each queued item to the server upon reconnection.</p>
+            </div>
+             <div class="variant-card">
+                <h3>Variant Name : "Last-Write-Wins (LWW) Strategy"</h3>
+                <p>This strategy is used for mutable data like user variables. When an offline change is synced, its timestamp is compared to the server's version. If the server's version is newer, the offline change is discarded and the client is updated with the server's data. Otherwise, the offline change overwrites the server data. This prevents stale data from overwriting newer changes made on another device.</p>
+            </div>
+        </div>
+
+    </main>
+</body>
+</html>

@@ -1,0 +1,24 @@
+sequenceDiagram
+    actor "Client (React SPA)" as ClientReactSPA
+    participant "Amazon API Gateway" as AmazonAPIGateway
+    actor "User & Data Service" as UserDataService
+    participant "Amazon CloudWatch Logs" as AmazonCloudWatchLogs
+
+    ClientReactSPA->>AmazonAPIGateway: 1. Sends API Request to create a custom mode with JWT for authentication.
+    AmazonAPIGateway-->>ClientReactSPA: Returns final HTTP response to the client.
+    activate AmazonAPIGateway
+    AmazonAPIGateway->>AmazonAPIGateway: 2. Generates AWS X-Ray Trace ID and initiates trace segment.
+    AmazonAPIGateway->>UserDataService: 3. Forwards request, injecting the X-Ray Trace ID into the 'X-Amzn-Trace-Id' header.
+    UserDataService-->>AmazonAPIGateway: Returns '201 Created' from backend.
+    activate UserDataService
+    UserDataService->>UserDataService: 4. NestJS Middleware/Interceptor extracts 'X-Amzn-Trace-Id' from headers.
+    UserDataService->>UserDataService: 5. Creates a request-scoped logger instance with the Correlation ID.
+    UserDataService->>AmazonCloudWatchLogs: 6. Streams structured log entry to CloudWatch Log Stream.
+    UserDataService->>UserDataService: 7. Executes business logic in controller/service.
+
+    note over AmazonAPIGateway: AWS X-Ray 'Active Tracing' must be enabled in the API Gateway stage configuration. This is the so...
+    note over UserDataService: The 'nestjs-pino' library should be configured with a request-scoped provider to ensure each requ...
+    note over AmazonCloudWatchLogs: Log streams from ECS containers and Lambda functions are automatically sent to CloudWatch. The EC...
+
+    deactivate UserDataService
+    deactivate AmazonAPIGateway

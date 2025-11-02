@@ -1,0 +1,948 @@
+# 1 Overview
+
+## 1.1 Diagram Id
+
+SEQ-COMP-002
+
+## 1.2 Name
+
+Data Subject Access Request (DSAR - Data Export)
+
+## 1.3 Description
+
+A user requests an export of all their personal data. This triggers an asynchronous backend process using SQS and Lambda that gathers all user data from the database, compiles it into a single machine-readable JSON file, stores it securely in a private S3 bucket, and emails a time-limited download link to the user via SES.
+
+## 1.4 Type
+
+🔹 ComplianceFlow
+
+## 1.5 Purpose
+
+To comply with data access rights under regulations like GDPR and CCPA, providing users with a transparent and complete view of their data stored in the system, as detailed in US-071 and REQ-LGL-001.
+
+## 1.6 Complexity
+
+Critical
+
+## 1.7 Priority
+
+🔴 High
+
+## 1.8 Frequency
+
+OnDemand
+
+## 1.9 Participants
+
+- REPO-SPA-CLIENT
+- REPO-API-GATEWAY
+- REPO-APP-USER-DATA
+- REPO-DB-POSTGRES
+- REPO-SQS
+- REPO-BACKGROUND-WORKER
+- REPO-FILE-STORAGE-S3
+- REPO-EMAIL-SERVICE-SES
+
+## 1.10 Key Interactions
+
+- User initiates the data export from their account settings in the Client SPA.
+- Client sends an API request to the User & Data Service to start the export.
+- User & Data Service validates the request, sets a 'processing' status, and publishes a job message to an SQS queue.
+- A background worker (Lambda) is triggered by the SQS message.
+- The worker queries the PostgreSQL database for the user's profile, history, variables, and custom modes.
+- The worker compiles all data into a single JSON file.
+- The worker uploads the JSON file to a private, secure S3 bucket.
+- The worker generates a time-limited (24-hour) pre-signed URL for the S3 object.
+- The worker invokes AWS SES to send the download link to the user's registered email.
+- The worker updates the user's export status to 'completed'.
+
+## 1.11 Triggers
+
+- User explicitly requests their data export.
+
+## 1.12 Outcomes
+
+- User receives an email with a secure link to download a JSON file containing all their personal data.
+
+## 1.13 Business Rules
+
+- A user can only have one active data export request at a time.
+- The download link must expire after 24 hours.
+- The exported file must contain all specified user data and exclude sensitive information like password hashes.
+
+## 1.14 Error Scenarios
+
+- The background job fails; the message is sent to a Dead Letter Queue (DLQ) and an error is logged.
+- The email service fails to send the notification.
+- User clicks an expired download link and is shown a 'Link Expired' page.
+
+## 1.15 Integration Points
+
+- AWS SQS
+- AWS S3
+- AWS SES
+
+# 2.0 Details
+
+## 2.1 Diagram Id
+
+SEQ-COMP-002-IMPL
+
+## 2.2 Name
+
+Implementation: Data Subject Access Request (DSAR) Asynchronous Export Flow
+
+## 2.3 Description
+
+Detailed technical sequence for a user's request to export their personal data. The flow is initiated by a synchronous API call which triggers a long-running, asynchronous backend process orchestrated by SQS and Lambda. The process aggregates all user data from PostgreSQL, generates a secure, time-limited download link for a JSON file stored in a private S3 bucket, and notifies the user via SES. This sequence is designed to be fully compliant with GDPR/CCPA data access rights.
+
+## 2.4 Participants
+
+### 2.4.1 UI Client
+
+#### 2.4.1.1 Repository Id
+
+REPO-SPA-CLIENT
+
+#### 2.4.1.2 Display Name
+
+Client SPA
+
+#### 2.4.1.3 Type
+
+🔹 UI Client
+
+#### 2.4.1.4 Technology
+
+React 18+, TypeScript
+
+#### 2.4.1.5 Order
+
+1
+
+#### 2.4.1.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #1E90FF |
+| Stereotype | UI |
+
+### 2.4.2.0 API Gateway
+
+#### 2.4.2.1 Repository Id
+
+REPO-API-GATEWAY
+
+#### 2.4.2.2 Display Name
+
+API Gateway
+
+#### 2.4.2.3 Type
+
+🔹 API Gateway
+
+#### 2.4.2.4 Technology
+
+Amazon API Gateway
+
+#### 2.4.2.5 Order
+
+2
+
+#### 2.4.2.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #FF4500 |
+| Stereotype | Gateway |
+
+### 2.4.3.0 Microservice
+
+#### 2.4.3.1 Repository Id
+
+REPO-APP-USER-DATA
+
+#### 2.4.3.2 Display Name
+
+User & Data Service
+
+#### 2.4.3.3 Type
+
+🔹 Microservice
+
+#### 2.4.3.4 Technology
+
+NestJS (Node.js) on AWS ECS
+
+#### 2.4.3.5 Order
+
+3
+
+#### 2.4.3.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #32CD32 |
+| Stereotype | Service |
+
+### 2.4.4.0 Database
+
+#### 2.4.4.1 Repository Id
+
+REPO-DB-POSTGRES
+
+#### 2.4.4.2 Display Name
+
+Application DB
+
+#### 2.4.4.3 Type
+
+🔹 Database
+
+#### 2.4.4.4 Technology
+
+Amazon RDS for PostgreSQL
+
+#### 2.4.4.5 Order
+
+4
+
+#### 2.4.4.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | database |
+| Color | #9370DB |
+| Stereotype | DB |
+
+### 2.4.5.0 Message Queue
+
+#### 2.4.5.1 Repository Id
+
+REPO-SQS
+
+#### 2.4.5.2 Display Name
+
+DSAR Job Queue
+
+#### 2.4.5.3 Type
+
+🔹 Message Queue
+
+#### 2.4.5.4 Technology
+
+AWS SQS
+
+#### 2.4.5.5 Order
+
+5
+
+#### 2.4.5.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | queue |
+| Color | #FFD700 |
+| Stereotype | Queue |
+
+### 2.4.6.0 Serverless Function
+
+#### 2.4.6.1 Repository Id
+
+REPO-BACKGROUND-WORKER
+
+#### 2.4.6.2 Display Name
+
+DSAR Export Worker
+
+#### 2.4.6.3 Type
+
+🔹 Serverless Function
+
+#### 2.4.6.4 Technology
+
+AWS Lambda (Node.js)
+
+#### 2.4.6.5 Order
+
+6
+
+#### 2.4.6.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #FF69B4 |
+| Stereotype | Lambda |
+
+### 2.4.7.0 Object Storage
+
+#### 2.4.7.1 Repository Id
+
+REPO-FILE-STORAGE-S3
+
+#### 2.4.7.2 Display Name
+
+Data Export Storage
+
+#### 2.4.7.3 Type
+
+🔹 Object Storage
+
+#### 2.4.7.4 Technology
+
+AWS S3
+
+#### 2.4.7.5 Order
+
+7
+
+#### 2.4.7.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | cloud |
+| Color | #4682B4 |
+| Stereotype | Storage |
+
+### 2.4.8.0 Email Service
+
+#### 2.4.8.1 Repository Id
+
+REPO-EMAIL-SERVICE-SES
+
+#### 2.4.8.2 Display Name
+
+Email Notification Service
+
+#### 2.4.8.3 Type
+
+🔹 Email Service
+
+#### 2.4.8.4 Technology
+
+AWS SES
+
+#### 2.4.8.5 Order
+
+8
+
+#### 2.4.8.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #00CED1 |
+| Stereotype | Notification |
+
+## 2.5.0.0 Interactions
+
+### 2.5.1.0 Request
+
+#### 2.5.1.1 Source Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.1.2 Target Id
+
+REPO-API-GATEWAY
+
+#### 2.5.1.3 Message
+
+Initiate data export request
+
+#### 2.5.1.4 Sequence Number
+
+1
+
+#### 2.5.1.5 Type
+
+🔹 Request
+
+#### 2.5.1.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.1.7 Return Message
+
+HTTP/1.1 202 Accepted
+
+#### 2.5.1.8 Has Return
+
+✅ Yes
+
+#### 2.5.1.9 Is Activation
+
+✅ Yes
+
+#### 2.5.1.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTPS |
+| Method | POST /api/v1/user/me/data-export |
+| Parameters | Headers: { 'Authorization': 'Bearer <JWT>' }, Body... |
+| Authentication | JWT Bearer Token required. Validated by Gateway Au... |
+| Error Handling | Client handles 401, 403, 409, 429, 5xx status code... |
+| Performance | Client-side timeout set to 15s. |
+
+### 2.5.2.0 Request
+
+#### 2.5.2.1 Source Id
+
+REPO-API-GATEWAY
+
+#### 2.5.2.2 Target Id
+
+REPO-APP-USER-DATA
+
+#### 2.5.2.3 Message
+
+Forward POST /user/me/data-export
+
+#### 2.5.2.4 Sequence Number
+
+2
+
+#### 2.5.2.5 Type
+
+🔹 Request
+
+#### 2.5.2.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.2.7 Return Message
+
+HTTP/1.1 202 Accepted
+
+#### 2.5.2.8 Has Return
+
+✅ Yes
+
+#### 2.5.2.9 Is Activation
+
+✅ Yes
+
+#### 2.5.2.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTPS |
+| Method | POST |
+| Parameters | Forwarded headers and body. Adds X-Correlation-ID ... |
+| Authentication | Request is pre-authenticated by Gateway. Service t... |
+| Error Handling | Propagates HTTP status codes from the service. |
+| Performance | P95 Latency < 200ms for this specific transaction. |
+
+### 2.5.3.0 Query
+
+#### 2.5.3.1 Source Id
+
+REPO-APP-USER-DATA
+
+#### 2.5.3.2 Target Id
+
+REPO-DB-POSTGRES
+
+#### 2.5.3.3 Message
+
+Check for existing active request
+
+#### 2.5.3.4 Sequence Number
+
+3
+
+#### 2.5.3.5 Type
+
+🔹 Query
+
+#### 2.5.3.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.3.7 Return Message
+
+0 rows or 1 row with active request status
+
+#### 2.5.3.8 Has Return
+
+✅ Yes
+
+#### 2.5.3.9 Is Activation
+
+❌ No
+
+#### 2.5.3.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | SQL |
+| Method | SELECT status FROM data_export_requests WHERE user... |
+| Parameters | { userId: string } extracted from JWT `sub` claim. |
+| Authentication | Connection via credentials from AWS Secrets Manage... |
+| Error Handling | If a row is returned, the service throws a 409 Con... |
+| Performance | Query must be indexed on (userId, status) for low ... |
+
+### 2.5.4.0 Command
+
+#### 2.5.4.1 Source Id
+
+REPO-APP-USER-DATA
+
+#### 2.5.4.2 Target Id
+
+REPO-DB-POSTGRES
+
+#### 2.5.4.3 Message
+
+Create new data export request record
+
+#### 2.5.4.4 Sequence Number
+
+4
+
+#### 2.5.4.5 Type
+
+🔹 Command
+
+#### 2.5.4.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.4.7 Return Message
+
+New request record ID
+
+#### 2.5.4.8 Has Return
+
+✅ Yes
+
+#### 2.5.4.9 Is Activation
+
+❌ No
+
+#### 2.5.4.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | SQL |
+| Method | INSERT INTO data_export_requests (id, userId, stat... |
+| Parameters | { userId: string } |
+| Authentication | Connection via credentials from AWS Secrets Manage... |
+| Error Handling | Database errors (e.g., connection failure) result ... |
+| Performance | N/A |
+
+### 2.5.5.0 Message
+
+#### 2.5.5.1 Source Id
+
+REPO-APP-USER-DATA
+
+#### 2.5.5.2 Target Id
+
+REPO-SQS
+
+#### 2.5.5.3 Message
+
+Publish data export job message
+
+#### 2.5.5.4 Sequence Number
+
+5
+
+#### 2.5.5.5 Type
+
+🔹 Message
+
+#### 2.5.5.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.5.7 Return Message
+
+Message ID
+
+#### 2.5.5.8 Has Return
+
+✅ Yes
+
+#### 2.5.5.9 Is Activation
+
+❌ No
+
+#### 2.5.5.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | AWS SDK |
+| Method | sqs.sendMessage() |
+| Parameters | MessageBody: { userId: string, requestId: string }... |
+| Authentication | Via IAM Role assigned to the ECS Task. |
+| Error Handling | Failure to publish results in rollback of DB trans... |
+| Performance | SDK call timeout set to 5s. |
+
+### 2.5.6.0 Event Trigger
+
+#### 2.5.6.1 Source Id
+
+REPO-SQS
+
+#### 2.5.6.2 Target Id
+
+REPO-BACKGROUND-WORKER
+
+#### 2.5.6.3 Message
+
+Trigger Lambda with job message
+
+#### 2.5.6.4 Sequence Number
+
+6
+
+#### 2.5.6.5 Type
+
+🔹 Event Trigger
+
+#### 2.5.6.6 Is Synchronous
+
+❌ No
+
+#### 2.5.6.7 Return Message
+
+
+
+#### 2.5.6.8 Has Return
+
+❌ No
+
+#### 2.5.6.9 Is Activation
+
+✅ Yes
+
+#### 2.5.6.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | SQS Event Source Mapping |
+| Method | Lambda Invocation |
+| Parameters | Event payload contains SQS message records. |
+| Authentication | Permissions managed by Lambda execution role and S... |
+| Error Handling | On function error, SQS visibility timeout allows f... |
+| Performance | N/A |
+
+### 2.5.7.0 Query
+
+#### 2.5.7.1 Source Id
+
+REPO-BACKGROUND-WORKER
+
+#### 2.5.7.2 Target Id
+
+REPO-DB-POSTGRES
+
+#### 2.5.7.3 Message
+
+Fetch all user-related data (profile, history, variables, modes)
+
+#### 2.5.7.4 Sequence Number
+
+7
+
+#### 2.5.7.5 Type
+
+🔹 Query
+
+#### 2.5.7.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.7.7 Return Message
+
+User data records
+
+#### 2.5.7.8 Has Return
+
+✅ Yes
+
+#### 2.5.7.9 Is Activation
+
+❌ No
+
+#### 2.5.7.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | SQL |
+| Method | Multiple SELECT statements within a single transac... |
+| Parameters | { userId: string } from the SQS message. |
+| Authentication | Connection via credentials from AWS Secrets Manage... |
+| Error Handling | Database errors cause Lambda to fail, triggering S... |
+| Performance | Queries must be optimized and indexed by `userId` ... |
+
+### 2.5.8.0 Command
+
+#### 2.5.8.1 Source Id
+
+REPO-BACKGROUND-WORKER
+
+#### 2.5.8.2 Target Id
+
+REPO-FILE-STORAGE-S3
+
+#### 2.5.8.3 Message
+
+Upload compiled JSON data file
+
+#### 2.5.8.4 Sequence Number
+
+8
+
+#### 2.5.8.5 Type
+
+🔹 Command
+
+#### 2.5.8.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.8.7 Return Message
+
+S3 Object ETag/VersionId
+
+#### 2.5.8.8 Has Return
+
+✅ Yes
+
+#### 2.5.8.9 Is Activation
+
+❌ No
+
+#### 2.5.8.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | AWS SDK |
+| Method | s3.putObject() |
+| Parameters | { Bucket, Key: 'exports/{userId}/{requestId}.json'... |
+| Authentication | Via IAM Role with `s3:PutObject` permissions restr... |
+| Error Handling | Upload failures cause Lambda to fail, triggering S... |
+| Performance | For large data sets, use S3 Multipart Upload. |
+
+### 2.5.9.0 Command
+
+#### 2.5.9.1 Source Id
+
+REPO-BACKGROUND-WORKER
+
+#### 2.5.9.2 Target Id
+
+REPO-FILE-STORAGE-S3
+
+#### 2.5.9.3 Message
+
+Generate time-limited pre-signed URL
+
+#### 2.5.9.4 Sequence Number
+
+9
+
+#### 2.5.9.5 Type
+
+🔹 Command
+
+#### 2.5.9.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.9.7 Return Message
+
+Secure download URL
+
+#### 2.5.9.8 Has Return
+
+✅ Yes
+
+#### 2.5.9.9 Is Activation
+
+❌ No
+
+#### 2.5.9.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | AWS SDK |
+| Method | s3.getSignedUrl('getObject') |
+| Parameters | { Bucket, Key, Expires: 86400 } (24 hours) |
+| Authentication | Via IAM Role with `s3:GetObject` permissions. |
+| Error Handling | Failure causes Lambda to fail. |
+| Performance | N/A |
+
+### 2.5.10.0 Command
+
+#### 2.5.10.1 Source Id
+
+REPO-BACKGROUND-WORKER
+
+#### 2.5.10.2 Target Id
+
+REPO-EMAIL-SERVICE-SES
+
+#### 2.5.10.3 Message
+
+Send download link email to user
+
+#### 2.5.10.4 Sequence Number
+
+10
+
+#### 2.5.10.5 Type
+
+🔹 Command
+
+#### 2.5.10.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.10.7 Return Message
+
+SES Message ID
+
+#### 2.5.10.8 Has Return
+
+✅ Yes
+
+#### 2.5.10.9 Is Activation
+
+❌ No
+
+#### 2.5.10.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | AWS SDK |
+| Method | ses.sendEmail() |
+| Parameters | { Source, Destination: { ToAddresses: [user.email]... |
+| Authentication | Via IAM Role with `ses:SendEmail` permissions. |
+| Error Handling | Failure causes Lambda to fail, triggering SQS retr... |
+| Performance | SDK call timeout set to 10s. |
+
+### 2.5.11.0 Command
+
+#### 2.5.11.1 Source Id
+
+REPO-BACKGROUND-WORKER
+
+#### 2.5.11.2 Target Id
+
+REPO-DB-POSTGRES
+
+#### 2.5.11.3 Message
+
+Update request status to 'completed'
+
+#### 2.5.11.4 Sequence Number
+
+11
+
+#### 2.5.11.5 Type
+
+🔹 Command
+
+#### 2.5.11.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.11.7 Return Message
+
+Update result
+
+#### 2.5.11.8 Has Return
+
+✅ Yes
+
+#### 2.5.11.9 Is Activation
+
+❌ No
+
+#### 2.5.11.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | SQL |
+| Method | UPDATE data_export_requests SET status = 'complete... |
+| Parameters | { requestId: string, s3Key: string } for audit pur... |
+| Authentication | Connection via credentials from AWS Secrets Manage... |
+| Error Handling | Failure causes Lambda to fail. |
+| Performance | N/A |
+
+## 2.6.0.0 Notes
+
+### 2.6.1.0 Content
+
+#### 2.6.1.1 Content
+
+Asynchronous Boundary: The client receives an immediate '202 Accepted' response. All subsequent processing is handled asynchronously.
+
+#### 2.6.1.2 Position
+
+after
+
+#### 2.6.1.3 Participant Id
+
+*Not specified*
+
+#### 2.6.1.4 Sequence Number
+
+5
+
+### 2.6.2.0 Content
+
+#### 2.6.2.1 Content
+
+Data Aggregation & Sanitization: The worker compiles data from multiple tables in-memory. It must explicitly filter out any fields not intended for export (e.g., internal metadata).
+
+#### 2.6.2.2 Position
+
+during
+
+#### 2.6.2.3 Participant Id
+
+REPO-BACKGROUND-WORKER
+
+#### 2.6.2.4 Sequence Number
+
+7
+
+### 2.6.3.0 Content
+
+#### 2.6.3.1 Content
+
+Idempotency: The background worker should be designed to be idempotent to handle SQS retries safely, preventing duplicate file uploads or emails.
+
+#### 2.6.3.2 Position
+
+start
+
+#### 2.6.3.3 Participant Id
+
+REPO-BACKGROUND-WORKER
+
+#### 2.6.3.4 Sequence Number
+
+6
+
+## 2.7.0.0 Implementation Guidance
+
+| Property | Value |
+|----------|-------|
+| Security Requirements | 1. **Least Privilege IAM Roles**: The ECS Task rol... |
+| Performance Targets | 1. **API Response**: The initial request (SEQ-1 to... |
+| Error Handling Strategy | 1. **API Layer**: The User & Data Service must ret... |
+| Testing Considerations | 1. **Unit Tests**: Test data aggregation logic and... |
+| Monitoring Requirements | 1. **Distributed Tracing**: The `X-Correlation-ID`... |
+| Deployment Considerations | 1. **Infrastructure as Code**: All AWS resources (... |
+

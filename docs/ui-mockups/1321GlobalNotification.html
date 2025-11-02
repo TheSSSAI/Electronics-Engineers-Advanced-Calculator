@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Global Notification Component</title>
+  <style>
+    /* --- BOILERPLATE & DEMO STYLES --- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: #F8F9FA;
+      color: #212529;
+      line-height: 1.6;
+      padding: 32px;
+      padding-top: 80px; /* Make space for the banner */
+    }
+    .showcase {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1, h2, p { margin-bottom: 16px; }
+    h1 { font-size: 2.5rem; }
+    h2 { font-size: 1.5rem; border-bottom: 1px solid #E0E0E0; padding-bottom: 8px; margin-top: 32px; }
+    p { color: #495057; }
+    code { background-color: #E9ECEF; padding: 2px 6px; border-radius: 4px; font-family: 'SF Mono', 'Fira Code', monospace; }
+
+    /* --- COMPONENT IMPLEMENTATION --- */
+    /* Component: GlobalNotification CSS */
+
+    /* Design System Tokens */
+    :root {
+      /* Colors */
+      --color-success-bg: #EDF7ED;
+      --color-success-text: #1E4620;
+      --color-success-icon: #2E7D32;
+      --color-error-bg: #FDEDED;
+      --color-error-text: #5F2120;
+      --color-error-icon: #D32F2F;
+      --color-sync-bg: #e3f2fd;
+      --color-sync-text: #0d47a1;
+      --color-sync-icon: #1976D2;
+      --color-offline-bg: #F1F3F5;
+      --color-offline-text: #495057;
+      --color-white: #FFFFFF;
+
+      /* Spacing */
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+
+      /* Typography */
+      --font-family-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      --font-size-sm: 14px;
+      --font-weight-medium: 500;
+
+      /* Misc */
+      --border-radius-md: 8px;
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --z-index-notification: 1000;
+    }
+
+    /* Base Component Styles */
+    .notification-banner,
+    .notification-toast {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      font-family: var(--font-family-primary);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      padding: 12px var(--space-md);
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    /* 1. Offline Banner Variant */
+    .notification-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      justify-content: center;
+      background-color: var(--color-offline-bg);
+      color: var(--color-offline-text);
+      z-index: var(--z-index-notification);
+      border-bottom: 1px solid #E0E0E0;
+    }
+
+    .notification-banner__icon {
+      flex-shrink: 0;
+    }
+
+    .notification-banner__icon svg {
+      width: 20px;
+      height: 20px;
+      display: block;
+    }
+
+    /* 2. Toast Container (for positioning) */
+    .toast-container {
+      position: fixed;
+      bottom: var(--space-lg);
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-md);
+      z-index: var(--z-index-notification);
+      width: calc(100% - 32px);
+      max-width: 420px;
+    }
+
+    /* 3. Toast Base Styles */
+    .notification-toast {
+      border-radius: var(--border-radius-md);
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      animation: slideInUp 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .notification-toast__icon {
+      flex-shrink: 0;
+      display: inline-flex;
+    }
+
+    .notification-toast__icon svg, .notification-toast__icon .spinner {
+      width: 20px;
+      height: 20px;
+    }
+
+    .notification-toast__message {
+      flex-grow: 1;
+    }
+
+    .notification-toast__close-btn {
+      flex-shrink: 0;
+      background: transparent;
+      border: none;
+      color: inherit;
+      opacity: 0.7;
+      cursor: pointer;
+      padding: var(--space-xs);
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s, opacity 0.2s;
+    }
+
+    .notification-toast__close-btn:hover {
+      opacity: 1;
+      background-color: rgba(0,0,0,0.1);
+    }
+
+    .notification-toast__close-btn:focus-visible {
+      outline: 2px solid var(--color-sync-icon);
+      outline-offset: 2px;
+    }
+
+    .notification-toast__close-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* 4. Toast Variants */
+    .notification-toast--success {
+      background-color: var(--color-success-bg);
+      color: var(--color-success-text);
+    }
+    .notification-toast--success .notification-toast__icon {
+      color: var(--color-success-icon);
+    }
+
+    .notification-toast--error {
+      background-color: var(--color-error-bg);
+      color: var(--color-error-text);
+    }
+    .notification-toast--error .notification-toast__icon {
+      color: var(--color-error-icon);
+    }
+
+    .notification-toast--sync {
+      background-color: var(--color-sync-bg);
+      color: var(--color-sync-text);
+    }
+    .notification-toast--sync .notification-toast__icon {
+      color: var(--color-sync-icon);
+    }
+
+    /* 5. Spinner for Sync Toast */
+    .spinner {
+        display: inline-block;
+        border-style: solid;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        border-width: 2.5px;
+        border-color: currentColor;
+        border-top-color: transparent;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideInUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Accessibility & Print */
+    @media (prefers-reduced-motion: reduce) {
+      .notification-banner, .notification-toast {
+        animation: fadeIn 0.01s;
+      }
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Main Showcase Content -->
+  <div class="showcase">
+    <h1>Global Notification Component</h1>
+    <p>This component provides global feedback to users. It includes a persistent top banner for states like 'offline' and temporary toasts for actions like 'save success' or 'syncing'.</p>
+    <p>All notifications are implemented with ARIA live regions to be announced by screen readers.</p>
+  </div>
+
+  <!-- Component Variations -->
+  <div class="showcase">
+    <h2>Component Variations</h2>
+
+    <!-- Variant 1: Offline Banner -->
+    <div class="component-variant">
+      <h3>Variant: Offline Banner</h3>
+      <p>A persistent banner at the top of the viewport for application-wide states. It uses <code>role="status"</code> and <code>aria-live="polite"</code>.</p>
+      
+      <div role="status" aria-live="polite" class="notification-banner">
+        <span class="notification-banner__icon" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="currentColor"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4c-1.48 0-2.85.43-4.01 1.17l1.46 1.46C10.21 6.23 11.08 6 12 6c3.04 0 5.5 2.46 5.5 5.5v.5H19c1.66 0 3 1.34 3 3 0 1.13-.64 2.11-1.56 2.62l1.45 1.45C23.16 18.16 24 16.68 24 15c0-2.64-2.05-4.78-4.65-4.96zM3 5.27l2.75 2.74C2.56 8.15 0 10.77 0 14c0 3.31 2.69 6 6 6h11.73l2 2L21 20.73 4.27 4 3 5.27zM7.73 10l8 8H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97L7.73 10z"/></svg>
+        </span>
+        <span>Connection lost. Core functions are available offline.</span>
+      </div>
+    </div>
+
+    <!-- Variant 2: Toasts -->
+    <div class="component-variant">
+      <h3>Variant: Toasts</h3>
+      <p>Temporary notifications that appear at the bottom of the screen to confirm actions or provide status updates. They use <code>role="status"</code> and <code>aria-live="assertive"</code> to be announced immediately.</p>
+      
+      <div class="toast-container">
+        <!-- Success Toast -->
+        <div role="status" aria-live="assertive" class="notification-toast notification-toast--success">
+          <span class="notification-toast__icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="currentColor"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+          </span>
+          <span class="notification-toast__message">Custom mode saved successfully.</span>
+          <button class="notification-toast__close-btn" aria-label="Close success notification">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+          </button>
+        </div>
+
+        <!-- Error Toast -->
+        <div role="status" aria-live="assertive" class="notification-toast notification-toast--error">
+          <span class="notification-toast__icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+          </span>
+          <span class="notification-toast__message">Failed to save variable. Please try again.</span>
+          <button class="notification-toast__close-btn" aria-label="Close error notification">
+             <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+          </button>
+        </div>
+
+        <!-- Sync Status Toast -->
+        <div role="status" aria-live="assertive" class="notification-toast notification-toast--sync">
+          <span class="notification-toast__icon" aria-hidden="true">
+            <span class="spinner"></span>
+          </span>
+          <span class="notification-toast__message">Syncing offline changes...</span>
+          <!-- No close button for uninterruptible status -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

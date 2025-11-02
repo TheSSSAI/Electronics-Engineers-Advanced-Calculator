@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Help System Host</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    /* CSS Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* 1. DESIGN SYSTEM FOUNDATION (Tokens) */
+    :root {
+      /* Color Palette */
+      --color-primary-50: #E3F2FD;
+      --color-primary-100: #BBDEFB;
+      --color-primary-500: #2196F3;
+      --color-primary-700: #1976D2;
+      --color-neutrals-white: #FFFFFF;
+      --color-neutrals-gray-50: #F8F9FA;
+      --color-neutrals-gray-100: #F1F3F5;
+      --color-neutrals-gray-400: #CED4DA;
+      --color-neutrals-gray-600: #868E96;
+      --color-neutrals-gray-700: #495057;
+      --color-neutrals-gray-800: #343A40;
+      --color-neutrals-gray-900: #212529;
+      --color-semantic-error-bg: #FDEDED;
+      --color-semantic-error-text: #5F2120;
+      --color-semantic-error-main: #D32F2F;
+      
+      /* Typography */
+      --font-family-primary: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      --font-family-monospace: 'Roboto Mono', 'Fira Code', 'Courier New', monospace;
+      --font-size-h3: 28px;
+      --font-size-h4: 20px;
+      --font-size-body: 16px;
+      --font-weight-regular: 400;
+      --font-weight-medium: 500;
+      --font-weight-bold: 600;
+      --line-height-body: 1.6;
+
+      /* Spacing */
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+
+      /* Borders & Shadows */
+      --border-radius-main: 8px;
+      --shadow-main: 0 4px 12px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    /* 2. BASE & LAYOUT STYLES */
+    html, body {
+      height: 100%;
+    }
+    
+    body {
+      font-family: var(--font-family-primary);
+      background-color: var(--color-neutrals-gray-50);
+      color: var(--color-neutrals-gray-800);
+      line-height: var(--line-height-body);
+      font-size: var(--font-size-body);
+    }
+
+    .main-app-content {
+        padding: var(--spacing-xl);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--spacing-lg);
+    }
+
+    .main-app-content h1 {
+        font-size: var(--font-size-h3);
+        color: var(--color-neutrals-gray-900);
+    }
+
+    .main-app-content p {
+        max-width: 600px;
+        text-align: center;
+        color: var(--color-neutrals-gray-700);
+    }
+
+    .btn {
+        font-family: var(--font-family-primary);
+        font-weight: var(--font-weight-medium);
+        padding: 10px 22px;
+        border: none;
+        border-radius: var(--border-radius-main);
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+        font-size: var(--font-size-body);
+    }
+    .btn--primary {
+        background-color: var(--color-primary-700);
+        color: var(--color-neutrals-white);
+    }
+    .btn--primary:hover {
+        background-color: #1565C0;
+    }
+    .btn--primary:focus-visible {
+        outline: 2px solid var(--color-primary-700);
+        outline-offset: 2px;
+    }
+
+    /* 3. HELP SYSTEM HOST COMPONENT STYLES */
+    .help-system-host {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background-color: rgba(33, 37, 41, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s ease, visibility 0.2s;
+    }
+
+    .help-system-host.is-open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .help-dialog {
+      background-color: var(--color-neutrals-white);
+      border-radius: var(--border-radius-main);
+      box-shadow: var(--shadow-main);
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      transform: scale(0.95);
+      transition: transform 0.2s ease;
+    }
+
+    .help-system-host.is-open .help-dialog {
+        transform: scale(1);
+    }
+
+    .help-dialog__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--spacing-md) var(--spacing-lg);
+      border-bottom: 1px solid var(--color-neutrals-gray-100);
+      flex-shrink: 0;
+    }
+
+    .help-dialog__title {
+      font-size: var(--font-size-h4);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-neutrals-gray-900);
+    }
+
+    .help-dialog__close-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: var(--spacing-xs);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-neutrals-gray-600);
+    }
+
+    .help-dialog__close-btn:hover {
+      background-color: var(--color-neutrals-gray-100);
+      color: var(--color-neutrals-gray-800);
+    }
+
+    .help-dialog__close-btn:focus-visible {
+        outline: 2px solid var(--color-primary-500);
+        outline-offset: 1px;
+    }
+
+    .help-dialog__close-btn svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .help-dialog__content {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: var(--spacing-lg);
+      position: relative;
+    }
+    
+    /* 4. CONTENT STATES */
+    .help-dialog__state {
+        display: none;
+    }
+    .help-dialog__content.is-loading .loading-state,
+    .help-dialog__content.is-error .error-state,
+    .help-dialog__content.is-loaded .loaded-state {
+        display: block;
+    }
+
+    /* Loading State */
+    .loading-state {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 5px solid var(--color-primary-100);
+      border-bottom-color: var(--color-primary-700);
+      border-radius: 50%;
+      display: inline-block;
+      animation: rotation 1s linear infinite;
+    }
+    @keyframes rotation {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Error State */
+    .error-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        gap: var(--spacing-md);
+        text-align: center;
+        color: var(--color-semantic-error-text);
+        background-color: var(--color-semantic-error-bg);
+        padding: var(--spacing-xl);
+        border-radius: var(--border-radius-main);
+    }
+    .error-state svg {
+        width: 48px;
+        height: 48px;
+        color: var(--color-semantic-error-main);
+    }
+    .error-state p {
+        margin: 0;
+        font-weight: var(--font-weight-medium);
+    }
+
+    /* Loaded State (Placeholder Content) */
+    .loaded-state h3 {
+        font-size: 24px;
+        color: var(--color-neutrals-gray-900);
+        margin-bottom: var(--spacing-md);
+        padding-bottom: var(--spacing-sm);
+        border-bottom: 1px solid var(--color-neutrals-gray-100);
+    }
+    .loaded-state p, .loaded-state ul {
+        margin-bottom: var(--spacing-md);
+    }
+    .loaded-state ul {
+        padding-left: var(--spacing-lg);
+    }
+    .loaded-state code {
+        font-family: var(--font-family-monospace);
+        background-color: var(--color-neutrals-gray-100);
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: var(--spacing-xs);
+        font-size: 14px;
+    }
+
+    /* 5. RESPONSIVE ADAPTATIONS */
+    @media (min-width: 768px) {
+      .help-dialog {
+        width: 90vw;
+        height: 90vh;
+        max-width: 960px;
+        max-height: 800px;
+      }
+    }
+    
+    /* VARIATIONS SECTION STYLES */
+    .screen-variations {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: var(--color-neutrals-gray-100);
+        padding: var(--spacing-md);
+        border-top: 1px solid var(--color-neutrals-gray-400);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: var(--spacing-md);
+        z-index: 50;
+    }
+  </style>
+</head>
+<body>
+  
+  <main class="main-app-content">
+    <h1>Main Application View</h1>
+    <p>This is the main application content that will be overlaid by the help system. You can continue to see this content slightly darkened when the modal is open.</p>
+    <button id="open-help-btn" class="btn btn--primary" type="button">Open Help System</button>
+  </main>
+
+  <!-- HELP SYSTEM HOST COMPONENT -->
+  <div id="help-system-host" class="help-system-host" role="dialog" aria-modal="true" aria-labelledby="help-dialog-title">
+    <div class="help-dialog">
+      <header class="help-dialog__header">
+        <h2 id="help-dialog-title" class="help-dialog__title">Help & Documentation</h2>
+        <button id="close-help-btn" class="help-dialog__close-btn" type="button" aria-label="Close help">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </header>
+      <div id="help-dialog-content" class="help-dialog__content">
+        <!-- Loading State -->
+        <div class="loading-state help-dialog__state">
+          <div class="spinner" role="status" aria-label="Loading help content"></div>
+        </div>
+        <!-- Error State -->
+        <div class="error-state help-dialog__state">
+           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+          </svg>
+          <p>Could not load documentation. Please check your internet connection and try again.</p>
+        </div>
+        <!-- Loaded State -->
+        <div class="loaded-state help-dialog__state">
+          <h3>Getting Started</h3>
+          <p>Welcome to the help system. Here you'll find information about all the features of the application, from basic arithmetic to advanced electronics modes.</p>
+          <ul>
+            <li>To perform a calculation, type an expression like <code>5 + 3 * 2</code> and press Enter.</li>
+            <li>Use the <strong>DEG/RAD/GRAD</strong> button to switch between angle modes for trigonometric functions.</li>
+            <li>Explore specialized modes like <strong>Ohm's Law</strong> for electronics calculations.</li>
+          </ul>
+          <h3>Custom Modes</h3>
+          <p>You can create your own calculators using the Custom Mode wizard. This allows you to define inputs, outputs, and the formulas that connect them. For example, a formula for the area of a circle would be <code>area = pi * radius^2</code>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen Variations Section -->
+  <div class="screen-variations">
+    <button class="btn" id="show-loading-btn">Show Loading State</button>
+    <button class="btn" id="show-content-btn">Show Loaded State</button>
+    <button class="btn" id="show-error-btn">Show Error State</button>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const helpHost = document.getElementById('help-system-host');
+        const helpContent = document.getElementById('help-dialog-content');
+        const openHelpBtn = document.getElementById('open-help-btn');
+        const closeHelpBtn = document.getElementById('close-help-btn');
+        const showLoadingBtn = document.getElementById('show-loading-btn');
+        const showContentBtn = document.getElementById('show-content-btn');
+        const showErrorBtn = document.getElementById('show-error-btn');
+        let lastFocusedElement;
+
+        const openModal = () => {
+            lastFocusedElement = document.activeElement;
+            helpHost.classList.add('is-open');
+            document.body.style.overflow = 'hidden';
+            // Simple focus management: move focus to the close button
+            setTimeout(() => closeHelpBtn.focus(), 100); 
+        };
+
+        const closeModal = () => {
+            helpHost.classList.remove('is-open');
+            document.body.style.overflow = '';
+            if(lastFocusedElement) {
+                lastFocusedElement.focus();
+            }
+        };
+
+        const setContentState = (state) => {
+            helpContent.classList.remove('is-loading', 'is-error', 'is-loaded');
+            if (state) {
+                helpContent.classList.add(`is-${state}`);
+            }
+        };
+
+        openHelpBtn.addEventListener('click', () => {
+            setContentState('loaded');
+            openModal();
+        });
+
+        closeHelpBtn.addEventListener('click', closeModal);
+        helpHost.addEventListener('click', (event) => {
+            if (event.target === helpHost) {
+                closeModal();
+            }
+        });
+        
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && helpHost.classList.contains('is-open')) {
+                closeModal();
+            }
+        });
+        
+        // Variation triggers
+        showLoadingBtn.addEventListener('click', () => {
+            setContentState('loading');
+            openModal();
+        });
+
+        showContentBtn.addEventListener('click', () => {
+            setContentState('loaded');
+            openModal();
+        });
+
+        showErrorBtn.addEventListener('click', () => {
+            setContentState('error');
+            openModal();
+        });
+    });
+  </script>
+</body>
+</html>

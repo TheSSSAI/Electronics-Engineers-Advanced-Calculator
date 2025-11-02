@@ -1,0 +1,5 @@
+"component_name","business_criticality","technical_complexity","change_frequency","test_types_required","unit_test_coverage","integration_test_coverage","e2e_test_coverage","automation_percentage","manual_test_effort","automated_test_effort","total_test_cases","risk_mitigation_score","quality_confidence","maintenance_overhead","tool_compatibility","team_skill_alignment"
+"User Authentication Module (Backend)","Critical","High","Low","[""Unit"",""Integration"",""Security"",""E2E""]","95","100","100","98","2","60","45","0.98","High","Low","Excellent","Good"
+"Secure Formula Execution Service (Lambda)","Critical","Critical","Medium","[""Unit"",""Integration"",""Security"",""Performance""]","98","95","90","100","","80","60","0.99","High","Medium","Excellent","High"
+"Offline Synchronization Logic (Frontend)","High","High","Low","[""Unit"",""Integration"",""E2E""]","90","85","75","85","16","70","50","0.9","Medium","High","Good","Good"
+"Core Calculation Engine (Frontend)","High","Medium","Low","[""Unit"",""E2E""]","99","","95","100","","40","150","0.99","High","Low","Excellent","Excellent"

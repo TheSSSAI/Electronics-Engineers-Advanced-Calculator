@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organism: Docs Site Sidebar</title>
+    <style>
+        /* --- CSS Reset and Basic Setup --- */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* --- Design System Tokens --- */
+        :root {
+            /* Colors */
+            --color-primary-50: #E3F2FD;
+            --color-primary-700: #1976D2;
+            --color-white: #FFFFFF;
+            --color-gray-50: #F8F9FA;
+            --color-gray-100: #F1F3F5;
+            --color-gray-200: #E9ECEF;
+            --color-gray-400: #CED4DA;
+            --color-gray-600: #868E96;
+            --color-gray-700: #495057;
+            --color-gray-900: #212529;
+            --color-focus-ring: #2196F380;
+
+            /* Typography */
+            --font-family-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --font-size-base: 16px;
+            --font-size-caption: 14px;
+            --font-weight-normal: 400;
+            --font-weight-semibold: 600;
+
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+
+            /* Borders, Shadows & Transitions */
+            --border-radius-md: 6px;
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition-fast: 150ms ease-in-out;
+            --transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+            /* Layout */
+            --sidebar-width: 280px;
+            --header-height: 60px;
+        }
+
+        /* --- Showcase Page Styles --- */
+        body {
+            font-family: var(--font-family-sans);
+            background-color: var(--color-gray-50);
+            color: var(--color-gray-800);
+            line-height: 1.6;
+        }
+
+        .showcase-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 var(--space-md);
+            height: var(--header-height);
+            background-color: var(--color-white);
+            border-bottom: 1px solid var(--color-gray-200);
+            position: sticky;
+            top: 0;
+            z-index: 900;
+        }
+
+        .showcase-header h1 {
+            font-size: 1.25rem;
+        }
+
+        .docs-layout {
+            display: flex;
+        }
+
+        .docs-main-content {
+            padding: var(--space-lg);
+            width: 100%;
+        }
+
+        .hamburger-menu {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            border-radius: 50%;
+            transition: background-color var(--transition-fast);
+        }
+
+        .hamburger-menu:hover {
+            background-color: var(--color-gray-100);
+        }
+
+        .hamburger-menu:focus-visible {
+            outline: 2px solid var(--color-focus-ring);
+            outline-offset: 2px;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        /* --- Organism: Docs Site Sidebar --- */
+        .docs-sidebar {
+            background-color: var(--color-white);
+            border-right: 1px solid var(--color-gray-200);
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            transform: translateX(-100%);
+            transition: transform var(--transition-smooth);
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 var(--space-md);
+            height: var(--header-height);
+            border-bottom: 1px solid var(--color-gray-200);
+            flex-shrink: 0;
+        }
+
+        .sidebar-header__title {
+            font-size: 1.1rem;
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-gray-900);
+        }
+
+        .sidebar-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: var(--space-md);
+        }
+
+        .sidebar-close-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            border-radius: 50%;
+            transition: background-color var(--transition-fast);
+        }
+
+        .sidebar-close-btn:hover {
+            background-color: var(--color-gray-100);
+        }
+
+        /* Mobile-only controls */
+        .sidebar-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity var(--transition-smooth), visibility var(--transition-smooth);
+        }
+
+        /* Checkbox hack for demoing mobile state */
+        #sidebar-toggle-checkbox {
+            display: none;
+        }
+
+        #sidebar-toggle-checkbox:checked~.docs-sidebar {
+            transform: translateX(0);
+            box-shadow: var(--shadow-lg);
+        }
+
+        #sidebar-toggle-checkbox:checked~.sidebar-backdrop {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* --- Molecular Component: Sidebar Navigation Item (Embedded) --- */
+        .sidebar-nav__list {
+            list-style: none;
+        }
+
+        .sidebar-nav__item {
+            margin-bottom: var(--space-xs);
+        }
+
+        .sidebar-nav__link,
+        .sidebar-nav__category-toggle {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: var(--space-sm) var(--space-md);
+            font-size: var(--font-size-caption);
+            font-weight: var(--font-weight-normal);
+            text-align: left;
+            border: none;
+            background-color: transparent;
+            border-radius: var(--border-radius-md);
+            cursor: pointer;
+            transition: background-color var(--transition-fast), color var(--transition-fast);
+            color: var(--color-gray-700);
+            text-decoration: none;
+            min-height: 44px;
+        }
+
+        .sidebar-nav__link:hover,
+        .sidebar-nav__category-toggle:hover {
+            background-color: var(--color-gray-100);
+            color: var(--color-gray-900);
+        }
+
+        .sidebar-nav__link:focus-visible,
+        .sidebar-nav__category-toggle:focus-visible {
+            outline: 2px solid var(--color-focus-ring);
+            outline-offset: 2px;
+        }
+
+        .sidebar-nav__link.is-active {
+            background-color: var(--color-primary-50);
+            color: var(--color-primary-700);
+            font-weight: var(--font-weight-semibold);
+        }
+
+        .sidebar-nav__item.has-active-child > .sidebar-nav__category-toggle {
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-gray-900);
+        }
+
+        .sidebar-nav__category-toggle {
+            justify-content: space-between;
+        }
+
+        .sidebar-nav__category-icon {
+            transition: transform var(--transition-fast);
+            flex-shrink: 0;
+            color: var(--color-gray-600);
+        }
+
+        .sidebar-nav__category-toggle[aria-expanded="true"] .sidebar-nav__category-icon {
+            transform: rotate(90deg);
+        }
+
+        .sidebar-nav__submenu {
+            list-style: none;
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height var(--transition-smooth);
+            padding-left: var(--space-md);
+        }
+        
+        /* Checkbox hack for expanding submenus */
+        .submenu-toggle-checkbox {
+            display: none;
+        }
+
+        .submenu-toggle-checkbox:checked + .sidebar-nav__category-toggle + .sidebar-nav__submenu {
+             max-height: 500px;
+        }
+        .submenu-toggle-checkbox:checked + .sidebar-nav__category-toggle .sidebar-nav__category-icon {
+            transform: rotate(90deg);
+        }
+
+
+        /* --- Responsive Adaptations --- */
+        @media (min-width: 768px) {
+            .hamburger-menu {
+                display: none;
+            }
+
+            .sidebar-close-btn {
+                display: none;
+            }
+
+            .docs-layout {
+                display: grid;
+                grid-template-columns: var(--sidebar-width) 1fr;
+            }
+
+            .docs-sidebar {
+                position: sticky;
+                transform: translateX(0);
+                box-shadow: none;
+                height: 100vh;
+            }
+
+            .docs-main-content {
+                width: auto;
+            }
+
+            .sidebar-backdrop {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Checkbox hack for controlling mobile sidebar visibility -->
+    <input type="checkbox" id="sidebar-toggle-checkbox" />
+
+    <header class="showcase-header">
+        <label for="sidebar-toggle-checkbox" class="hamburger-menu" aria-label="Open documentation menu">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </label>
+        <h1>Documentation Site</h1>
+        <div></div>
+    </header>
+
+    <div class="docs-layout">
+        <aside class="docs-sidebar" role="dialog" aria-modal="true" aria-labelledby="sidebar-title">
+            <div class="sidebar-header">
+                <h2 id="sidebar-title" class="sidebar-header__title">Help & Docs</h2>
+                <label for="sidebar-toggle-checkbox" class="sidebar-close-btn" aria-label="Close documentation menu">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </label>
+            </div>
+            <div class="sidebar-content">
+                <nav aria-label="Documentation Navigation">
+                    <ul class="sidebar-nav__list">
+                        <li class="sidebar-nav__item">
+                            <a href="#" class="sidebar-nav__link">Introduction</a>
+                        </li>
+                        <li class="sidebar-nav__item">
+                            <input type="checkbox" class="submenu-toggle-checkbox" id="submenu-core-toggle" />
+                            <label for="submenu-core-toggle" class="sidebar-nav__category-toggle" aria-expanded="false" aria-controls="submenu-core">
+                                <span>Core Calculator</span>
+                                <svg class="sidebar-nav__category-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </label>
+                            <ul class="sidebar-nav__submenu" id="submenu-core">
+                                <li class="sidebar-nav__item"><a href="#" class="sidebar-nav__link">Arithmetic</a></li>
+                                <li class="sidebar-nav__item"><a href="#" class="sidebar-nav__link">Trigonometry</a></li>
+                            </ul>
+                        </li>
+                        <li class="sidebar-nav__item has-active-child">
+                            <input type="checkbox" class="submenu-toggle-checkbox" id="submenu-electronics-toggle" checked />
+                            <label for="submenu-electronics-toggle" class="sidebar-nav__category-toggle" aria-expanded="true" aria-controls="submenu-electronics">
+                                <span>Electronics</span>
+                                <svg class="sidebar-nav__category-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </label>
+                            <ul class="sidebar-nav__submenu" id="submenu-electronics">
+                                <li class="sidebar-nav__item"><a href="#" class="sidebar-nav__link">Ohm's Law</a></li>
+                                <li class="sidebar-nav__item"><a href="#" class="sidebar-nav__link is-active">555 Timer</a></li>
+                                <li class="sidebar-nav__item"><a href="#" class="sidebar-nav__link">Resistor Codes</a></li>
+                            </ul>
+                        </li>
+                        <li class="sidebar-nav__item">
+                            <a href="#" class="sidebar-nav__link">User Accounts</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="docs-main-content">
+            <h2>Main Content Area</h2>
+            <p>This is where the main documentation article content would go. On desktop screens, this area sits to the right of the persistent sidebar. On mobile screens, the sidebar is a drawer that overlays this content.</p>
+            <p>Try resizing your browser window to see the responsive behavior. Below 768px, the sidebar will disappear, and a hamburger menu will appear in the top header. Clicking it (or its label, in this demo) will open the sidebar drawer.</p>
+            
+            <div style="margin-top: 40px;">
+                <h3>Component Variations</h3>
+                <div>
+                    <h4>desktop-persistent</h4>
+                    <p>On viewports wider than 768px, the sidebar is always visible on the left, pushing the main content to the side. It remains in place as the user scrolls the content.</p>
+                </div>
+                <div style="margin-top: 20px;">
+                    <h4>mobile-drawer</h4>
+                    <p>On viewports narrower than 768px, the sidebar is hidden off-screen. It is revealed by interacting with a toggle button (hamburger menu) and slides in from the left, covering the main content with a backdrop.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Backdrop for mobile drawer -->
+    <label for="sidebar-toggle-checkbox" class="sidebar-backdrop" aria-label="Close menu"></label>
+
+</body>
+</html>

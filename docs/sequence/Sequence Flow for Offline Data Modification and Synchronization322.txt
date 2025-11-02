@@ -1,0 +1,1172 @@
+# 1 Overview
+
+## 1.1 Diagram Id
+
+SEQ-DF-001
+
+## 1.2 Name
+
+Offline Data Modification and Synchronization
+
+## 1.3 Description
+
+A logged-in user modifies their data (e.g., adds a calculation to history, saves a variable) while offline. The client queues these changes locally in IndexedDB. When network connectivity is restored, the client automatically syncs the queued changes with the backend, using a last-write-wins strategy for conflicting updates.
+
+## 1.4 Type
+
+🔹 DataFlow
+
+## 1.5 Purpose
+
+To provide a seamless user experience by allowing data modifications during periods of no connectivity and ensuring data consistency once reconnected, as per REQ-ENV-001.
+
+## 1.6 Complexity
+
+High
+
+## 1.7 Priority
+
+🔴 High
+
+## 1.8 Frequency
+
+OnDemand
+
+## 1.9 Participants
+
+- REPO-SPA-CLIENT
+- REPO-API-GATEWAY
+- REPO-APP-USER-DATA
+- REPO-DB-POSTGRES
+
+## 1.10 Key Interactions
+
+- Client SPA detects it is offline.
+- User performs an action that modifies data (e.g., saves a variable with a client-side timestamp).
+- The client-side service intercepts the API call and stores the modification request in an IndexedDB queue.
+- Client SPA detects network connectivity is restored.
+- The client-side sync manager processes the queue, sending each request to the User & Data Service.
+- For append-only data (history), items are added.
+- For mutable data (variables), the backend compares the incoming timestamp with the existing record's 'updatedAt' timestamp and applies a 'last-write-wins' strategy, with the server's state being authoritative in a conflict.
+- Upon successful sync, the item is removed from the local IndexedDB queue.
+
+## 1.11 Triggers
+
+- User modifies data while offline, and then later reconnects to the internet.
+
+## 1.12 Outcomes
+
+- User data created or modified offline is successfully persisted to the backend.
+- Data consistency is maintained between client and server.
+
+## 1.13 Business Rules
+
+- Append-only data (history) is merged.
+- Mutable data (variables, custom mode definitions) uses a 'last-write-wins' conflict resolution strategy based on server-authoritative timestamps.
+
+## 1.14 Error Scenarios
+
+- Sync fails for a specific item (e.g., validation error); the item is marked as failed in the queue for manual user intervention.
+- Backend is unavailable during sync attempt; client will retry later.
+
+## 1.15 Integration Points
+
+- Browser IndexedDB API.
+
+# 2.0 Details
+
+## 2.1 Diagram Id
+
+SEQ-DF-001
+
+## 2.2 Name
+
+Implementation: Offline Data Modification and Synchronization
+
+## 2.3 Description
+
+Technical sequence for a client application handling offline data modifications using IndexedDB for queuing. Upon network restoration, the client syncs queued changes to the backend, which employs a server-authoritative, timestamp-based, last-write-wins (LWW) conflict resolution strategy for mutable data.
+
+## 2.4 Participants
+
+### 2.4.1 Client
+
+#### 2.4.1.1 Repository Id
+
+REPO-SPA-CLIENT
+
+#### 2.4.1.2 Display Name
+
+Client SPA
+
+#### 2.4.1.3 Type
+
+🔹 Client
+
+#### 2.4.1.4 Technology
+
+React/TypeScript, IndexedDB
+
+#### 2.4.1.5 Order
+
+1
+
+#### 2.4.1.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #1E90FF |
+| Stereotype | UI/Offline Manager |
+
+### 2.4.2.0 APIGateway
+
+#### 2.4.2.1 Repository Id
+
+REPO-API-GATEWAY
+
+#### 2.4.2.2 Display Name
+
+API Gateway
+
+#### 2.4.2.3 Type
+
+🔹 APIGateway
+
+#### 2.4.2.4 Technology
+
+Amazon API Gateway
+
+#### 2.4.2.5 Order
+
+2
+
+#### 2.4.2.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | boundary |
+| Color | #FF4500 |
+| Stereotype | REST Endpoint |
+
+### 2.4.3.0 Microservice
+
+#### 2.4.3.1 Repository Id
+
+REPO-APP-USER-DATA
+
+#### 2.4.3.2 Display Name
+
+User & Data Service
+
+#### 2.4.3.3 Type
+
+🔹 Microservice
+
+#### 2.4.3.4 Technology
+
+NestJS/TypeORM
+
+#### 2.4.3.5 Order
+
+3
+
+#### 2.4.3.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | control |
+| Color | #32CD32 |
+| Stereotype | Business Logic |
+
+### 2.4.4.0 Database
+
+#### 2.4.4.1 Repository Id
+
+REPO-DB-POSTGRES
+
+#### 2.4.4.2 Display Name
+
+PostgreSQL DB
+
+#### 2.4.4.3 Type
+
+🔹 Database
+
+#### 2.4.4.4 Technology
+
+Amazon RDS for PostgreSQL
+
+#### 2.4.4.5 Order
+
+4
+
+#### 2.4.4.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | database |
+| Color | #9370DB |
+| Stereotype | Data Persistence |
+
+## 2.5.0.0 Interactions
+
+### 2.5.1.0 LocalInvocation
+
+#### 2.5.1.1 Source Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.1.2 Target Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.1.3 Message
+
+1. [Opt: Offline] User performs data modification (e.g., save variable 'myVar' = 123)
+
+#### 2.5.1.4 Sequence Number
+
+1
+
+#### 2.5.1.5 Type
+
+🔹 LocalInvocation
+
+#### 2.5.1.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.1.7 Return Message
+
+
+
+#### 2.5.1.8 Has Return
+
+❌ No
+
+#### 2.5.1.9 Is Activation
+
+✅ Yes
+
+#### 2.5.1.10 Technical Details
+
+##### 2.5.1.10.1 Protocol
+
+Browser Event
+
+##### 2.5.1.10.2 Method
+
+UI Event Handler
+
+##### 2.5.1.10.3 Parameters
+
+- {'name': 'variableData', 'type': 'object', 'schema': '{ name: string, value: any }'}
+
+##### 2.5.1.10.4 Authentication
+
+N/A (Local)
+
+##### 2.5.1.10.5 Error Handling
+
+Display UI error if input is invalid.
+
+##### 2.5.1.10.6 Performance
+
+UI response < 50ms.
+
+#### 2.5.1.11.0 Nested Interactions
+
+##### 2.5.1.11.1 InternalCheck
+
+###### 2.5.1.11.1.1 Source Id
+
+REPO-SPA-CLIENT
+
+###### 2.5.1.11.1.2 Target Id
+
+REPO-SPA-CLIENT
+
+###### 2.5.1.11.1.3 Message
+
+1.1. Intercept API call; detect offline status (`navigator.onLine === false`)
+
+###### 2.5.1.11.1.4 Sequence Number
+
+2
+
+###### 2.5.1.11.1.5 Type
+
+🔹 InternalCheck
+
+###### 2.5.1.11.1.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.1.11.1.7 Return Message
+
+isOffline: true
+
+###### 2.5.1.11.1.8 Has Return
+
+✅ Yes
+
+###### 2.5.1.11.1.9 Is Activation
+
+❌ No
+
+###### 2.5.1.11.1.10 Technical Details
+
+####### 2.5.1.11.1.10.1 Protocol
+
+Browser API
+
+####### 2.5.1.11.1.10.2 Method
+
+navigator.onLine
+
+####### 2.5.1.11.1.10.3 Parameters
+
+*No items available*
+
+####### 2.5.1.11.1.10.4 Authentication
+
+N/A
+
+####### 2.5.1.11.1.10.5 Error Handling
+
+Defaults to 'online' if API is unsupported.
+
+####### 2.5.1.11.1.10.6 Performance
+
+Immediate.
+
+##### 2.5.1.11.2.0.0 DatabaseWrite
+
+###### 2.5.1.11.2.1.0 Source Id
+
+REPO-SPA-CLIENT
+
+###### 2.5.1.11.2.2.0 Target Id
+
+REPO-SPA-CLIENT
+
+###### 2.5.1.11.2.3.0 Message
+
+1.2. Queue modification request in IndexedDB
+
+###### 2.5.1.11.2.4.0 Sequence Number
+
+3
+
+###### 2.5.1.11.2.5.0 Type
+
+🔹 DatabaseWrite
+
+###### 2.5.1.11.2.6.0 Is Synchronous
+
+❌ No
+
+###### 2.5.1.11.2.7.0 Return Message
+
+Promise<IDBValidKey>
+
+###### 2.5.1.11.2.8.0 Has Return
+
+✅ Yes
+
+###### 2.5.1.11.2.9.0 Is Activation
+
+❌ No
+
+###### 2.5.1.11.2.10.0 Technical Details
+
+####### 2.5.1.11.2.10.1 Protocol
+
+IndexedDB API
+
+####### 2.5.1.11.2.10.2 Method
+
+IDBObjectStore.put()
+
+####### 2.5.1.11.2.10.3 Parameters
+
+- {'name': 'queuedRequest', 'type': 'object', 'schema': "{ id: string, endpoint: string, method: string, payload: object, clientTimestamp: ISOString, status: 'pending' }"}
+
+####### 2.5.1.11.2.10.4 Authentication
+
+N/A
+
+####### 2.5.1.11.2.10.5 Error Handling
+
+Handle IndexedDB errors (e.g., quota exceeded) and notify user.
+
+####### 2.5.1.11.2.10.6 Performance
+
+Typically < 10ms.
+
+### 2.5.2.0.0.0.0 EventSubscription
+
+#### 2.5.2.1.0.0.0 Source Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.2.2.0.0.0 Target Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.2.3.0.0.0 Message
+
+2. [Loop: While Online & Queue Not Empty] Detect network restoration
+
+#### 2.5.2.4.0.0.0 Sequence Number
+
+4
+
+#### 2.5.2.5.0.0.0 Type
+
+🔹 EventSubscription
+
+#### 2.5.2.6.0.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.2.7.0.0.0 Return Message
+
+
+
+#### 2.5.2.8.0.0.0 Has Return
+
+❌ No
+
+#### 2.5.2.9.0.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.2.10.0.0.0 Technical Details
+
+##### 2.5.2.10.1.0.0 Protocol
+
+Browser API
+
+##### 2.5.2.10.2.0.0 Method
+
+window.addEventListener('online', ...)
+
+##### 2.5.2.10.3.0.0 Parameters
+
+*No items available*
+
+##### 2.5.2.10.4.0.0 Authentication
+
+N/A
+
+##### 2.5.2.10.5.0.0 Error Handling
+
+N/A
+
+##### 2.5.2.10.6.0.0 Performance
+
+Event-driven.
+
+### 2.5.3.0.0.0.0 DatabaseRead
+
+#### 2.5.3.1.0.0.0 Source Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.3.2.0.0.0 Target Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.3.3.0.0.0 Message
+
+2.1. Read next 'pending' request from IndexedDB queue
+
+#### 2.5.3.4.0.0.0 Sequence Number
+
+5
+
+#### 2.5.3.5.0.0.0 Type
+
+🔹 DatabaseRead
+
+#### 2.5.3.6.0.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.3.7.0.0.0 Return Message
+
+Promise<queuedRequest>
+
+#### 2.5.3.8.0.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.3.9.0.0.0 Is Activation
+
+❌ No
+
+#### 2.5.3.10.0.0.0 Technical Details
+
+##### 2.5.3.10.1.0.0 Protocol
+
+IndexedDB API
+
+##### 2.5.3.10.2.0.0 Method
+
+IDBObjectStore.get()
+
+##### 2.5.3.10.3.0.0 Parameters
+
+*No items available*
+
+##### 2.5.3.10.4.0.0 Authentication
+
+N/A
+
+##### 2.5.3.10.5.0.0 Error Handling
+
+Handle read errors.
+
+##### 2.5.3.10.6.0.0 Performance
+
+< 10ms.
+
+### 2.5.4.0.0.0.0 APICall
+
+#### 2.5.4.1.0.0.0 Source Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.4.2.0.0.0 Target Id
+
+REPO-API-GATEWAY
+
+#### 2.5.4.3.0.0.0 Message
+
+2.2. POST /api/v1/variables
+
+#### 2.5.4.4.0.0.0 Sequence Number
+
+6
+
+#### 2.5.4.5.0.0.0 Type
+
+🔹 APICall
+
+#### 2.5.4.6.0.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.4.7.0.0.0 Return Message
+
+200 OK or 409 Conflict
+
+#### 2.5.4.8.0.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.4.9.0.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.4.10.0.0.0 Technical Details
+
+##### 2.5.4.10.1.0.0 Protocol
+
+HTTPS/REST
+
+##### 2.5.4.10.2.0.0 Method
+
+POST (or PUT, based on queued request)
+
+##### 2.5.4.10.3.0.0 Parameters
+
+###### 2.5.4.10.3.1.0 object
+
+####### 2.5.4.10.3.1.1 Name
+
+body
+
+####### 2.5.4.10.3.1.2 Type
+
+🔹 object
+
+####### 2.5.4.10.3.1.3 Schema
+
+{ name: string, value: any, clientTimestamp: ISOString }
+
+###### 2.5.4.10.3.2.0 Header
+
+####### 2.5.4.10.3.2.1 Name
+
+Authorization
+
+####### 2.5.4.10.3.2.2 Type
+
+🔹 Header
+
+####### 2.5.4.10.3.2.3 Value
+
+Bearer <JWT>
+
+##### 2.5.4.10.4.0.0 Authentication
+
+JWT Bearer Token from Cognito
+
+##### 2.5.4.10.5.0.0 Error Handling
+
+Handle 4xx/5xx responses; retry on 5xx/network error.
+
+##### 2.5.4.10.6.0.0 Performance
+
+Must meet REQ-NFP-001 (<200ms P95).
+
+### 2.5.5.0.0.0.0 Proxy
+
+#### 2.5.5.1.0.0.0 Source Id
+
+REPO-API-GATEWAY
+
+#### 2.5.5.2.0.0.0 Target Id
+
+REPO-APP-USER-DATA
+
+#### 2.5.5.3.0.0.0 Message
+
+2.3. Forward request to User & Data Service
+
+#### 2.5.5.4.0.0.0 Sequence Number
+
+7
+
+#### 2.5.5.5.0.0.0 Type
+
+🔹 Proxy
+
+#### 2.5.5.6.0.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.5.7.0.0.0 Return Message
+
+Service response
+
+#### 2.5.5.8.0.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.5.9.0.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.5.10.0.0.0 Technical Details
+
+##### 2.5.5.10.1.0.0 Protocol
+
+HTTPS
+
+##### 2.5.5.10.2.0.0 Method
+
+POST
+
+##### 2.5.5.10.3.0.0 Parameters
+
+- {'name': 'X-Correlation-ID', 'type': 'Header', 'value': 'Generated UUID'}
+
+##### 2.5.5.10.4.0.0 Authentication
+
+Valid JWT is passed through
+
+##### 2.5.5.10.5.0.0 Error Handling
+
+Returns 5xx if upstream service is unavailable.
+
+##### 2.5.5.10.6.0.0 Performance
+
+Adds < 5ms latency.
+
+### 2.5.6.0.0.0.0 DatabaseQuery
+
+#### 2.5.6.1.0.0.0 Source Id
+
+REPO-APP-USER-DATA
+
+#### 2.5.6.2.0.0.0 Target Id
+
+REPO-DB-POSTGRES
+
+#### 2.5.6.3.0.0.0 Message
+
+2.4. [Alt: Conflict Resolution] BEGIN TRANSACTION; SELECT FOR UPDATE
+
+#### 2.5.6.4.0.0.0 Sequence Number
+
+8
+
+#### 2.5.6.5.0.0.0 Type
+
+🔹 DatabaseQuery
+
+#### 2.5.6.6.0.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.6.7.0.0.0 Return Message
+
+Existing record or NULL
+
+#### 2.5.6.8.0.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.6.9.0.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.6.10.0.0.0 Technical Details
+
+##### 2.5.6.10.1.0.0 Protocol
+
+SQL
+
+##### 2.5.6.10.2.0.0 Method
+
+```sql
+SELECT ... FROM user_variables WHERE user_id = $1 AND name = $2 FOR UPDATE
+```
+
+##### 2.5.6.10.3.0.0 Parameters
+
+###### 2.5.6.10.3.1.0 UUID
+
+####### 2.5.6.10.3.1.1 Name
+
+$1
+
+####### 2.5.6.10.3.1.2 Type
+
+🔹 UUID
+
+####### 2.5.6.10.3.1.3 Description
+
+User ID from JWT
+
+###### 2.5.6.10.3.2.0 string
+
+####### 2.5.6.10.3.2.1 Name
+
+$2
+
+####### 2.5.6.10.3.2.2 Type
+
+🔹 string
+
+####### 2.5.6.10.3.2.3 Description
+
+Variable name from payload
+
+##### 2.5.6.10.4.0.0 Authentication
+
+DB credentials from Secrets Manager.
+
+##### 2.5.6.10.5.0.0 Error Handling
+
+Transaction will be rolled back on failure.
+
+##### 2.5.6.10.6.0.0 Performance
+
+Requires index on (user_id, name). Sets a row-level lock to prevent race conditions.
+
+#### 2.5.6.11.0.0.0 Nested Interactions
+
+##### 2.5.6.11.1.0.0 BusinessRuleValidation
+
+###### 2.5.6.11.1.1.0 Source Id
+
+REPO-APP-USER-DATA
+
+###### 2.5.6.11.1.2.0 Target Id
+
+REPO-APP-USER-DATA
+
+###### 2.5.6.11.1.3.0 Message
+
+2.4.1. [If record exists AND clientTimestamp <= record.updatedAt] Conflict detected, server state wins
+
+###### 2.5.6.11.1.4.0 Sequence Number
+
+9
+
+###### 2.5.6.11.1.5.0 Type
+
+🔹 BusinessRuleValidation
+
+###### 2.5.6.11.1.6.0 Is Synchronous
+
+✅ Yes
+
+###### 2.5.6.11.1.7.0 Return Message
+
+Abort update, return 409 Conflict
+
+###### 2.5.6.11.1.8.0 Has Return
+
+✅ Yes
+
+###### 2.5.6.11.1.9.0 Is Activation
+
+❌ No
+
+###### 2.5.6.11.1.10.0 Technical Details
+
+####### 2.5.6.11.1.10.1 Protocol
+
+Internal Logic
+
+####### 2.5.6.11.1.10.2 Method
+
+Timestamp Comparison
+
+####### 2.5.6.11.1.10.3 Parameters
+
+*No items available*
+
+####### 2.5.6.11.1.10.4 Authentication
+
+N/A
+
+####### 2.5.6.11.1.10.5 Error Handling
+
+Logs the conflict for observability.
+
+####### 2.5.6.11.1.10.6 Performance
+
+Immediate.
+
+##### 2.5.6.11.2.0.0 DatabaseWrite
+
+###### 2.5.6.11.2.1.0 Source Id
+
+REPO-APP-USER-DATA
+
+###### 2.5.6.11.2.2.0 Target Id
+
+REPO-DB-POSTGRES
+
+###### 2.5.6.11.2.3.0 Message
+
+2.4.2. [Else] INSERT or UPDATE record
+
+###### 2.5.6.11.2.4.0 Sequence Number
+
+10
+
+###### 2.5.6.11.2.5.0 Type
+
+🔹 DatabaseWrite
+
+###### 2.5.6.11.2.6.0 Is Synchronous
+
+✅ Yes
+
+###### 2.5.6.11.2.7.0 Return Message
+
+Write result
+
+###### 2.5.6.11.2.8.0 Has Return
+
+✅ Yes
+
+###### 2.5.6.11.2.9.0 Is Activation
+
+❌ No
+
+###### 2.5.6.11.2.10.0 Technical Details
+
+####### 2.5.6.11.2.10.1 Protocol
+
+SQL
+
+####### 2.5.6.11.2.10.2 Method
+
+```sql
+INSERT INTO user_variables (...) VALUES (...) ON CONFLICT (user_id, name) DO UPDATE SET value = $3, updatedAt = CURRENT_TIMESTAMP
+```
+
+####### 2.5.6.11.2.10.3 Parameters
+
+*No items available*
+
+####### 2.5.6.11.2.10.4 Authentication
+
+N/A
+
+####### 2.5.6.11.2.10.5 Error Handling
+
+Database constraints (e.g., unique key) enforced.
+
+####### 2.5.6.11.2.10.6 Performance
+
+Utilizes ON CONFLICT for an efficient upsert operation.
+
+##### 2.5.6.11.3.0.0 DatabaseTransaction
+
+###### 2.5.6.11.3.1.0 Source Id
+
+REPO-APP-USER-DATA
+
+###### 2.5.6.11.3.2.0 Target Id
+
+REPO-DB-POSTGRES
+
+###### 2.5.6.11.3.3.0 Message
+
+2.4.3. COMMIT TRANSACTION
+
+###### 2.5.6.11.3.4.0 Sequence Number
+
+11
+
+###### 2.5.6.11.3.5.0 Type
+
+🔹 DatabaseTransaction
+
+###### 2.5.6.11.3.6.0 Is Synchronous
+
+✅ Yes
+
+###### 2.5.6.11.3.7.0 Return Message
+
+Commit success
+
+###### 2.5.6.11.3.8.0 Has Return
+
+✅ Yes
+
+###### 2.5.6.11.3.9.0 Is Activation
+
+❌ No
+
+###### 2.5.6.11.3.10.0 Technical Details
+
+####### 2.5.6.11.3.10.1 Protocol
+
+SQL
+
+####### 2.5.6.11.3.10.2 Method
+
+COMMIT
+
+####### 2.5.6.11.3.10.3 Parameters
+
+*No items available*
+
+####### 2.5.6.11.3.10.4 Authentication
+
+N/A
+
+####### 2.5.6.11.3.10.5 Error Handling
+
+N/A
+
+####### 2.5.6.11.3.10.6 Performance
+
+Releases database locks.
+
+### 2.5.7.0.0.0.0 DatabaseWrite
+
+#### 2.5.7.1.0.0.0 Source Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.7.2.0.0.0 Target Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.7.3.0.0.0 Message
+
+2.5. [If sync success] Remove request from IndexedDB queue
+
+#### 2.5.7.4.0.0.0 Sequence Number
+
+12
+
+#### 2.5.7.5.0.0.0 Type
+
+🔹 DatabaseWrite
+
+#### 2.5.7.6.0.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.7.7.0.0.0 Return Message
+
+Promise<void>
+
+#### 2.5.7.8.0.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.7.9.0.0.0 Is Activation
+
+❌ No
+
+#### 2.5.7.10.0.0.0 Technical Details
+
+##### 2.5.7.10.1.0.0 Protocol
+
+IndexedDB API
+
+##### 2.5.7.10.2.0.0 Method
+
+IDBObjectStore.delete()
+
+##### 2.5.7.10.3.0.0 Parameters
+
+- {'name': 'id', 'type': 'string', 'description': 'ID of the queued request'}
+
+##### 2.5.7.10.4.0.0 Authentication
+
+N/A
+
+##### 2.5.7.10.5.0.0 Error Handling
+
+Log error if delete fails.
+
+##### 2.5.7.10.6.0.0 Performance
+
+< 10ms.
+
+### 2.5.8.0.0.0.0 DatabaseWrite
+
+#### 2.5.8.1.0.0.0 Source Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.8.2.0.0.0 Target Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.8.3.0.0.0 Message
+
+2.6. [Else if sync failure (4xx)] Mark request as 'failed' in IndexedDB
+
+#### 2.5.8.4.0.0.0 Sequence Number
+
+13
+
+#### 2.5.8.5.0.0.0 Type
+
+🔹 DatabaseWrite
+
+#### 2.5.8.6.0.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.8.7.0.0.0 Return Message
+
+Promise<IDBValidKey>
+
+#### 2.5.8.8.0.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.8.9.0.0.0 Is Activation
+
+❌ No
+
+#### 2.5.8.10.0.0.0 Technical Details
+
+##### 2.5.8.10.1.0.0 Protocol
+
+IndexedDB API
+
+##### 2.5.8.10.2.0.0 Method
+
+IDBObjectStore.put()
+
+##### 2.5.8.10.3.0.0 Parameters
+
+- {'name': 'queuedRequest', 'type': 'object', 'schema': "{ ... status: 'failed', error: '...' }"}
+
+##### 2.5.8.10.4.0.0 Authentication
+
+N/A
+
+##### 2.5.8.10.5.0.0 Error Handling
+
+N/A
+
+##### 2.5.8.10.6.0.0 Performance
+
+< 10ms.
+
+## 2.6.0.0.0.0.0 Notes
+
+### 2.6.1.0.0.0.0 Content
+
+#### 2.6.1.1.0.0.0 Content
+
+Offline detection relies on the browser's `navigator.onLine` API, which indicates connection to a network, not necessarily the internet. The sync process must handle server unavailability gracefully.
+
+#### 2.6.1.2.0.0.0 Position
+
+Top
+
+#### 2.6.1.3.0.0.0 Participant Id
+
+REPO-SPA-CLIENT
+
+#### 2.6.1.4.0.0.0 Sequence Number
+
+2
+
+### 2.6.2.0.0.0.0 Content
+
+#### 2.6.2.1.0.0.0 Content
+
+The 'last-write-wins' (LWW) logic is implemented by comparing the client's modification timestamp with the server's 'updatedAt' timestamp. A pessimistic lock (`SELECT FOR UPDATE`) is used within a transaction to prevent race conditions during the read-compare-write cycle.
+
+#### 2.6.2.2.0.0.0 Position
+
+Right
+
+#### 2.6.2.3.0.0.0 Participant Id
+
+REPO-APP-USER-DATA
+
+#### 2.6.2.4.0.0.0 Sequence Number
+
+8
+
+### 2.6.3.0.0.0.0 Content
+
+#### 2.6.3.1.0.0.0 Content
+
+Append-only data like 'calculation_history' does not require LWW logic and can be handled with a simple INSERT, making its synchronization flow simpler than the one shown for mutable data.
+
+#### 2.6.3.2.0.0.0 Position
+
+Bottom
+
+#### 2.6.3.3.0.0.0 Participant Id
+
+*Not specified*
+
+#### 2.6.3.4.0.0.0 Sequence Number
+
+*Not specified*
+
+## 2.7.0.0.0.0.0 Implementation Guidance
+
+| Property | Value |
+|----------|-------|
+| Security Requirements | The API endpoint for synchronization must be prote... |
+| Performance Targets | The database query for conflict resolution must us... |
+| Error Handling Strategy | Client-Side: For 5xx server errors or network fail... |
+| Testing Considerations | E2E tests should use tools like Cypress to mock th... |
+| Monitoring Requirements | The User & Data Service should log LWW conflict ev... |
+| Deployment Considerations | The client-side database schema in IndexedDB must ... |
+

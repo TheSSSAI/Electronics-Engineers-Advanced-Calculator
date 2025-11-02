@@ -1,0 +1,2 @@
+"total_stories","total_story_points","must_have_stories","should_have_stories","could_have_stories","epics_identified","estimated_sprints","key_dependencies"
+"10","60","7","3","0","[""Core Calculator & UI Framework"",""User Account & Data Persistence"",""Advanced Electronics Modes"",""User-Extensible Functionality (Custom Modes)""]","3","[""AWS Cognito Setup"",""Core UI Layout before feature integration"",""Secure Lambda for Custom Mode execution""]"

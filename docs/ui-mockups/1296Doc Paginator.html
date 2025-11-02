@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Molecular Component: Doc Paginator</title>
+  <style>
+    /* --- CSS Reset and Basic Setup --- */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* --- Design System Tokens --- */
+    :root {
+      /* Colors */
+      --color-white: #ffffff;
+      --color-gray-50: #f8f9fa;
+      --color-gray-200: #e9ecef;
+      --color-gray-600: #868e96;
+      --color-gray-800: #343a40;
+      --color-black: #1a1a1a;
+      --color-link: #0066cc;
+      --color-focus-ring: #0066cc80;
+
+      /* Typography */
+      --font-family-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+      --font-size-base: 1rem;
+      --font-size-sm: 0.875rem;
+      --line-height-base: 1.6;
+
+      /* Spacing */
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      --space-xl: 2rem;
+      --space-xxl: 3rem;
+
+      /* Borders & Shadows */
+      --border-radius-md: 6px;
+    }
+
+    /* --- Showcase Page Styles --- */
+    body {
+      font-family: var(--font-family-sans);
+      background-color: var(--color-white);
+      color: var(--color-gray-800);
+      line-height: var(--line-height-base);
+      padding: var(--space-xl);
+    }
+
+    .showcase__header {
+      margin-bottom: var(--space-xxl);
+      border-bottom: 1px solid var(--color-gray-200);
+      padding-bottom: var(--space-lg);
+    }
+
+    .showcase__header h1 {
+      font-size: 2.5rem;
+      color: var(--color-black);
+    }
+
+    .variant-section {
+      margin-bottom: var(--space-xxl);
+    }
+
+    .variant-section > h2 {
+      font-size: 1.75rem;
+      color: var(--color-black);
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-sm);
+      border-bottom: 1px solid var(--color-gray-200);
+    }
+    
+    .variant-section > p {
+        color: var(--color-gray-600);
+        margin-bottom: var(--space-lg);
+        max-width: 70ch;
+    }
+
+    /* --- Component: Doc Paginator --- */
+    .doc-paginator {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: var(--space-md);
+      margin-top: var(--space-xl);
+      list-style: none;
+      padding: 0;
+    }
+
+    .doc-paginator__item {
+      flex: 1 1 0;
+      min-width: 200px; /* Prevents excessive shrinking */
+    }
+
+    .doc-paginator__item--next {
+      text-align: right;
+    }
+
+    .doc-paginator__link {
+      display: inline-block;
+      width: 100%;
+      padding: var(--space-md) var(--space-lg);
+      border: 1px solid var(--color-gray-200);
+      border-radius: var(--border-radius-md);
+      text-decoration: none;
+      color: var(--color-gray-800);
+      transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+      height: 100%;
+    }
+
+    .doc-paginator__link:hover {
+      border-color: var(--color-link);
+      background-color: var(--color-gray-50);
+      transform: translateY(-2px);
+    }
+
+    .doc-paginator__link:focus-visible {
+      outline: 2px solid var(--color-focus-ring);
+      outline-offset: 2px;
+      border-color: var(--color-link);
+    }
+
+    .doc-paginator__label {
+      display: block;
+      font-size: var(--font-size-sm);
+      color: var(--color-gray-600);
+      margin-bottom: var(--space-xs);
+    }
+
+    .doc-paginator__item--prev .doc-paginator__label::before {
+      content: '← ';
+      margin-right: var(--space-xs);
+    }
+
+    .doc-paginator__item--next .doc-paginator__label::after {
+      content: ' →';
+      margin-left: var(--space-xs);
+    }
+
+    .doc-paginator__title {
+      display: block;
+      font-weight: 600;
+      color: var(--color-link);
+      line-height: 1.4;
+    }
+
+    /* Responsive Adaptations */
+    @media (max-width: 640px) {
+      .doc-paginator {
+        flex-direction: column;
+      }
+      .doc-paginator__item {
+        width: 100%;
+      }
+      .doc-paginator__item--next {
+        text-align: left; /* Stack items are left-aligned */
+      }
+    }
+
+    /* Accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      .doc-paginator__link {
+        transition: none;
+      }
+      .doc-paginator__link:hover {
+        transform: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <main class="showcase">
+    <header class="showcase__header">
+      <h1>Molecular Component: Doc Paginator</h1>
+    </header>
+
+    <div class="variant-section">
+        <h2>Both Links (Default)</h2>
+        <p>This is the standard implementation, used when an article has both a preceding and a succeeding article in the sequence.</p>
+        <nav aria-label="Documentation pages">
+            <ul class="doc-paginator">
+                <li class="doc-paginator__item doc-paginator__item--prev">
+                    <a href="#" class="doc-paginator__link" rel="prev">
+                        <span class="doc-paginator__label">Previous</span>
+                        <span class="doc-paginator__title">Getting Started with the Calculator</span>
+                    </a>
+                </li>
+                <li class="doc-paginator__item doc-paginator__item--next">
+                    <a href="#" class="doc-paginator__link" rel="next">
+                        <span class="doc-paginator__label">Next</span>
+                        <span class="doc-paginator__title">Advanced: Creating Custom Modes</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <div class="variant-section">
+        <h2>Next Link Only</h2>
+        <p>Used on the first page of a documentation series, where there is no previous article to link to.</p>
+        <nav aria-label="Documentation pages">
+            <ul class="doc-paginator">
+                <!-- No previous item -->
+                <li class="doc-paginator__item doc-paginator__item--next">
+                    <a href="#" class="doc-paginator__link" rel="next">
+                        <span class="doc-paginator__label">Next</span>
+                        <span class="doc-paginator__title">Configuring Your Account</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    
+    <div class="variant-section">
+        <h2>Previous Link Only</h2>
+        <p>Used on the last page of a documentation series, where there is no next article to link to.</p>
+        <nav aria-label="Documentation pages">
+            <ul class="doc-paginator">
+                <li class="doc-paginator__item doc-paginator__item--prev">
+                    <a href="#" class="doc-paginator__link" rel="prev">
+                        <span class="doc-paginator__label">Previous</span>
+                        <span class="doc-paginator__title">Sharing Your Custom Modes</span>
+                    </a>
+                </li>
+                <!-- No next item -->
+            </ul>
+        </nav>
+    </div>
+
+  </main>
+</body>
+</html>

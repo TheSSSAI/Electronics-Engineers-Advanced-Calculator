@@ -1,0 +1,63 @@
+sequenceDiagram
+    actor ClientSPA as "Client: React SPA"
+    participant IndexedDB as "Local Queue (IndexedDB)"
+    participant Backend as "API Gateway / Backend"
+
+    box rgb(255, 245, 245) Initialization Failure on Load
+        ClientSPA->>Backend: 1. GET /api/v1/user-data (e.g., history, variables)
+        activate Backend
+        Backend-->>ClientSPA: 2. HTTP 503 Service Unavailable
+        deactivate Backend
+        activate ClientSPA
+        ClientSPA->>ClientSPA: 3. Catch API error
+        ClientSPA->>ClientSPA: 4. Display non-blocking notification: "Could not load saved data."
+        deactivate ClientSPA
+    end
+
+    note over ClientSPA, Backend: ... Sometime later, user makes changes while offline ...
+
+    box rgb(245, 245, 255) Synchronization Failure on Reconnection
+        activate ClientSPA
+        ClientSPA->>ClientSPA: 5. Detects network is back online & queue has items
+        ClientSPA->>IndexedDB: 6. Read next pending change from queue
+        activate IndexedDB
+        IndexedDB-->>ClientSPA: 7. Return change data
+        deactivate IndexedDB
+
+        ClientSPA->>Backend: 8. POST /api/v1/sync with change data
+        activate Backend
+        Backend-->>ClientSPA: 9. HTTP 500 Internal Server Error
+        deactivate Backend
+
+        ClientSPA->>ClientSPA: 10. Catch sync error
+        ClientSPA->>ClientSPA: 11. Display notification: "Sync failed. Will retry..."
+        note right of ClientSPA: Retain item in IndexedDB queue.
+        ClientSPA->>ClientSPA: 12. Schedule retry with exponential backoff (e.g., wait 2s)
+
+        note over ClientSPA, Backend: ... After 2-second delay ...
+
+        ClientSPA->>IndexedDB: 13. Re-read pending change from queue
+        activate IndexedDB
+        IndexedDB-->>ClientSPA: 14. Return change data
+        deactivate IndexedDB
+
+        ClientSPA->>Backend: 15. RETRY: POST /api/v1/sync with change data
+        activate Backend
+        
+        alt On Retry Success
+            Backend-->>ClientSPA: 16a. HTTP 200 OK
+            deactivate Backend
+            ClientSPA->>IndexedDB: 17a. Remove successfully synced item from queue
+            activate IndexedDB
+            IndexedDB-->>ClientSPA: 18a. Acknowledge removal
+            deactivate IndexedDB
+            ClientSPA->>ClientSPA: 19a. Update notification: "All changes saved."
+        else On Retry Failure
+            Backend-->>ClientSPA: 16b. HTTP 500 Internal Server Error
+            deactivate Backend
+            ClientSPA->>ClientSPA: 17b. Display notification: "Sync failed again..."
+            note right of ClientSPA: Retain item in queue.
+            ClientSPA->>ClientSPA: 18b. Schedule next retry with longer backoff (e.g., wait 4s)
+        end
+        deactivate ClientSPA
+    end

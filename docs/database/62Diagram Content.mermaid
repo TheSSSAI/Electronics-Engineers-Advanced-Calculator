@@ -1,0 +1,20 @@
+erDiagram
+    User {
+        Guid userId PK
+    }
+    CustomMode {
+        Guid customModeId PK
+        Guid userId FK
+    }
+    UserVariable {
+        Guid userVariableId PK
+        Guid userId FK
+    }
+    CalculationHistory {
+        Guid calculationHistoryId PK
+        Guid userId FK
+    }
+
+    User ||--o{ CustomMode : has
+    User ||--o{ UserVariable : defines
+    User ||--o{ CalculationHistory : logs

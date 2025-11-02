@@ -1,0 +1,52 @@
+name: Publish Package
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish-npm:
+    name: Publish to NPM Registry
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'skip-ci')"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+      
+      - name: Get package version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@v1.3.1
+
+      - name: Check if package version is already published
+        id: check-version
+        uses: PostHog/check-if-npm-package-version-is-published-action@v2
+        with:
+          package-name: '@calculator/shared-api-contracts'
+          package-version: ${{ steps.package-version.outputs.current-version }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Install dependencies and build
+        if: steps.check-version.outputs.is-published == 'false'
+        run: |
+          npm ci
+          npm run build
+
+      - name: Publish to NPM
+        if: steps.check-version.outputs.is-published == 'false'
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      - name: Print Skip Message
+        if: steps.check-version.outputs.is-published == 'true'
+        run: echo "Version ${{ steps.package-version.outputs.current-version }} is already published. Skipping."

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ohm's Law & Power Calculator</title>
+  <style>
+    /* CSS Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Design System Tokens (CSS Custom Properties) */
+    :root {
+      /* Typography */
+      --font-primary: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      --font-monospace: 'Roboto Mono', 'Fira Code', 'Courier New', monospace;
+      --font-size-body: 16px;
+      --font-size-caption: 14px;
+      --font-size-h3: 28px;
+      --font-weight-regular: 400;
+      --font-weight-medium: 500;
+      --font-weight-bold: 600;
+
+      /* Color Palette */
+      --color-primary-500: #2196F3;
+      --color-primary-700: #1976D2;
+      --color-neutrals-white: #FFFFFF;
+      --color-neutrals-gray-50: #F8F9FA;
+      --color-neutrals-gray-100: #F1F3F5;
+      --color-neutrals-gray-400: #CED4DA;
+      --color-neutrals-gray-500: #ADB5BD;
+      --color-neutrals-gray-700: #495057;
+      --color-neutrals-gray-800: #343A40;
+      --color-neutrals-gray-900: #212529;
+      --color-semantic-error: #D32F2F;
+      --color-semantic-info: #0288D1;
+
+      /* Spacing System */
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+
+      /* Borders & Shadows */
+      --border-radius-main: 8px;
+      --shadow-main: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    }
+    
+    /* Base Styles */
+    body {
+      font-family: var(--font-primary);
+      font-size: var(--font-size-body);
+      line-height: 1.6;
+      background-color: var(--color-neutrals-gray-100);
+      color: var(--color-neutrals-gray-900);
+      padding: var(--spacing-md);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-xl);
+    }
+
+    /* Screen Layout */
+    .screen-container {
+      width: 100%;
+      max-width: 600px;
+      background-color: var(--color-neutrals-white);
+      border-radius: var(--border-radius-main);
+      box-shadow: var(--shadow-main);
+      padding: var(--spacing-lg);
+    }
+
+    .screen-header {
+      margin-bottom: var(--spacing-lg);
+      padding-bottom: var(--spacing-md);
+      border-bottom: 1px solid var(--color-neutrals-gray-400);
+    }
+
+    .screen-header h1 {
+      font-size: var(--font-size-h3);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-neutrals-gray-900);
+      text-align: center;
+    }
+
+    .screen-content {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-lg);
+    }
+    
+    /* Ohm's Law Calculator Component Styles */
+    .ohms-law-form {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-lg);
+    }
+    
+    .input-grid {
+      display: grid;
+      grid-template-columns: 1fr; /* Mobile-first: single column */
+      gap: var(--spacing-lg);
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+    }
+
+    .input-group label {
+      font-weight: var(--font-weight-medium);
+      color: var(--color-neutrals-gray-700);
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+    
+    .input-wrapper input {
+      width: 100%;
+      padding: 12px 48px 12px 16px;
+      font-family: var(--font-monospace);
+      font-size: 1.1rem;
+      border: 1px solid var(--color-neutrals-gray-400);
+      border-radius: var(--border-radius-main);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    
+    .input-wrapper input:focus {
+      outline: none;
+      border-color: var(--color-primary-500);
+      box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+    }
+
+    .input-unit {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--color-neutrals-gray-500);
+      font-weight: var(--font-weight-bold);
+    }
+
+    .guidance-message {
+      padding: var(--spacing-md);
+      background-color: var(--color-semantic-info);
+      color: var(--color-neutrals-white);
+      border-radius: var(--border-radius-main);
+      text-align: center;
+      font-weight: var(--font-weight-medium);
+    }
+    .guidance-message--hidden {
+      display: none;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      padding: 10px 22px;
+      border: none;
+      border-radius: var(--border-radius-main);
+      font-weight: var(--font-weight-bold);
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+    .btn--secondary {
+      background-color: var(--color-neutrals-gray-100);
+      color: var(--color-neutrals-gray-800);
+      border: 1px solid var(--color-neutrals-gray-400);
+    }
+    .btn--secondary:hover {
+      background-color: var(--color-neutrals-gray-400);
+    }
+
+    /* Component States */
+    .input-group--error .input-wrapper input {
+      border-color: var(--color-semantic-error);
+      border-width: 2px;
+      padding: 11px 47px 11px 15px; /* Adjust padding for border */
+    }
+    .input-group--error .input-wrapper input:focus {
+       box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.2);
+    }
+
+    .error-message {
+      color: var(--color-semantic-error);
+      font-size: var(--font-size-caption);
+      font-weight: var(--font-weight-medium);
+    }
+    
+    .input--calculated {
+      background-color: var(--color-neutrals-gray-50);
+      color: var(--color-neutrals-gray-800);
+      font-weight: var(--font-weight-bold);
+      border-style: dashed;
+    }
+    .input--calculated:focus {
+      border-color: var(--color-primary-500);
+      box-shadow: none;
+    }
+    
+    /* Screen Variations Styling */
+    .screen-variations {
+      width: 100%;
+      max-width: 600px;
+      margin-top: var(--spacing-xl);
+    }
+    .screen-variations h2 {
+      text-align: center;
+      margin-bottom: var(--spacing-lg);
+      color: var(--color-neutrals-gray-800);
+    }
+    .variation-group {
+      margin-bottom: var(--spacing-xl);
+      padding: var(--spacing-lg);
+      border: 2px dashed var(--color-neutrals-gray-400);
+      border-radius: var(--border-radius-main);
+    }
+    .variation-group h3 {
+      margin-bottom: var(--spacing-md);
+      font-weight: var(--font-weight-bold);
+    }
+    .variation-group .description {
+        font-size: var(--font-size-caption);
+        color: var(--color-neutrals-gray-700);
+        margin-bottom: var(--spacing-lg);
+        font-style: italic;
+    }
+
+    /* Responsive adjustments for tablet and desktop */
+    @media (min-width: 768px) {
+      .input-grid {
+        grid-template-columns: 1fr 1fr; /* 2x2 grid on larger screens */
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="screen-container">
+    <header class="screen-header">
+      <h1>Ohm's Law & Power</h1>
+    </header>
+    
+    <main class="screen-content">
+      <form class="ohms-law-form" onsubmit="event.preventDefault();">
+        <div id="guidance-default" class="guidance-message">
+          Enter any two values to calculate.
+        </div>
+
+        <div class="input-grid">
+          <div class="input-group">
+            <label for="voltage-default">Voltage (V)</label>
+            <div class="input-wrapper">
+              <input type="text" id="voltage-default" placeholder="e.g., 12V">
+              <span class="input-unit">V</span>
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="current-default">Current (I)</label>
+            <div class="input-wrapper">
+              <input type="text" id="current-default" placeholder="e.g., 500mA">
+              <span class="input-unit">A</span>
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="resistance-default">Resistance (R)</label>
+            <div class="input-wrapper">
+              <input type="text" id="resistance-default" placeholder="e.g., 1kΩ">
+              <span class="input-unit">Ω</span>
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="power-default">Power (P)</label>
+            <div class="input-wrapper">
+              <input type="text" id="power-default" placeholder="e.g., 1W">
+              <span class="input-unit">W</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="actions">
+          <button type="reset" class="btn btn--secondary">Reset</button>
+        </div>
+      </form>
+    </main>
+  </div>
+  
+  <!-- Screen Variations Section -->
+  <div class="screen-variations">
+    <h2>Screen Variations</h2>
+    
+    <div class="variation-group">
+      <h3>Variant Name: "Default / Insufficient Input"</h3>
+      <p class="description">This is the initial state or when fewer than two values are provided. A guidance message is visible.</p>
+      
+      <form class="ohms-law-form" onsubmit="event.preventDefault();">
+        <div class="guidance-message">
+          Enter any two values to calculate.
+        </div>
+        <div class="input-grid">
+          <div class="input-group">
+            <label for="voltage-insufficient">Voltage (V)</label>
+            <div class="input-wrapper">
+              <input type="text" id="voltage-insufficient" value="12">
+              <span class="input-unit">V</span>
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="current-insufficient">Current (I)</label>
+            <div class="input-wrapper"><input type="text" id="current-insufficient" placeholder="e.g., 500mA"><span class="input-unit">A</span></div>
+          </div>
+          <div class="input-group">
+            <label for="resistance-insufficient">Resistance (R)</label>
+            <div class="input-wrapper"><input type="text" id="resistance-insufficient" placeholder="e.g., 1kΩ"><span class="input-unit">Ω</span></div>
+          </div>
+          <div class="input-group">
+            <label for="power-insufficient">Power (P)</label>
+            <div class="input-wrapper"><input type="text" id="power-insufficient" placeholder="e.g., 1W"><span class="input-unit">W</span></div>
+          </div>
+        </div>
+      </form>
+    </div>
+    
+    <div class="variation-group">
+      <h3>Variant Name: "Calculated State"</h3>
+      <p class="description">After two valid values are entered, the remaining two are calculated and displayed in visually distinct, read-only fields. The guidance message is hidden.</p>
+      
+      <form class="ohms-law-form" onsubmit="event.preventDefault();">
+        <div class="guidance-message guidance-message--hidden">
+            Enter any two values to calculate.
+        </div>
+        <div class="input-grid">
+          <div class="input-group">
+            <label for="voltage-calculated">Voltage (V)</label>
+            <div class="input-wrapper">
+              <input type="text" id="voltage-calculated" value="5">
+              <span class="input-unit">V</span>
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="current-calculated">Current (I)</label>
+            <div class="input-wrapper"><input type="text" id="current-calculated" value="5mA" class="input--calculated" readonly><span class="input-unit">A</span></div>
+          </div>
+          <div class="input-group">
+            <label for="resistance-calculated">Resistance (R)</label>
+            <div class="input-wrapper">
+              <input type="text" id="resistance-calculated" value="1k">
+              <span class="input-unit">Ω</span>
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="power-calculated">Power (P)</label>
+            <div class="input-wrapper"><input type="text" id="power-calculated" value="25mW" class="input--calculated" readonly><span class="input-unit">W</span></div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="variation-group">
+        <h3>Variant Name: "Error State"</h3>
+        <p class="description">When a user enters a physically impossible value (e.g., negative resistance), the field is highlighted and a specific error message is shown.</p>
+        
+        <form class="ohms-law-form" onsubmit="event.preventDefault();">
+          <div class="guidance-message">
+            Enter any two values to calculate.
+          </div>
+          <div class="input-grid">
+            <div class="input-group">
+              <label for="voltage-error">Voltage (V)</label>
+              <div class="input-wrapper">
+                <input type="text" id="voltage-error" value="12">
+                <span class="input-unit">V</span>
+              </div>
+            </div>
+            <div class="input-group">
+              <label for="current-error">Current (I)</label>
+              <div class="input-wrapper"><input type="text" id="current-error"><span class="input-unit">A</span></div>
+            </div>
+            <div class="input-group input-group--error">
+              <label for="resistance-error">Resistance (R)</label>
+              <div class="input-wrapper">
+                <input type="text" id="resistance-error" value="-100" aria-describedby="resistance-error-msg">
+                <span class="input-unit">Ω</span>
+              </div>
+              <div id="resistance-error-msg" class="error-message" role="alert">
+                Resistance must be a positive value.
+              </div>
+            </div>
+            <div class="input-group">
+              <label for="power-error">Power (P)</label>
+              <div class="input-wrapper"><input type="text" id="power-error"><span class="input-unit">W</span></div>
+            </div>
+          </div>
+        </form>
+      </div>
+  </div>
+</body>
+</html>

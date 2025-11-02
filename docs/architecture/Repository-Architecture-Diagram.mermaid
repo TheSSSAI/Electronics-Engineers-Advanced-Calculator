@@ -1,0 +1,107 @@
+### Runtime Component & Integration Architecture
+mermaid
+C4Context
+    title System Runtime Architecture Diagram
+
+    actor User
+
+    System_Boundary(spa_boundary, "Client SPA") {
+        Component(spa, "React SPA", "React 18, Redux, Material-UI", "The client-side single page application running in the user's browser.")
+    }
+
+    System_Boundary(aws_cloud, "AWS Cloud") {
+        System_Boundary(api_facade, "API Facade") {
+            Component(api_gateway, "Amazon API Gateway", "REST API", "Single entry point, handles routing, auth, and throttling. REQ-1-054")
+        }
+
+        System_Boundary(backend_services, "Backend Services") {
+            Component(user_service, "User & Data Service", "NestJS on ECS Fargate", "Manages users, custom modes, variables, and history. REQ-1-057")
+            Component(formula_service, "Formula Execution Service", "Node.js on AWS Lambda", "Executes untrusted user formulas in a secure sandbox. REQ-1-053")
+        }
+
+        System_Boundary(data_and_identity, "Data & Identity Providers") {
+            ComponentDb(database, "PostgreSQL DB", "Amazon RDS", "Stores all application data (users, modes, etc). REQ-1-054")
+            Component(cognito, "AWS Cognito", "Identity Provider", "Manages user registration and authentication. REQ-1-029")
+        }
+    }
+
+    Rel(User, spa, "Uses calculator features", "HTTPS")
+    Rel(spa, api_gateway, "Makes API Calls", "REST/JSON (HTTPS)")
+    Rel(spa, cognito, "Authenticates via OAuth 2.0 PKCE flow")
+
+    Rel(api_gateway, cognito, "Validates JWT Bearer Token")
+    Rel(api_gateway, user_service, "Routes requests for user data, modes, history")
+    Rel(api_gateway, formula_service, "Routes requests for secure formula execution")
+
+    Rel(user_service, database, "Reads/Writes data", "SQL/TCP")
+
+    UpdateRelStyle(User, spa, $textColor="#FFFFFF", $lineColor="#4CAF50", $sprite="person")
+    UpdateRelStyle(spa, api_gateway, $textColor="#FFFFFF", $lineColor="#2196F3")
+    UpdateRelStyle(api_gateway, user_service, $textColor="#FFFFFF", $lineColor="#FFC107")
+    UpdateRelStyle(api_gateway, formula_service, $textColor="#FFFFFF", $lineColor="#FF9800")
+    UpdateRelStyle(user_service, database, $textColor="#FFFFFF", $lineColor="#9C27B0")
+
+
+### Repository Dependency Architecture
+mermaid
+graph TD
+    subgraph A ["Presentation & UI Layer"]
+        direction LR
+        REPO_APP_FRONTEND["frontend-app<br>(Application Shell)"]
+        REPO_LIB_UI_COMPONENTS["ui-components-library<br>(React Components)"]
+        REPO_LIB_FRONTEND_UTILS["frontend-utils<br>(Offline Sync)"]
+        REPO_APP_DOCS["docs-site<br>(Help Content)"]
+    end
+
+    subgraph B ["Application & Domain Logic Layer"]
+        direction LR
+        REPO_APP_USER_DATA["user-data-service<br>(NestJS API)"]
+        REPO_LIB_DOMAIN_LOGIC["calculator-domain-logic<br>(Pure Business Rules)"]
+        REPO_APP_FORMULA_EXEC["formula-execution-service<br>(Lambda Sandbox)"]
+    end
+
+    subgraph C ["Shared Contracts Layer"]
+        direction LR
+        REPO_LIB_API_CONTRACTS["shared-api-contracts<br>(TypeScript DTOs)"]
+    end
+
+    subgraph D ["Infrastructure & Configuration Layer"]
+        direction LR
+        REPO_INFRA_TERRAFORM["infrastructure-as-code<br>(Terraform)"]
+        REPO_LIB_BUILD_CONFIG["shared-build-config<br>(ESLint, Prettier)"]
+    end
+
+    %% Dependencies
+    REPO_APP_FRONTEND --> REPO_LIB_UI_COMPONENTS
+    REPO_APP_FRONTEND --> REPO_LIB_FRONTEND_UTILS
+    REPO_APP_FRONTEND --> REPO_LIB_API_CONTRACTS
+    REPO_APP_FRONTEND --> REPO_LIB_BUILD_CONFIG
+
+    REPO_LIB_UI_COMPONENTS --> REPO_LIB_API_CONTRACTS
+    REPO_LIB_UI_COMPONENTS --> REPO_LIB_BUILD_CONFIG
+
+    REPO_LIB_FRONTEND_UTILS --> REPO_LIB_API_CONTRACTS
+    REPO_LIB_FRONTEND_UTILS --> REPO_LIB_BUILD_CONFIG
+
+    REPO_APP_USER_DATA --> REPO_LIB_DOMAIN_LOGIC
+    REPO_APP_USER_DATA --> REPO_LIB_API_CONTRACTS
+    REPO_APP_USER_DATA --> REPO_LIB_BUILD_CONFIG
+
+    REPO_LIB_DOMAIN_LOGIC --> REPO_LIB_BUILD_CONFIG
+
+    REPO_APP_FORMULA_EXEC --> REPO_LIB_BUILD_CONFIG
+
+    %% Styling
+    style REPO_APP_FRONTEND fill:#03A9F4,stroke:#333,stroke-width:2px,color:#fff
+    style REPO_APP_USER_DATA fill:#03A9F4,stroke:#333,stroke-width:2px,color:#fff
+    style REPO_APP_FORMULA_EXEC fill:#FF9800,stroke:#333,stroke-width:2px,color:#fff
+    style REPO_APP_DOCS fill:#4CAF50,stroke:#333,stroke-width:2px,color:#fff
+
+    style REPO_LIB_UI_COMPONENTS fill:#81D4FA,stroke:#333,stroke-width:2px,color:#000
+    style REPO_LIB_FRONTEND_UTILS fill:#81D4FA,stroke:#333,stroke-width:2px,color:#000
+    style REPO_LIB_DOMAIN_LOGIC fill:#81D4FA,stroke:#333,stroke-width:2px,color:#000
+
+    style REPO_LIB_API_CONTRACTS fill:#E1BEE7,stroke:#333,stroke-width:2px,color:#000
+    style REPO_LIB_BUILD_CONFIG fill:#CFD8DC,stroke:#333,stroke-width:2px,color:#000
+
+    style REPO_INFRA_TERRAFORM fill:#FFC107,stroke:#333,stroke-width:2px,color:#000

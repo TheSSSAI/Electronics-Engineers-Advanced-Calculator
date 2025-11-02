@@ -1,0 +1,59 @@
+# This workflow builds and deploys the Docusaurus documentation site to AWS S3 and CloudFront.
+# It is triggered on every push to the 'main' branch.
+name: Deploy Documentation Site
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allows manual triggering
+
+# Use OpenID Connect for secure, short-lived credentials to AWS
+permissions:
+  id-token: write # Required for OIDC authentication
+  contents: read # Required to checkout the repository
+
+jobs:
+  deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }} # Stored in GitHub secrets
+          aws-region: ${{ secrets.AWS_REGION }} # Stored in GitHub secrets
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: 'package.json' # Uses the 'engines' field from package.json
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Docusaurus Site
+        run: npm run build
+        env:
+          # Algolia credentials for search indexing during build
+          ALGOLIA_APP_ID: ${{ secrets.ALGOLIA_APP_ID }}
+          ALGOLIA_API_KEY: ${{ secrets.ALGOLIA_API_KEY }}
+          ALGOLIA_INDEX_NAME: ${{ secrets.ALGOLIA_INDEX_NAME }}
+
+      - name: Deploy to AWS S3
+        run: |
+          aws s3 sync ./build s3://${{ secrets.AWS_S3_BUCKET_NAME }} --delete
+        env:
+          AWS_S3_BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET_NAME }}
+
+      - name: Invalidate AWS CloudFront Cache
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+        env:
+          AWS_CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }}

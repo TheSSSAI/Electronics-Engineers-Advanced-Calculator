@@ -1,0 +1,40 @@
+sequenceDiagram
+    actor "Consuming App (React SPA)" as App
+    participant "OfflineSyncManager (Library)" as Lib
+    participant "Browser (Network & IndexedDB)" as Browser
+    actor "Backend Server (API)" as Server
+
+    App->>Lib: 1. initialize(config)
+    note right of App: App sets up the library on startup,
+providing API endpoints and sync strategies.
+
+    App->>App: 2. User performs an action (e.g., save data)
+
+    App->>Lib: 3. queueAction(actionPayload)
+    activate Lib
+
+    alt [Device is Online]
+        Lib->>Server: 4a. POST /api/sync (actionPayload)
+        Server-->>Lib: 200 OK
+    else [Device is Offline]
+        Lib->>Browser: 4b. Store action in IndexedDB queue
+        Browser-->>Lib: Success
+    end
+
+    deactivate Lib
+
+    Browser->>Lib: 5. [Later] Network connection restored (fires 'online' event)
+    activate Lib
+
+    Lib->>Lib: 6. Starts processing sync queue
+
+    loop [For each item in queue]
+        Lib->>Browser: 7. Read next action from IndexedDB
+        Browser-->>Lib: returns actionPayload
+        Lib->>Server: 8. POST /api/sync (actionPayload)
+        Server-->>Lib: 200 OK
+        Lib->>Browser: 9. Remove synced action from IndexedDB queue
+        Browser-->>Lib: Success
+    end
+
+    deactivate Lib

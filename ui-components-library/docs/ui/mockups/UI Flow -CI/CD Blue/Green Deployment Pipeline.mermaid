@@ -1,0 +1,53 @@
+sequenceDiagram
+    participant Developer
+    participant "GitHub Repository" as GitHubRepository
+    participant "CI/CD: GitHub Actions" as GitHubActions
+    participant "Registry: Amazon ECR" as AmazonECR
+    participant "IaC: Terraform" as Terraform
+    participant "AWS Environment" as AWSEnvironment
+
+    Developer->>GitHubRepository: 1. Push code to main branch
+    GitHubRepository->>GitHubActions: 2. Trigger 'on push' workflow
+    
+    activate GitHubActions
+    GitHubActions->>GitHubActions: 3. Run CI Stage (Lint, Test, SAST, SCA)
+    GitHubActions->>GitHubActions: 4. Build & Scan Docker Image
+    GitHubActions->>AmazonECR: 5. Push Image to Registry
+    activate AmazonECR
+    AmazonECR-->>GitHubActions: Push confirmation
+    deactivate AmazonECR
+    
+    GitHubActions->>AWSEnvironment: 6. Run Database Migrations
+    activate AWSEnvironment
+    AWSEnvironment-->>GitHubActions: Migration status (Success/Fail)
+    deactivate AWSEnvironment
+
+    activate Terraform
+    GitHubActions->>Terraform: 7. Apply Terraform for 'Green' Environment
+    Terraform->>AWSEnvironment: 8. Provision/Update 'Green' ECS Service, Lambda, etc.
+    activate AWSEnvironment
+    AWSEnvironment-->>Terraform: Resource ARNs and status
+    deactivate AWSEnvironment
+    Terraform-->>GitHubActions: Terraform apply result
+    deactivate Terraform
+
+    GitHubActions->>AWSEnvironment: 9. Perform Health Checks on 'Green' Deployment
+    activate AWSEnvironment
+    AWSEnvironment-->>GitHubActions: Health status (200 OK / non-200)
+    deactivate AWSEnvironment
+
+    alt Health Check Successful
+        GitHubActions->>AWSEnvironment: 10. Switch Production Traffic to 'Green' (e.g., update Route 53 / ALB)
+        activate AWSEnvironment
+        AWSEnvironment-->>GitHubActions: Traffic switch confirmation
+        deactivate AWSEnvironment
+        GitHubActions->>GitHubRepository: 11. Update Commit Status to 'Success'
+    else Health Check Failed
+        GitHubActions->>Terraform: 10a. [Rollback] Terraform destroy for 'Green' (optional)
+        GitHubActions->>GitHubRepository: 11a. Update Commit Status to 'Failure'
+        GitHubActions->>Developer: 12a. Send Failure Notification
+    end
+    deactivate GitHubActions
+
+    note over GitHubActions: All sensitive data (AWS credentials, DB connection strings) must be stored in GitHub Encrypted Secrets and accessed as environment variables in the workflow.
+    note over AWSEnvironment: The 'Green' environment health check can be a simple endpoint check or a more comprehensive suite of integration tests run against the new deployment.

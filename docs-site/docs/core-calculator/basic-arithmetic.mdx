@@ -1,0 +1,62 @@
+---
+sidebar_position: 1
+title: Basic Arithmetic & Core Functions
+sidebar_label: Basic Arithmetic
+---
+
+import Keybind from '@site/src/components/Keybind';
+
+# Basic Arithmetic & Core Functions
+
+The heart of Calculator Pro is a powerful and intuitive scientific calculator module. This article covers the fundamental operations that form the basis of all calculations.
+
+## Standard Operations
+
+The calculator supports the four standard arithmetic operations:
+
+-   **Addition (`+`)**
+-   **Subtraction (`-`)**
+-   **Multiplication (`×` or `*`)**
+-   **Division (`÷` or `/`)**
+
+You can enter expressions using the on-screen keypad or your physical keyboard.
+
+### Order of Operations (PEMDAS/BODMAS)
+
+The calculator automatically respects the standard mathematical order of operations. Multiplication and division are performed before addition and subtraction.
+
+For example, the expression `5 + 3 * 2` will be evaluated as `5 + 6`, yielding a result of `11`.
+
+To override the default order, use parentheses `()`. For instance, `(5 + 3) * 2` will be evaluated as `8 * 2`, resulting in `16`.
+
+## Clearing the Input
+
+There are two primary ways to clear your current work:
+
+-   **Clear Entry (CE)**: Deletes the last number or operator you entered. This is useful for correcting a single mistake without erasing the entire expression.
+-   **All Clear (AC)**: Resets the entire calculator, clearing the current expression, the result, and any error states.
+
+## Undo and Redo
+
+Calculator Pro provides a convenient way to step backward and forward through your input history, making it easy to correct mistakes without starting over.
+
+-   **Undo**: Reverts the last change you made to the input expression.
+-   **Redo**: Re-applies the last change you undid.
+
+You can use the dedicated UI buttons or standard keyboard shortcuts:
+
+-   **Undo**: <Keybind keys={['Ctrl', 'Z']} /> (or <Keybind keys={['Cmd', 'Z']} /> on macOS)
+-   **Redo**: <Keybind keys={['Ctrl', 'Y']} /> (or <Keybind keys={['Cmd', 'Y']} /> on macOS)
+
+:::tip
+Any new input you type after performing an `Undo` action will clear the `Redo` history. This is standard behavior in most applications and prevents inconsistent states.
+:::
+
+## Handling Errors
+
+If you enter an expression with invalid syntax (e.g., `5 + * 3` or an unmatched parenthesis), the calculator will display a clear, helpful error message. Your original input will be preserved, allowing you to easily find and correct the mistake.
+
+Common errors include:
+-   **Syntax Error**: An issue with the structure of your expression, like consecutive operators.
+-   **Division by Zero**: Attempting to divide any number by `0`.
+-   **Domain Error**: Providing an invalid input to a function, such as `sqrt(-1)`.

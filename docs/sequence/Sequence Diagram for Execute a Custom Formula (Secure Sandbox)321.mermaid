@@ -1,0 +1,30 @@
+sequenceDiagram
+    actor "Client SPA" as ClientSPA
+    participant "API Gateway" as APIGateway
+    participant "Formula Execution Service" as FormulaExecutionService
+
+    ClientSPA->>APIGateway: 1. Sends formula execution request.
+    APIGateway-->>ClientSPA: Receives calculation result or structured error.
+    APIGateway->>APIGateway: 2. Validates JWT and authorizes request.
+    APIGateway-->>APIGateway: Token valid or invalid.
+    activate FormulaExecutionService
+    APIGateway->>FormulaExecutionService: 3. Invokes Lambda function with request payload.
+    FormulaExecutionService-->>APIGateway: Receives JSON response from Lambda.
+    FormulaExecutionService->>FormulaExecutionService: 4. Executes formula in secure V8 sandbox.
+    FormulaExecutionService-->>FormulaExecutionService: Returns calculated value or an execution error.
+    FormulaExecutionService->>FormulaExecutionService: 4.1. 1. Validate and parse request payload.
+    FormulaExecutionService->>FormulaExecutionService: 4.2. 2. Create V8 Isolate with strict resource limits.
+    FormulaExecutionService->>FormulaExecutionService: 4.3. 3. Create isolated context.
+    FormulaExecutionService->>FormulaExecutionService: 4.4. 4. Inject allow-listed functions and constants into context global.
+    FormulaExecutionService->>FormulaExecutionService: 4.5. 5. Inject user input variables into context.
+    FormulaExecutionService->>FormulaExecutionService: 4.6. 6. Compile and run user script with timeout.
+    FormulaExecutionService->>FormulaExecutionService: 4.7. 7. Capture result or format execution error.
+    FormulaExecutionService->>FormulaExecutionService: 4.8. 8. Dispose of Isolate to release all resources.
+    activate APIGateway
+    FormulaExecutionService->>APIGateway: 5. Returns structured JSON response.
+
+    note over FormulaExecutionService: Zero Trust Principle: The user-provided 'formula' string is treated as untrusted and potentially ...
+    note over FormulaExecutionService: REQ-CON-001 explicitly forbids vm2 due to critical vulnerabilities. isolated-vm is the mandated, ...
+
+    deactivate APIGateway
+    deactivate FormulaExecutionService

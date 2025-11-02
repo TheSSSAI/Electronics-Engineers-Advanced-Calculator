@@ -1,0 +1,48 @@
+flowchart TD
+    subgraph User Journey
+        A[User navigates to /register] --> B[User fills Email, Password, Confirm Password fields]
+    end
+
+    subgraph Form Interaction & Client Validation
+        B --> C{"Terms & Conditions checkbox checked?"}
+        C -->|No| D[Create Account button is disabled]
+        C -->|Yes| E{"All fields filled?"}
+        E -->|No| D
+        E -->|Yes| F{"Email format valid and Passwords match?"}
+        F -->|No| G[Show inline validation errors]
+        G --> B
+    end
+
+    subgraph Server Interaction
+        F -->|Yes| H[User clicks "Create Account"]
+        H --> I["POST /api/v1/register request sent to Backend"]
+        I --> J{"Backend Validation (via AWS Cognito)"}
+        J -->|Email already exists| K[Return 409 Conflict]
+        J -->|Password violates policy| L[Return 400 Bad Request]
+        J -->|Other validation error| M[Return 400 Bad Request]
+        J -->|Valid| N[Create User in Cognito & Application DB]
+    end
+
+    subgraph User Feedback & Redirection
+        K --> O["Display error: 'Email already in use'"]
+        L --> P["Display error: 'Password does not meet requirements'"]
+        M --> Q["Display generic validation error"]
+        O --> B
+        P --> B
+        Q --> B
+        N --> R["Backend returns Success (201) with JWTs"]
+        R --> S[Store tokens, set authenticated state]
+        S --> T[Redirect to main application]
+        T --> U["Show success notification: 'Welcome!'"]
+    end
+
+    %% Styling
+    classDef action fill:#e3f2fd,stroke:#2196f3,stroke-width:2px,color:#000
+    classDef decision fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:#000
+    classDef error fill:#ffebee,stroke:#d32f2f,stroke-width:2px,color:#000
+    classDef success fill:#e8f5e9,stroke:#388e3c,stroke-width:2px,color:#000
+
+    class H,I action
+    class C,E,F,J decision
+    class G,K,L,M,O,P,Q error
+    class N,R,S,T,U success

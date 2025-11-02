@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authentication Form</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* CSS Reset */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    img,
+    picture,
+    video,
+    canvas,
+    svg {
+      display: block;
+      max-width: 100%;
+    }
+
+    input,
+    button,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    p,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      overflow-wrap: break-word;
+    }
+
+    /* Design System Tokens */
+    :root {
+      /* Typography */
+      --font-primary: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      --font-size-h1: 48px;
+      --font-size-body: 16px;
+      --font-size-caption: 14px;
+      --font-weight-normal: 400;
+      --font-weight-medium: 500;
+      --font-weight-bold: 700;
+
+      /* Color Palette */
+      --color-primary-500: #2196F3;
+      --color-primary-600: #1E88E5;
+      --color-primary-700: #1976D2;
+      --color-primary-800: #1565C0;
+      --color-neutrals-white: #FFFFFF;
+      --color-neutrals-gray-50: #F8F9FA;
+      --color-neutrals-gray-100: #F1F3F5;
+      --color-neutrals-gray-200: #E9ECEF;
+      --color-neutrals-gray-400: #CED4DA;
+      --color-neutrals-gray-500: #ADB5BD;
+      --color-neutrals-gray-700: #495057;
+      --color-neutrals-gray-800: #343A40;
+      --color-neutrals-gray-900: #212529;
+      --color-semantic-success: #2E7D32;
+      --color-semantic-error: #D32F2F;
+      --color-semantic-error-bg: #FDEDED;
+      
+      /* Spacing System */
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+
+      /* Borders & Shadows */
+      --border-radius-main: 8px;
+      --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    }
+
+    /* Base Screen Styles */
+    body {
+      font-family: var(--font-primary);
+      background-color: var(--color-neutrals-gray-50);
+      color: var(--color-neutrals-gray-800);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: var(--spacing-xl);
+      min-height: 100vh;
+    }
+    
+    .screen-container {
+        width: 100%;
+        max-width: 420px;
+    }
+    
+    /* Auth Form Styles */
+    .auth-form-container {
+      background-color: var(--color-neutrals-white);
+      padding: var(--spacing-xl);
+      border-radius: var(--border-radius-main);
+      box-shadow: var(--shadow-card);
+      width: 100%;
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .form-header {
+      text-align: center;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .form-title {
+      font-size: 28px;
+      font-weight: var(--font-weight-bold);
+      color: var(--color-neutrals-gray-900);
+    }
+    
+    .form-alert {
+        padding: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+        border-radius: 4px;
+        font-size: var(--font-size-caption);
+        font-weight: var(--font-weight-medium);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        background-color: var(--color-semantic-error-bg);
+        color: #5F2120;
+        border: 1px solid var(--color-semantic-error);
+    }
+
+    .form-alert svg {
+        flex-shrink: 0;
+    }
+    
+    .form-group {
+      margin-bottom: var(--spacing-md);
+    }
+
+    .form-label {
+      display: block;
+      font-size: var(--font-size-caption);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-neutrals-gray-700);
+      margin-bottom: var(--spacing-sm);
+    }
+    
+    .password-input-wrapper {
+        position: relative;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--color-neutrals-gray-400);
+      border-radius: 4px;
+      font-size: var(--font-size-body);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--color-primary-500);
+      box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+    }
+
+    .form-input.is-error {
+      border-color: var(--color-semantic-error);
+    }
+    
+    .form-input.is-error:focus {
+        box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.2);
+    }
+    
+    .password-toggle {
+        position: absolute;
+        top: 50%;
+        right: 12px;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--color-neutrals-gray-500);
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .password-toggle:hover {
+        color: var(--color-neutrals-gray-700);
+    }
+    
+    .field-error-message {
+        color: var(--color-semantic-error);
+        font-size: 12px;
+        margin-top: var(--spacing-xs);
+    }
+    
+    .form-options {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-lg);
+        font-size: var(--font-size-caption);
+    }
+
+    .form-checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+    
+    .form-checkbox-group label {
+      color: var(--color-neutrals-gray-700);
+    }
+    
+    .form-link {
+      color: var(--color-primary-600);
+      text-decoration: none;
+      font-weight: var(--font-weight-medium);
+      transition: color 0.2s;
+    }
+
+    .form-link:hover {
+      color: var(--color-primary-700);
+      text-decoration: underline;
+    }
+
+    .form-actions {
+      margin-top: var(--spacing-lg);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px 22px;
+      border: none;
+      border-radius: 4px;
+      font-size: var(--font-size-body);
+      font-weight: var(--font-weight-medium);
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-sm);
+    }
+    
+    .btn--primary {
+      background-color: var(--color-primary-600);
+      color: var(--color-neutrals-white);
+    }
+
+    .btn--primary:hover {
+      background-color: var(--color-primary-700);
+    }
+    
+    .btn--primary:active {
+      background-color: var(--color-primary-800);
+      transform: scale(0.99);
+    }
+
+    .btn:focus-visible {
+      outline: 2px solid var(--color-primary-700);
+      outline-offset: 2px;
+    }
+
+    .btn:disabled {
+      background-color: var(--color-neutrals-gray-200);
+      color: var(--color-neutrals-gray-500);
+      cursor: not-allowed;
+    }
+    
+    .form-footer {
+        margin-top: var(--spacing-lg);
+        text-align: center;
+        font-size: var(--font-size-caption);
+        color: var(--color-neutrals-gray-700);
+    }
+    
+    /* Spinner for Loading State */
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: var(--color-neutrals-white);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    .btn.is-loading .btn-text {
+        visibility: hidden;
+    }
+    
+    .btn.is-loading .spinner {
+        position: absolute;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    
+    .variation-title {
+        margin-bottom: var(--spacing-md);
+        padding-bottom: var(--spacing-sm);
+        border-bottom: 1px solid var(--color-neutrals-gray-200);
+    }
+    .variation-title h3 {
+        font-size: 20px;
+        color: var(--color-neutrals-gray-900);
+    }
+     .variation-title p {
+        font-size: var(--font-size-caption);
+        color: var(--color-neutrals-gray-700);
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="screen-container">
+    
+    <div class="variation-title">
+        <h3>Variants</h3>
+        <p>Demonstration of the authentication form in its different states and variants.</p>
+    </div>
+
+    <!-- Variant 1: Default Login Form -->
+    <div class="auth-form-container">
+      <header class="form-header">
+        <h1 class="form-title">Login</h1>
+      </header>
+      <form>
+        <div class="form-group">
+          <label for="login-email" class="form-label">Email Address</label>
+          <input type="email" id="login-email" class="form-input" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label for="login-password" class="form-label">Password</label>
+          <div class="password-input-wrapper">
+              <input type="password" id="login-password" class="form-input" placeholder="••••••••" required>
+              <button type="button" class="password-toggle" aria-label="Show password">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+          </div>
+        </div>
+        <div class="form-options">
+            <div class="form-checkbox-group">
+                <input type="checkbox" id="login-remember">
+                <label for="login-remember">Remember me</label>
+            </div>
+            <a href="#" class="form-link">Forgot Password?</a>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn--primary">
+            <span class="btn-text">Login</span>
+          </button>
+        </div>
+        <div class="form-footer">
+          Don't have an account? <a href="#" class="form-link">Register</a>
+        </div>
+      </form>
+    </div>
+
+    <!-- Variant 2: Default Register Form -->
+    <div class="auth-form-container">
+      <header class="form-header">
+        <h1 class="form-title">Create Account</h1>
+      </header>
+      <form>
+        <div class="form-group">
+          <label for="register-email" class="form-label">Email Address</label>
+          <input type="email" id="register-email" class="form-input" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label for="register-password" class="form-label">Password</label>
+           <div class="password-input-wrapper">
+              <input type="password" id="register-password" class="form-input" placeholder="Minimum 12 characters" required>
+              <button type="button" class="password-toggle" aria-label="Show password">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+          </div>
+        </div>
+         <div class="form-group">
+          <label for="register-confirm-password" class="form-label">Confirm Password</label>
+           <div class="password-input-wrapper">
+              <input type="password" id="register-confirm-password" class="form-input" placeholder="••••••••" required>
+          </div>
+        </div>
+        <div class="form-options">
+            <div class="form-checkbox-group">
+                <input type="checkbox" id="register-terms" required>
+                <label for="register-terms">I agree to the <a href="#" class="form-link">Terms of Service</a></label>
+            </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn--primary">
+            <span class="btn-text">Register</span>
+          </button>
+        </div>
+         <div class="form-footer">
+          Already have an account? <a href="#" class="form-link">Login</a>
+        </div>
+      </form>
+    </div>
+    
+    <!-- Variant 3: Login Form - Loading State -->
+    <div class="auth-form-container">
+      <header class="form-header">
+        <h1 class="form-title">Login</h1>
+      </header>
+      <form>
+        <div class="form-group">
+          <label for="loading-email" class="form-label">Email Address</label>
+          <input type="email" id="loading-email" class="form-input" value="user@example.com" readonly>
+        </div>
+        <div class="form-group">
+          <label for="loading-password" class="form-label">Password</label>
+          <input type="password" id="loading-password" class="form-input" value="••••••••" readonly>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn--primary is-loading" disabled>
+            <div class="spinner"></div>
+            <span class="btn-text">Login</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Variant 4: Login Form - Error State -->
+    <div class="auth-form-container">
+      <header class="form-header">
+        <h1 class="form-title">Login</h1>
+      </header>
+      <form>
+        <div class="form-alert" role="alert" aria-live="assertive">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+            <span>Invalid email or password. Please try again.</span>
+        </div>
+        <div class="form-group">
+          <label for="error-email" class="form-label">Email Address</label>
+          <input type="email" id="error-email" class="form-input is-error" value="user@example.com" required aria-describedby="email-error">
+          <p id="email-error" class="field-error-message">This field is incorrect.</p>
+        </div>
+        <div class="form-group">
+          <label for="error-password" class="form-label">Password</label>
+          <input type="password" id="error-password" class="form-input is-error" placeholder="••••••••" required>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn--primary">
+            <span class="btn-text">Login</span>
+          </button>
+        </div>
+      </form>
+    </div>
+    
+  </div>
+
+  <div class="screen-variations" style="display: none;">
+    <h2>Screen Variations</h2>
+    <div class="variation-group">
+      <h3>Variant Name: "Default Login Form"</h3>
+      <normal>The standard form for existing users to log in. All fields are ready for input.</normal>
+    </div>
+    <div class="variation-group">
+      <h3>Variant Name: "Default Register Form"</h3>
+      <normal>The standard form for new users to create an account. Includes password confirmation and terms of service agreement.</normal>
+    </div>
+    <div class="variation-group">
+      <h3>Variant Name: "Loading State"</h3>
+      <normal>Shows the form after submission, while waiting for a server response. The submit button is disabled and displays a spinner to indicate activity.</normal>
+    </div>
+    <div class="variation-group">
+      <h3>Variant Name: "Error State"</h3>
+      <normal>Demonstrates the form after a failed submission. A form-level alert provides a general error, and specific fields can be highlighted with inline error messages.</normal>
+    </div>
+  </div>
+
+</body>
+
+</html>

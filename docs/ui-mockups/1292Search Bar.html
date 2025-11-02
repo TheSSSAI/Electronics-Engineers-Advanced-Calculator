@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Molecular Component: Search Bar</title>
+  <style>
+    /* --- CSS Reset and Basic Setup --- */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* --- Design System Tokens --- */
+    :root {
+      /* Colors */
+      --color-primary-100: #BBDEFB;
+      --color-primary-500: #2196F3;
+      --color-primary-600: #1E88E5;
+      --color-white: #FFFFFF;
+      --color-gray-50: #F8F9FA;
+      --color-gray-100: #F1F3F5;
+      --color-gray-200: #E9ECEF;
+      --color-gray-400: #CED4DA;
+      --color-gray-500: #ADB5BD;
+      --color-gray-700: #495057;
+      --color-gray-800: #343A40;
+      --color-gray-900: #212529;
+
+      /* Typography */
+      --font-family-sans: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      --font-size-body: 16px;
+      --font-size-caption: 14px;
+      --font-size-small: 12px;
+
+      /* Spacing */
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+
+      /* Borders & Shadows */
+      --border-radius-main: 8px;
+      --shadow-dropdown: 0 4px 12px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.08);
+      --focus-shadow: 0 0 0 3px rgba(33, 150, 243, 0.25);
+    }
+    
+    /* --- Showcase Page Styles --- */
+    body {
+      font-family: var(--font-family-sans);
+      background-color: var(--color-gray-50);
+      color: var(--color-gray-800);
+      padding: var(--space-xl);
+    }
+    .showcase-container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .showcase-header {
+      margin-bottom: var(--space-xl);
+      padding-bottom: var(--space-md);
+      border-bottom: 1px solid var(--color-gray-200);
+    }
+    .showcase-header h1 {
+      font-size: 2rem;
+      color: var(--color-gray-900);
+    }
+    .showcase-section {
+      margin-bottom: var(--space-xl);
+      padding: var(--space-lg);
+      background-color: var(--color-white);
+      border: 1px solid var(--color-gray-200);
+      border-radius: var(--border-radius-main);
+    }
+    .showcase-section h2 {
+      font-size: 1.5rem;
+      margin-bottom: var(--space-lg);
+    }
+    .showcase-section h3 {
+        font-size: 1.1rem;
+        margin-bottom: var(--space-md);
+        color: var(--color-gray-700);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+    .state-wrapper {
+        margin-bottom: var(--space-xl);
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    /* Component Name CSS */
+    
+    /* Component Base: Search Bar */
+    .search-bar {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+      max-width: 400px; 
+      font-size: var(--font-size-body);
+    }
+
+    .search-bar__icon {
+      position: absolute;
+      left: var(--space-md);
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--color-gray-500);
+      pointer-events: none;
+      width: 20px;
+      height: 20px;
+    }
+
+    .search-bar__input {
+      width: 100%;
+      padding: 12px 16px 12px 48px; /* Left padding for icon */
+      border: 1px solid var(--color-gray-400);
+      border-radius: var(--border-radius-main);
+      font-family: var(--font-family-sans);
+      font-size: inherit;
+      color: var(--color-gray-800);
+      background-color: var(--color-white);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .search-bar__input::placeholder {
+      color: var(--color-gray-500);
+    }
+
+    /* Focused State */
+    .search-bar__input:focus, 
+    .is-focused .search-bar__input {
+      outline: none;
+      border-color: var(--color-primary-500);
+      box-shadow: var(--focus-shadow);
+    }
+
+    /* Results Dropdown */
+    .search-bar__results {
+      position: absolute;
+      top: calc(100% + var(--space-sm));
+      left: 0;
+      right: 0;
+      background-color: var(--color-white);
+      border-radius: var(--border-radius-main);
+      box-shadow: var(--shadow-dropdown);
+      border: 1px solid var(--color-gray-200);
+      max-height: 400px;
+      overflow-y: auto;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+    }
+
+    .has-results .search-bar__results,
+    .is-loading .search-bar__results,
+    .no-results .search-bar__results {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .search-results__list {
+      list-style: none;
+      margin: 0;
+      padding: var(--space-sm) 0;
+    }
+
+    .search-results__item a {
+      display: block;
+      padding: var(--space-sm) var(--space-md);
+      color: var(--color-gray-700);
+      text-decoration: none;
+      transition: background-color 0.15s ease;
+    }
+
+    .search-results__item a:hover, 
+    .search-results__item a:focus {
+      background-color: var(--color-gray-50);
+      color: var(--color-primary-600);
+      outline: none;
+    }
+    
+    .search-results__item a:focus-visible {
+        background-color: var(--color-gray-100);
+    }
+
+    .search-results__title {
+      font-weight: 600;
+      margin-bottom: var(--space-xs);
+      font-size: var(--font-size-body);
+    }
+
+    .search-results__snippet {
+      font-size: var(--font-size-caption);
+      color: var(--color-gray-500);
+    }
+
+    .search-results__snippet mark {
+      background-color: var(--color-primary-100);
+      color: var(--color-primary-600);
+      font-weight: 600;
+      border-radius: 2px;
+      padding: 0 2px;
+    }
+
+    /* Loading and No Results States */
+    .search-results__state-wrapper {
+      padding: var(--space-lg) var(--space-md);
+      text-align: center;
+      color: var(--color-gray-500);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .search-results__loader {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      border: 3px solid var(--color-gray-200);
+      border-top-color: var(--color-primary-500);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Mobile Variant: Icon Button and Modal Overlay */
+    .search-bar--mobile-trigger {
+      display: none; /* Hidden by default, shown via media query */
+      background: transparent;
+      border: none;
+      padding: var(--space-sm);
+      cursor: pointer;
+      color: var(--color-gray-700);
+      border-radius: 50%;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .search-bar--mobile-trigger:hover {
+        background-color: var(--color-gray-100);
+        color: var(--color-gray-900);
+    }
+    
+    .search-bar--mobile-trigger:focus-visible {
+        outline: none;
+        box-shadow: var(--focus-shadow);
+    }
+
+    .search-bar--mobile-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(248, 249, 250, 0.95); /* Semi-transparent light gray */
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      padding: var(--space-md);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s;
+    }
+    
+    .mobile-search__header {
+        display: flex;
+        width: 100%;
+        gap: var(--space-sm);
+        margin-bottom: var(--space-md);
+    }
+
+    .mobile-search__header .search-bar {
+        flex-grow: 1;
+    }
+
+    .search-bar--mobile-overlay .search-bar__results {
+        position: static;
+        width: 100%;
+        margin-top: 0;
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        flex-grow: 1;
+        box-shadow: none;
+        border: none;
+        background: transparent;
+    }
+    
+    .mobile-search__close-btn {
+        background: transparent;
+        border: 1px solid var(--color-gray-400);
+        color: var(--color-gray-700);
+        padding: 0 var(--space-md);
+        border-radius: var(--border-radius-main);
+        cursor: pointer;
+        font-size: var(--font-size-small);
+        font-weight: 600;
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+    .mobile-search__close-btn:hover {
+        background-color: var(--color-gray-100);
+    }
+
+    /* Checkbox hack for demo */
+    #mobile-search-toggle {
+        display: none;
+    }
+    #mobile-search-toggle:checked ~ .search-bar--mobile-overlay {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Responsive Adaptations */
+    @media (max-width: 768px) {
+      /* Hide desktop bar */
+      .search-bar--desktop {
+        display: none;
+      }
+      /* Show mobile trigger */
+      .search-bar--mobile-trigger {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="showcase-container">
+    <header class="showcase-header">
+      <h1>Molecular Component: Search Bar</h1>
+    </header>
+
+    <div class="showcase-section">
+      <h2>Desktop Expanded View</h2>
+      <p>This is the standard search bar view on screens wider than 768px.</p>
+
+      <div class="state-wrapper">
+        <h3>Default State</h3>
+        <form role="search" class="search-bar search-bar--desktop">
+          <label for="search-input-default" class="sr-only">Search documentation</label>
+          <svg class="search-bar__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="search" id="search-input-default" class="search-bar__input" placeholder="Search documentation...">
+        </form>
+      </div>
+
+      <div class="state-wrapper">
+        <h3>Focused State</h3>
+        <form role="search" class="search-bar search-bar--desktop is-focused">
+          <label for="search-input-focused" class="sr-only">Search documentation</label>
+          <svg class="search-bar__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="search" id="search-input-focused" class="search-bar__input" placeholder="Search documentation...">
+        </form>
+      </div>
+
+      <div class="state-wrapper">
+        <h3>With Results Dropdown</h3>
+        <form role="search" class="search-bar search-bar--desktop has-results">
+            <label for="search-input-results" class="sr-only">Search documentation</label>
+            <svg class="search-bar__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="search" id="search-input-results" class="search-bar__input" placeholder="Search documentation..." value="ohm's law">
+            <div class="search-bar__results" id="search-results-1">
+              <ul class="search-results__list" role="listbox">
+                <li class="search-results__item" role="option">
+                  <a href="#">
+                    <div class="search-results__title">Ohm's Law & Power Mode</div>
+                    <div class="search-results__snippet">...enter any two known values for Voltage, Current, Resistance, or Power, so that the calculator automatically computes the remaining two values based on <mark>Ohm's Law</mark>...</div>
+                  </a>
+                </li>
+                <li class="search-results__item" role="option">
+                  <a href="#">
+                    <div class="search-results__title">Invalid Ohm's Law Inputs</div>
+                    <div class="search-results__snippet">...prevented from entering negative values for Resistance or Power and see a clear validation error...</div>
+                  </a>
+                </li>
+                 <li class="search-results__item" role="option">
+                  <a href="#">
+                    <div class="search-results__title">SI Prefixes</div>
+                    <div class="search-results__snippet">...use standard SI prefixes like 'k' for kilo (k<mark>Ohm</mark>) and 'n' for nano...</div>
+                  </a>
+                </li>
+              </ul>
+            </div>
+        </form>
+      </div>
+        
+      <div class="state-wrapper">
+        <h3>Loading State</h3>
+        <form role="search" class="search-bar search-bar--desktop is-loading">
+            <label for="search-input-loading" class="sr-only">Search documentation</label>
+            <svg class="search-bar__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="search" id="search-input-loading" class="search-bar__input" placeholder="Search documentation..." value="555 timer">
+            <div class="search-bar__results">
+              <div class="search-results__state-wrapper" role="status" aria-live="polite">
+                <div class="search-results__loader"></div>
+                <span>Searching...</span>
+              </div>
+            </div>
+        </form>
+      </div>
+      
+      <div class="state-wrapper">
+        <h3>No Results State</h3>
+        <form role="search" class="search-bar search-bar--desktop no-results">
+            <label for="search-input-no-results" class="sr-only">Search documentation</label>
+            <svg class="search-bar__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="search" id="search-input-no-results" class="search-bar__input" placeholder="Search documentation..." value="quantum entanglement">
+            <div class="search-bar__results">
+              <div class="search-results__state-wrapper" role="status" aria-live="polite">
+                <span>No results found for "quantum entanglement"</span>
+              </div>
+            </div>
+        </form>
+      </div>
+    </div>
+    
+    <div class="showcase-section">
+      <h2>Mobile Icon View & Overlay</h2>
+      <p>On screens smaller than 768px, the search bar collapses to an icon. Tapping it opens a full-screen search interface. (This demo uses a checkbox to simulate the modal opening).</p>
+      
+      <!-- Checkbox hack -->
+      <input type="checkbox" id="mobile-search-toggle">
+      
+      <!-- Mobile Trigger Button -->
+      <label for="mobile-search-toggle" class="search-bar--mobile-trigger" aria-label="Open Search">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      </label>
+
+      <!-- Mobile Overlay -->
+      <div class="search-bar--mobile-overlay" role="dialog" aria-modal="true">
+        <div class="mobile-search__header">
+          <form role="search" class="search-bar no-results">
+            <label for="search-input-mobile" class="sr-only">Search documentation</label>
+            <svg class="search-bar__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="search" id="search-input-mobile" class="search-bar__input" placeholder="Search documentation...">
+          </form>
+          <label for="mobile-search-toggle" class="mobile-search__close-btn">Cancel</label>
+        </div>
+        <!-- Results would appear here -->
+        <div class="search-bar__results">
+          <div class="search-results__state-wrapper">
+            <span>Start typing to see results.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div>
+    <h2>Component Variations</h2>
+    <div>
+        <h3>Variant Name: Desktop Expanded</h3>
+        <p>The default, expanded search bar used on viewports wider than 768px.</p>
+        <form role="search" class="search-bar">
+          <label for="var-1" class="sr-only">Search documentation</label>
+          <svg class="search-bar__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="search" id="var-1" class="search-bar__input" placeholder="Search documentation...">
+        </form>
+    </div>
+    <div style="margin-top: 24px;">
+        <h3>Variant Name: Mobile Icon</h3>
+        <p>The icon-only button that triggers the search overlay on viewports smaller than 768px.</p>
+        <button class="search-bar--mobile-trigger" aria-label="Open Search" style="display: inline-flex; position: static;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
+    </div>
+  </div>
+
+</body>
+</html>

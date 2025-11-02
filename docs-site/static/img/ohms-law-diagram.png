@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400px" height="350px" viewBox="0 0 400 350" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Ohm's Law Triangle</title>
+    <defs>
+        <filter x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox" id="filter-1">
+            <feGaussianBlur stdDeviation="2" in="SourceAlpha" result="shadowBlurInner1"></feGaussianBlur>
+            <feOffset dx="0" dy="1" in="shadowBlurInner1" result="shadowOffsetInner1"></feOffset>
+            <feComposite in="shadowOffsetInner1" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="shadowInnerInner1"></feComposite>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.1 0" type="matrix" in="shadowInnerInner1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g transform="translate(50.000000, 25.000000)">
+            <path d="M150,0 L293.923048,258 L6.07695154,258 L150,0 Z" stroke="#88C0D0" stroke-width="4"></path>
+            <line x1="0" y1="129" x2="300" y2="129" stroke="#4C566A" stroke-width="2" stroke-linecap="square"></line>
+            <text font-family="Helvetica-Bold, Helvetica" font-size="64" font-weight="bold" fill="#D8DEE9">
+                <tspan x="127" y="100">V</tspan>
+            </text>
+            <text font-family="Helvetica-Bold, Helvetica" font-size="64" font-weight="bold" fill="#D8DEE9">
+                <tspan x="60" y="220">I</tspan>
+            </text>
+            <text font-family="Helvetica-Bold, Helvetica" font-size="64" font-weight="bold" fill="#D8DEE9">
+                <tspan x="195" y="220">R</tspan>
+            </text>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Molecular Component: ModeSwitcher</title>
+  
+  <style>
+    /* --- DESIGN SYSTEM FOUNDATION (Tokens) --- */
+    :root {
+      /* Color Palette */
+      --color-primary-500: #2196F3;
+      --color-primary-700: #1976D2;
+      --color-neutral-white: #FFFFFF;
+      --color-neutral-gray-50: #F8F9FA;
+      --color-neutral-gray-100: #F1F3F5;
+      --color-neutral-gray-200: #E9ECEF;
+      --color-neutral-gray-700: #495057;
+      --color-neutral-gray-900: #212529;
+
+      /* Typography */
+      --font-family-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      --font-family-monospace: 'Roboto Mono', 'Fira Code', 'Courier New', monospace;
+      --font-size-small: 14px;
+      --font-size-body: 16px;
+
+      /* Spacing */
+      --space-xs: 4px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+
+      /* Borders & Radius */
+      --border-radius: 6px;
+    }
+
+    /* --- BASE & LAYOUT STYLES --- */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family-primary);
+      background-color: var(--color-neutral-gray-50);
+      color: var(--color-neutral-gray-900);
+      line-height: 1.6;
+      padding: var(--space-xl);
+    }
+
+    .showcase-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .component-header {
+        border-bottom: 1px solid var(--color-neutral-gray-200);
+        margin-bottom: var(--space-lg);
+        padding-bottom: var(--space-md);
+    }
+
+    .component-header h1 {
+      font-size: 2.5rem;
+      margin-bottom: var(--space-xs);
+    }
+
+    .component-header p {
+        font-size: 1.1rem;
+        color: var(--color-neutral-gray-700);
+    }
+    
+    .variant-section {
+      background-color: var(--color-neutral-white);
+      border: 1px solid var(--color-neutral-gray-200);
+      border-radius: var(--border-radius);
+      padding: var(--space-lg);
+      margin-bottom: var(--space-xl);
+    }
+
+    .variant-section h2 {
+      font-size: 1.5rem;
+      margin-bottom: var(--space-xs);
+    }
+
+    .variant-section p {
+      font-size: var(--font-size-body);
+      color: var(--color-neutral-gray-700);
+      margin-bottom: var(--space-md);
+    }
+    
+    .implementation-area {
+        padding: var(--space-lg);
+        background-color: var(--color-neutral-gray-50);
+        border-radius: var(--border-radius);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* --- COMPONENT STYLES: ModeSwitcher --- */
+
+    /* Base Styles */
+    .mode-switcher {
+      display: inline-flex;
+      align-items: center;
+      background-color: var(--color-neutral-gray-100);
+      border-radius: var(--border-radius);
+      padding: var(--space-xs);
+      border: 1px solid var(--color-neutral-gray-200);
+    }
+
+    /* Button Styles */
+    .mode-switcher__button {
+      font-family: var(--font-family-primary);
+      font-size: var(--font-size-small);
+      font-weight: 600;
+      color: var(--color-neutral-gray-700);
+      background-color: transparent;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px; /* Slightly smaller radius than container */
+      cursor: pointer;
+      transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+      white-space: nowrap;
+      min-height: 38px; /* Maintain touch-friendly height */
+    }
+
+    /* States */
+    .mode-switcher__button:hover:not([aria-pressed="true"]) {
+      background-color: var(--color-neutral-gray-200);
+      color: var(--color-neutral-gray-900);
+    }
+
+    .mode-switcher__button[aria-pressed="true"] {
+      background-color: var(--color-neutral-white);
+      color: var(--color-primary-700);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+      cursor: default;
+    }
+
+    .mode-switcher__button:focus-visible {
+      outline: 2px solid var(--color-primary-700);
+      outline-offset: 2px;
+      z-index: 1;
+    }
+
+    /* Angle Mode Variant */
+    .mode-switcher--angle .mode-switcher__button {
+        font-family: var(--font-family-monospace);
+        padding: 4px 10px;
+        min-width: 50px; /* Ensure consistent width */
+    }
+
+    /* Responsive Adaptations */
+    @media (max-width: 768px) {
+      .mode-switcher {
+        flex-wrap: wrap; /* Allow wrapping on small screens instead of collapsing to dropdown */
+        justify-content: center;
+      }
+      .mode-switcher__button {
+        flex-grow: 1; /* Allow buttons to grow to fill space */
+      }
+    }
+
+    /* Accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      .mode-switcher__button {
+        transition: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <main class="showcase-container">
+    <header class="component-header">
+      <h1>ModeSwitcher</h1>
+      <p>A molecular component for switching between related views or settings.</p>
+    </header>
+
+    <div class="variant-section">
+      <h2>Main Modes</h2>
+      <p>Used for switching between the primary calculator modes. The active state is clearly indicated.</p>
+      <div class="implementation-area">
+        <div class="mode-switcher" role="group" aria-label="Main Calculator Modes">
+          <button class="mode-switcher__button" aria-pressed="true">Scientific</button>
+          <button class="mode-switcher__button" aria-pressed="false">Ohm's Law</button>
+          <button class="mode-switcher__button" aria-pressed="false">Resistors</button>
+          <button class="mode-switcher__button" aria-pressed="false">555 Timer</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="variant-section">
+      <h2>Angle Modes</h2>
+      <p>A compact variant for short, fixed-width labels, such as those for trigonometric angle modes. Uses a monospace font for a technical feel.</p>
+      <div class="implementation-area">
+        <div class="mode-switcher mode-switcher--angle" role="group" aria-label="Angle Modes">
+          <button class="mode-switcher__button" aria-pressed="false">DEG</button>
+          <button class="mode-switcher__button" aria-pressed="true">RAD</button>
+          <button class="mode-switcher__button" aria-pressed="false">GRAD</button>
+        </div>
+      </div>
+    </div>
+	
+	<div>
+        <h2>Component Variations</h2>
+        <div class="variant-section">
+            <h3>Variant Name: "main_modes"</h3>
+            <p>Standard switcher for primary application modes. Labels are descriptive.</p>
+            <div class="implementation-area">
+                <div class="mode-switcher" role="group" aria-label="Main Calculator Modes">
+                  <button class="mode-switcher__button" aria-pressed="true">Scientific</button>
+                  <button class="mode-switcher__button" aria-pressed="false">Ohm's Law</button>
+                  <button class="mode-switcher__button" aria-pressed="false">Resistors</button>
+                  <button class="mode-switcher__button" aria-pressed="false">555 Timer</button>
+                </div>
+            </div>
+        </div>
+        <div class="variant-section">
+            <h3>Variant Name: "angle_modes"</h3>
+            <p>Compact switcher for angle settings. Uses monospace font for abbreviations.</p>
+            <div class="implementation-area">
+                <div class="mode-switcher mode-switcher--angle" role="group" aria-label="Angle Modes">
+                  <button class="mode-switcher__button" aria-pressed="false">DEG</button>
+                  <button class="mode-switcher__button" aria-pressed="true">RAD</button>
+                  <button class="mode-switcher__button" aria-pressed="false">GRAD</button>
+                </div>
+            </div>
+        </div>
+    </div>    
+
+  </main>
+
+</body>
+</html>

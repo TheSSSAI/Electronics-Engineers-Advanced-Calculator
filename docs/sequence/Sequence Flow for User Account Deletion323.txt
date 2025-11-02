@@ -1,0 +1,829 @@
+# 1 Overview
+
+## 1.1 Diagram Id
+
+SEQ-COMP-001
+
+## 1.2 Name
+
+User Account Deletion
+
+## 1.3 Description
+
+A user initiates the permanent deletion of their account. After confirming the non-recoverable action, the backend service performs a single database transaction to systematically remove all data associated with the user and then makes an administrative call to delete their identity from Cognito.
+
+## 1.4 Type
+
+🔹 ComplianceFlow
+
+## 1.5 Purpose
+
+To comply with data protection regulations (like GDPR's 'Right to be Forgotten') by providing users a mechanism to permanently and completely remove their data from the system (REQ-FRU-001).
+
+## 1.6 Complexity
+
+High
+
+## 1.7 Priority
+
+🚨 Critical
+
+## 1.8 Frequency
+
+OnDemand
+
+## 1.9 Participants
+
+- REPO-SPA-CLIENT
+- REPO-API-GATEWAY
+- REPO-APP-USER-DATA
+- REPO-DB-POSTGRES
+- REPO-IAM-COGNITO
+
+## 1.10 Key Interactions
+
+- User clicks 'Delete Account' and passes a final confirmation step (e.g., typing username) in the Client SPA.
+- Client sends a final, authenticated deletion request to the User & Data Service.
+- User & Data Service begins a database transaction.
+- The service executes DELETE statements for the user_id in `calculation_history`, `user_variables`, and `custom_modes` tables.
+- The service executes a DELETE statement for the user in the `users` table.
+- The transaction is committed.
+- The service makes an administrative API call to AWS Cognito to delete the user's identity from the User Pool.
+- The client is logged out, and all local session tokens and data are cleared.
+
+## 1.11 Triggers
+
+- User confirms their intent to permanently delete their account.
+
+## 1.12 Outcomes
+
+- All of the user's data is permanently erased from the application database.
+- The user's identity is removed from the authentication provider.
+- The user can no longer log in.
+
+## 1.13 Business Rules
+
+- Deletion must be a cascading operation that removes all dependent data.
+- The action requires a final, explicit confirmation from the user.
+
+## 1.14 Error Scenarios
+
+- A database delete operation fails, causing the transaction to roll back, leaving the user account intact. An error is logged and returned to the client.
+- The call to Cognito fails after the database deletion; the user's data is gone but their identity might remain in a disabled state (requires manual cleanup).
+
+## 1.15 Integration Points
+
+- AWS Cognito (for identity deletion).
+
+# 2.0 Details
+
+## 2.1 Diagram Id
+
+SEQ-COMP-001
+
+## 2.2 Name
+
+User Personal Data Export Request (GDPR/CCPA DSAR)
+
+## 2.3 Description
+
+Implementation-ready sequence for processing a user's Data Subject Access Request (DSAR) as per GDPR/CCPA. This is an asynchronous flow initiated by a synchronous API call, which queues a background job to aggregate user data, store it securely, and notify the user via a time-limited download link. The process is designed for compliance, security, and auditability.
+
+## 2.4 Participants
+
+### 2.4.1 Frontend Application
+
+#### 2.4.1.1 Repository Id
+
+REPO-SPA-CLIENT
+
+#### 2.4.1.2 Display Name
+
+Client SPA
+
+#### 2.4.1.3 Type
+
+🔹 Frontend Application
+
+#### 2.4.1.4 Technology
+
+React 18, TypeScript
+
+#### 2.4.1.5 Order
+
+1
+
+#### 2.4.1.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #4285F4 |
+| Stereotype | User Interface |
+
+### 2.4.2.0 API Gateway
+
+#### 2.4.2.1 Repository Id
+
+REPO-API-GATEWAY
+
+#### 2.4.2.2 Display Name
+
+API Gateway
+
+#### 2.4.2.3 Type
+
+🔹 API Gateway
+
+#### 2.4.2.4 Technology
+
+Amazon API Gateway
+
+#### 2.4.2.5 Order
+
+2
+
+#### 2.4.2.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | boundary |
+| Color | #FF9900 |
+| Stereotype | AWS Service |
+
+### 2.4.3.0 Microservice
+
+#### 2.4.3.1 Repository Id
+
+REPO-APP-USER-DATA
+
+#### 2.4.3.2 Display Name
+
+User & Data Service
+
+#### 2.4.3.3 Type
+
+🔹 Microservice
+
+#### 2.4.3.4 Technology
+
+NestJS, Node.js
+
+#### 2.4.3.5 Order
+
+3
+
+#### 2.4.3.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | control |
+| Color | #DB4437 |
+| Stereotype | ECS Fargate |
+
+### 2.4.4.0 Message Queue
+
+#### 2.4.4.1 Repository Id
+
+REPO-MESSAGING-SQS
+
+#### 2.4.4.2 Display Name
+
+SQS Queue
+
+#### 2.4.4.3 Type
+
+🔹 Message Queue
+
+#### 2.4.4.4 Technology
+
+Amazon SQS
+
+#### 2.4.4.5 Order
+
+4
+
+#### 2.4.4.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | queue |
+| Color | #7D3C98 |
+| Stereotype | AWS Service |
+
+### 2.4.5.0 Serverless Function
+
+#### 2.4.5.1 Repository Id
+
+REPO-WORKER-LAMBDA
+
+#### 2.4.5.2 Display Name
+
+Export Worker Lambda
+
+#### 2.4.5.3 Type
+
+🔹 Serverless Function
+
+#### 2.4.5.4 Technology
+
+AWS Lambda (Node.js)
+
+#### 2.4.5.5 Order
+
+5
+
+#### 2.4.5.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | control |
+| Color | #F4B400 |
+| Stereotype | AWS Service |
+
+### 2.4.6.0 Database
+
+#### 2.4.6.1 Repository Id
+
+REPO-DB-POSTGRES
+
+#### 2.4.6.2 Display Name
+
+PostgreSQL DB
+
+#### 2.4.6.3 Type
+
+🔹 Database
+
+#### 2.4.6.4 Technology
+
+Amazon RDS PostgreSQL
+
+#### 2.4.6.5 Order
+
+6
+
+#### 2.4.6.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | database |
+| Color | #0F9D58 |
+| Stereotype | AWS RDS |
+
+### 2.4.7.0 Object Storage
+
+#### 2.4.7.1 Repository Id
+
+REPO-STORAGE-S3
+
+#### 2.4.7.2 Display Name
+
+S3 Storage
+
+#### 2.4.7.3 Type
+
+🔹 Object Storage
+
+#### 2.4.7.4 Technology
+
+Amazon S3
+
+#### 2.4.7.5 Order
+
+7
+
+#### 2.4.7.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | storage |
+| Color | #1A73E8 |
+| Stereotype | AWS Service |
+
+### 2.4.8.0 Email Service
+
+#### 2.4.8.1 Repository Id
+
+REPO-EMAIL-SES
+
+#### 2.4.8.2 Display Name
+
+Email Service
+
+#### 2.4.8.3 Type
+
+🔹 Email Service
+
+#### 2.4.8.4 Technology
+
+Amazon SES
+
+#### 2.4.8.5 Order
+
+8
+
+#### 2.4.8.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | entity |
+| Color | #5E6368 |
+| Stereotype | AWS Service |
+
+## 2.5.0.0 Interactions
+
+### 2.5.1.0 API Request
+
+#### 2.5.1.1 Source Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.1.2 Target Id
+
+REPO-API-GATEWAY
+
+#### 2.5.1.3 Message
+
+1. POST /users/me/export-data
+
+#### 2.5.1.4 Sequence Number
+
+1
+
+#### 2.5.1.5 Type
+
+🔹 API Request
+
+#### 2.5.1.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.1.7 Return Message
+
+8. 202 Accepted
+
+#### 2.5.1.8 Has Return
+
+✅ Yes
+
+#### 2.5.1.9 Is Activation
+
+✅ Yes
+
+#### 2.5.1.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTPS/REST |
+| Method | POST |
+| Parameters | Body: {} |
+| Authentication | Requires valid JWT Bearer Token in Authorization h... |
+| Error Handling | Client handles 401 (Unauthorized), 409 (Conflict),... |
+| Performance | Must meet REQ-NFP-001 (<200ms P95). |
+
+### 2.5.2.0 Service Invocation
+
+#### 2.5.2.1 Source Id
+
+REPO-API-GATEWAY
+
+#### 2.5.2.2 Target Id
+
+REPO-APP-USER-DATA
+
+#### 2.5.2.3 Message
+
+2. Forward request
+
+#### 2.5.2.4 Sequence Number
+
+2
+
+#### 2.5.2.5 Type
+
+🔹 Service Invocation
+
+#### 2.5.2.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.2.7 Return Message
+
+7. Forward 202 Accepted
+
+#### 2.5.2.8 Has Return
+
+✅ Yes
+
+#### 2.5.2.9 Is Activation
+
+✅ Yes
+
+#### 2.5.2.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTPS |
+| Method | POST |
+| Parameters | Forwards request body and user context from JWT. |
+| Authentication | Validates JWT signature and claims against Cognito... |
+| Error Handling | Returns 401 if JWT invalid. Returns 409 if service... |
+| Performance | Adds minimal latency (<20ms). |
+
+### 2.5.3.0 Database Query
+
+#### 2.5.3.1 Source Id
+
+REPO-APP-USER-DATA
+
+#### 2.5.3.2 Target Id
+
+REPO-DB-POSTGRES
+
+#### 2.5.3.3 Message
+
+3. Check for existing 'pending' request for user
+
+#### 2.5.3.4 Sequence Number
+
+3
+
+#### 2.5.3.5 Type
+
+🔹 Database Query
+
+#### 2.5.3.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.3.7 Return Message
+
+4. Return request status
+
+#### 2.5.3.8 Has Return
+
+✅ Yes
+
+#### 2.5.3.9 Is Activation
+
+❌ No
+
+#### 2.5.3.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | SQL |
+| Method | SELECT |
+| Parameters | `userId` |
+| Authentication | IAM authentication for DB connection. |
+| Error Handling | If query fails, return 500. If an active request e... |
+| Performance | Query must be indexed and complete in <10ms. |
+
+### 2.5.4.0 Message Queueing
+
+#### 2.5.4.1 Source Id
+
+REPO-APP-USER-DATA
+
+#### 2.5.4.2 Target Id
+
+REPO-MESSAGING-SQS
+
+#### 2.5.4.3 Message
+
+5. SendMessage({ userId, email, correlationId })
+
+#### 2.5.4.4 Sequence Number
+
+5
+
+#### 2.5.4.5 Type
+
+🔹 Message Queueing
+
+#### 2.5.4.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.4.7 Return Message
+
+6. Acknowledge message
+
+#### 2.5.4.8 Has Return
+
+✅ Yes
+
+#### 2.5.4.9 Is Activation
+
+❌ No
+
+#### 2.5.4.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | AWS SDK |
+| Method | SendMessage |
+| Parameters | Message body contains necessary user identifiers a... |
+| Authentication | Requires IAM permissions: `sqs:SendMessage`. |
+| Error Handling | If queueing fails, log error and return 500 to the... |
+| Performance | Low latency operation (<50ms). |
+
+### 2.5.5.0 Event Trigger
+
+#### 2.5.5.1 Source Id
+
+REPO-MESSAGING-SQS
+
+#### 2.5.5.2 Target Id
+
+REPO-WORKER-LAMBDA
+
+#### 2.5.5.3 Message
+
+9. Trigger Export Worker (async)
+
+#### 2.5.5.4 Sequence Number
+
+9
+
+#### 2.5.5.5 Type
+
+🔹 Event Trigger
+
+#### 2.5.5.6 Is Synchronous
+
+❌ No
+
+#### 2.5.5.7 Return Message
+
+
+
+#### 2.5.5.8 Has Return
+
+❌ No
+
+#### 2.5.5.9 Is Activation
+
+✅ Yes
+
+#### 2.5.5.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | Lambda Event Source Mapping |
+| Method | N/A |
+| Parameters | Event payload contains SQS message with user data. |
+| Authentication | IAM role-based invocation. |
+| Error Handling | On processing failure, message is retried based on... |
+| Performance | N/A |
+
+#### 2.5.5.11 Nested Interactions
+
+##### 2.5.5.11.1 Database Query
+
+###### 2.5.5.11.1.1 Source Id
+
+REPO-WORKER-LAMBDA
+
+###### 2.5.5.11.1.2 Target Id
+
+REPO-DB-POSTGRES
+
+###### 2.5.5.11.1.3 Message
+
+10. Query user data (users, history, variables, modes)
+
+###### 2.5.5.11.1.4 Sequence Number
+
+10
+
+###### 2.5.5.11.1.5 Type
+
+🔹 Database Query
+
+###### 2.5.5.11.1.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.5.11.1.7 Return Message
+
+11. Return aggregated data sets
+
+###### 2.5.5.11.1.8 Has Return
+
+✅ Yes
+
+###### 2.5.5.11.1.9 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | SQL |
+| Method | SELECT |
+| Parameters | `userId` from event payload. |
+| Authentication | Requires IAM role permissions for RDS. |
+| Error Handling | On failure, log error and send failure notificatio... |
+| Performance | Must handle large datasets without timeout. Use ef... |
+
+##### 2.5.5.11.2.0 Object Storage
+
+###### 2.5.5.11.2.1 Source Id
+
+REPO-WORKER-LAMBDA
+
+###### 2.5.5.11.2.2 Target Id
+
+REPO-STORAGE-S3
+
+###### 2.5.5.11.2.3 Message
+
+12. Upload aggregated data as JSON file
+
+###### 2.5.5.11.2.4 Sequence Number
+
+12
+
+###### 2.5.5.11.2.5 Type
+
+🔹 Object Storage
+
+###### 2.5.5.11.2.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.5.11.2.7 Return Message
+
+13. Confirm upload
+
+###### 2.5.5.11.2.8 Has Return
+
+✅ Yes
+
+###### 2.5.5.11.2.9 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | AWS SDK |
+| Method | PutObject |
+| Parameters | Body: JSON string, Bucket: private-user-exports, K... |
+| Authentication | Requires IAM role permissions: `s3:PutObject` on t... |
+| Error Handling | On failure, log error, send failure notification, ... |
+| Performance | N/A |
+
+##### 2.5.5.11.3.0 Security Operation
+
+###### 2.5.5.11.3.1 Source Id
+
+REPO-WORKER-LAMBDA
+
+###### 2.5.5.11.3.2 Target Id
+
+REPO-STORAGE-S3
+
+###### 2.5.5.11.3.3 Message
+
+14. Generate pre-signed URL for the object
+
+###### 2.5.5.11.3.4 Sequence Number
+
+14
+
+###### 2.5.5.11.3.5 Type
+
+🔹 Security Operation
+
+###### 2.5.5.11.3.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.5.11.3.7 Return Message
+
+15. Return secure, time-limited URL
+
+###### 2.5.5.11.3.8 Has Return
+
+✅ Yes
+
+###### 2.5.5.11.3.9 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | AWS SDK |
+| Method | getSignedUrl |
+| Parameters | ExpiresIn: 86400 seconds (24 hours). |
+| Authentication | Requires IAM role permissions: `s3:GetObject`. |
+| Error Handling | On failure, log error, send failure notification, ... |
+| Performance | N/A |
+
+##### 2.5.5.11.4.0 Notification
+
+###### 2.5.5.11.4.1 Source Id
+
+REPO-WORKER-LAMBDA
+
+###### 2.5.5.11.4.2 Target Id
+
+REPO-EMAIL-SES
+
+###### 2.5.5.11.4.3 Message
+
+16. Send email with download link
+
+###### 2.5.5.11.4.4 Sequence Number
+
+16
+
+###### 2.5.5.11.4.5 Type
+
+🔹 Notification
+
+###### 2.5.5.11.4.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.5.11.4.7 Return Message
+
+17. Confirm email sent
+
+###### 2.5.5.11.4.8 Has Return
+
+✅ Yes
+
+###### 2.5.5.11.4.9 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | AWS SDK |
+| Method | SendEmail |
+| Parameters | To: user's email, Subject: 'Your Personal Data Exp... |
+| Authentication | Requires IAM role permissions: `ses:SendEmail`. |
+| Error Handling | On failure, log error, retry. Final failure result... |
+| Performance | N/A |
+
+## 2.6.0.0.0.0 Notes
+
+### 2.6.1.0.0.0 Content
+
+#### 2.6.1.1.0.0 Content
+
+AC-001, AC-005: The initial API call is synchronous but only queues the job. It immediately returns a 202 Accepted, and the UI shows a success message. The actual heavy lifting is done asynchronously.
+
+#### 2.6.1.2.0.0 Position
+
+top-right
+
+#### 2.6.1.3.0.0 Participant Id
+
+REPO-APP-USER-DATA
+
+#### 2.6.1.4.0.0 Sequence Number
+
+5
+
+### 2.6.2.0.0.0 Content
+
+#### 2.6.2.1.0.0 Content
+
+AC-002, AC-003, AC-004, AC-006: The core data aggregation and notification logic is handled by the Lambda worker. It must have a longer timeout configured to handle large user data sets.
+
+#### 2.6.2.2.0.0 Position
+
+bottom-right
+
+#### 2.6.2.3.0.0 Participant Id
+
+REPO-WORKER-LAMBDA
+
+#### 2.6.2.4.0.0 Sequence Number
+
+9
+
+### 2.6.3.0.0.0 Content
+
+#### 2.6.3.1.0.0 Content
+
+AC-007: If any step within the Lambda execution fails, a catch block will trigger a failure notification email to the user and log the detailed error to CloudWatch. The SQS message will be sent to a Dead Letter Queue after configured retries for manual inspection.
+
+#### 2.6.3.2.0.0 Position
+
+bottom-right
+
+#### 2.6.3.3.0.0 Participant Id
+
+REPO-WORKER-LAMBDA
+
+#### 2.6.3.4.0.0 Sequence Number
+
+17
+
+## 2.7.0.0.0.0 Implementation Guidance
+
+| Property | Value |
+|----------|-------|
+| Security Requirements | 1. API Gateway must enforce JWT authentication via... |
+| Performance Targets | The initial request API (`/users/me/export-data`) ... |
+| Error Handling Strategy | A Dead Letter Queue (DLQ) must be configured for t... |
+| Testing Considerations | 1. Integration tests are critical for the Lambda w... |
+| Monitoring Requirements | 1. Every log message across the User & Data Servic... |
+| Deployment Considerations | All new infrastructure (SQS Queue, DLQ, S3 Bucket,... |
+

@@ -1,0 +1,41 @@
+sequenceDiagram
+    actor "Client SPA" as ClientSPA
+    participant "API Gateway" as APIGateway
+    actor "User & Data Service" as UserDataService
+    participant "Application DB" as ApplicationDB
+    participant "DSAR Job Queue" as DSARJobQueue
+    participant "DSAR Export Worker" as DSARExportWorker
+    participant "Data Export Storage" as DataExportStorage
+    participant "Email Notification Service" as EmailNotificationService
+
+    activate APIGateway
+    ClientSPA->>APIGateway: 1. Initiate data export request
+    APIGateway-->>ClientSPA: HTTP/1.1 202 Accepted
+    activate UserDataService
+    APIGateway->>UserDataService: 2. Forward POST /user/me/data-export
+    UserDataService-->>APIGateway: HTTP/1.1 202 Accepted
+    UserDataService->>ApplicationDB: 3. Check for existing active request
+    ApplicationDB-->>UserDataService: 0 rows or 1 row with active request status
+    UserDataService->>ApplicationDB: 4. Create new data export request record
+    ApplicationDB-->>UserDataService: New request record ID
+    UserDataService->>DSARJobQueue: 5. Publish data export job message
+    DSARJobQueue-->>UserDataService: Message ID
+    activate DSARExportWorker
+    DSARJobQueue->>DSARExportWorker: 6. Trigger Lambda with job message
+    DSARExportWorker->>ApplicationDB: 7. Fetch all user-related data (profile, history, variables, modes)
+    ApplicationDB-->>DSARExportWorker: User data records
+    DSARExportWorker->>DataExportStorage: 8. Upload compiled JSON data file
+    DataExportStorage-->>DSARExportWorker: S3 Object ETag/VersionId
+    DSARExportWorker->>DataExportStorage: 9. Generate time-limited pre-signed URL
+    DataExportStorage-->>DSARExportWorker: Secure download URL
+    DSARExportWorker->>EmailNotificationService: 10. Send download link email to user
+    EmailNotificationService-->>DSARExportWorker: SES Message ID
+    DSARExportWorker->>ApplicationDB: 11. Update request status to 'completed'
+    ApplicationDB-->>DSARExportWorker: Update result
+
+    note over DSARExportWorker: Data Aggregation & Sanitization: The worker compiles data from multiple tables in-memory. It must...
+    note over DSARExportWorker: Idempotency: The background worker should be designed to be idempotent to handle SQS retries safe...
+
+    deactivate DSARExportWorker
+    deactivate UserDataService
+    deactivate APIGateway

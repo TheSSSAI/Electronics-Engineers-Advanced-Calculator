@@ -1,0 +1,815 @@
+# 1 Overview
+
+## 1.1 Diagram Id
+
+SEQ-FEAT-001
+
+## 1.2 Name
+
+Logged-in User Calculation and History Persistence
+
+## 1.3 Description
+
+A logged-in user with an active internet connection performs a calculation using the core calculator. The client application performs the calculation locally and then sends the expression and result to the backend to be persisted in the user's calculation history.
+
+## 1.4 Type
+
+🔹 FeatureFlow
+
+## 1.5 Purpose
+
+To provide core calculator functionality while ensuring a user's activity is saved to their account for future reference, fulfilling REQ-FRC-001.
+
+## 1.6 Complexity
+
+Low
+
+## 1.7 Priority
+
+🔴 High
+
+## 1.8 Frequency
+
+OnDemand
+
+## 1.9 Participants
+
+- REPO-SPA-CLIENT
+- REPO-API-GATEWAY
+- REPO-APP-USER-DATA
+- REPO-DB-POSTGRES
+
+## 1.10 Key Interactions
+
+- User enters an expression in the Client SPA.
+- The client-side logic calculates the result and updates the UI.
+- The client sends an authenticated API request with the expression and result to the User & Data Service.
+- API Gateway validates the user's JWT.
+- User & Data Service saves the new entry to the `CalculationHistory` table in the database.
+
+## 1.11 Triggers
+
+- A logged-in user successfully completes a calculation.
+
+## 1.12 Outcomes
+
+- The calculation result is displayed to the user.
+- The calculation is added to the user's history, both in the UI and in the database.
+
+## 1.13 Business Rules
+
+- Calculation history is appended and associated with the specific user_id.
+
+## 1.14 Error Scenarios
+
+- User is offline (handled by SEQ-DF-001).
+- API call to save history fails due to network or server error.
+
+## 1.15 Integration Points
+
+*No items available*
+
+# 2.0 Details
+
+## 2.1 Diagram Id
+
+SEQ-FEAT-001
+
+## 2.2 Name
+
+Feature Flow: Logged-in User Calculation and History Persistence
+
+## 2.3 Description
+
+This sequence details the complete technical flow for a logged-in user performing a calculation. The client application is responsible for the immediate calculation and UI update, followed by an asynchronous, authenticated API call to persist the calculation details (expression and result) into the user's history in the backend database. This ensures a responsive user experience while guaranteeing data persistence.
+
+## 2.4 Participants
+
+### 2.4.1 Frontend Application
+
+#### 2.4.1.1 Repository Id
+
+REPO-SPA-CLIENT
+
+#### 2.4.1.2 Display Name
+
+Client SPA
+
+#### 2.4.1.3 Type
+
+🔹 Frontend Application
+
+#### 2.4.1.4 Technology
+
+React 18+, TypeScript, Redux Toolkit
+
+#### 2.4.1.5 Order
+
+1
+
+#### 2.4.1.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #3498DB |
+| Stereotype | User Interface |
+
+### 2.4.2.0 API Gateway
+
+#### 2.4.2.1 Repository Id
+
+REPO-API-GATEWAY
+
+#### 2.4.2.2 Display Name
+
+API Gateway
+
+#### 2.4.2.3 Type
+
+🔹 API Gateway
+
+#### 2.4.2.4 Technology
+
+Amazon API Gateway
+
+#### 2.4.2.5 Order
+
+2
+
+#### 2.4.2.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | boundary |
+| Color | #F39C12 |
+| Stereotype | AWS Service |
+
+### 2.4.3.0 Microservice
+
+#### 2.4.3.1 Repository Id
+
+REPO-APP-USER-DATA
+
+#### 2.4.3.2 Display Name
+
+User & Data Service
+
+#### 2.4.3.3 Type
+
+🔹 Microservice
+
+#### 2.4.3.4 Technology
+
+NestJS, TypeORM, Pino
+
+#### 2.4.3.5 Order
+
+3
+
+#### 2.4.3.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | control |
+| Color | #8E44AD |
+| Stereotype | ECS Service |
+
+### 2.4.4.0 Database
+
+#### 2.4.4.1 Repository Id
+
+REPO-DB-POSTGRES
+
+#### 2.4.4.2 Display Name
+
+PostgreSQL Database
+
+#### 2.4.4.3 Type
+
+🔹 Database
+
+#### 2.4.4.4 Technology
+
+Amazon RDS for PostgreSQL 15+
+
+#### 2.4.4.5 Order
+
+4
+
+#### 2.4.4.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | database |
+| Color | #2ECC71 |
+| Stereotype | RDS Instance |
+
+## 2.5.0.0 Interactions
+
+### 2.5.1.0 User Interaction
+
+#### 2.5.1.1 Source Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.1.2 Target Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.1.3 Message
+
+1. User enters expression (e.g., '10k * 2') and triggers calculation.
+
+#### 2.5.1.4 Sequence Number
+
+1
+
+#### 2.5.1.5 Type
+
+🔹 User Interaction
+
+#### 2.5.1.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.1.7 Return Message
+
+
+
+#### 2.5.1.8 Has Return
+
+❌ No
+
+#### 2.5.1.9 Is Activation
+
+✅ Yes
+
+#### 2.5.1.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | DOM Event |
+| Method | onClick/onKeyPress |
+| Parameters | Event object |
+| Authentication | N/A |
+| Error Handling | Handled by UI validation (e.g., preventing invalid... |
+| Performance | Must be < 50ms for UI responsiveness. |
+
+### 2.5.2.0 Local Computation
+
+#### 2.5.2.1 Source Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.2.2 Target Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.2.3 Message
+
+2. evaluateExpression(expression) & updateState(result)
+
+#### 2.5.2.4 Sequence Number
+
+2
+
+#### 2.5.2.5 Type
+
+🔹 Local Computation
+
+#### 2.5.2.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.2.7 Return Message
+
+result: '20000'
+
+#### 2.5.2.8 Has Return
+
+✅ Yes
+
+#### 2.5.2.9 Is Activation
+
+❌ No
+
+#### 2.5.2.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | Internal Function Call |
+| Method | Client-side calculation logic and Redux dispatch |
+| Parameters | expression: string |
+| Authentication | N/A |
+| Error Handling | Catch syntax errors, display user-friendly message... |
+| Performance | Must complete in < 50ms. |
+
+### 2.5.3.0 API Request
+
+#### 2.5.3.1 Source Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.3.2 Target Id
+
+REPO-API-GATEWAY
+
+#### 2.5.3.3 Message
+
+3. POST /api/v1/history
+
+#### 2.5.3.4 Sequence Number
+
+3
+
+#### 2.5.3.5 Type
+
+🔹 API Request
+
+#### 2.5.3.6 Is Synchronous
+
+❌ No
+
+#### 2.5.3.7 Return Message
+
+
+
+#### 2.5.3.8 Has Return
+
+✅ Yes
+
+#### 2.5.3.9 Is Activation
+
+✅ Yes
+
+#### 2.5.3.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTPS/REST |
+| Method | POST |
+| Parameters | Body: { expression: '10k * 2', result: '20000' } |
+| Authentication | Authorization: Bearer <JWT from Cognito>. Handled ... |
+| Error Handling | Client-side ApiServiceClient handles network error... |
+| Performance | Fire-and-forget from UI perspective. Must not bloc... |
+
+### 2.5.4.0 Security Checkpoint
+
+#### 2.5.4.1 Source Id
+
+REPO-API-GATEWAY
+
+#### 2.5.4.2 Target Id
+
+REPO-API-GATEWAY
+
+#### 2.5.4.3 Message
+
+4. Validate JWT with Cognito User Pool
+
+#### 2.5.4.4 Sequence Number
+
+4
+
+#### 2.5.4.5 Type
+
+🔹 Security Checkpoint
+
+#### 2.5.4.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.4.7 Return Message
+
+Valid token claims (incl. userId)
+
+#### 2.5.4.8 Has Return
+
+✅ Yes
+
+#### 2.5.4.9 Is Activation
+
+❌ No
+
+#### 2.5.4.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | Internal AWS Integration |
+| Method | Cognito JWT Authorizer |
+| Parameters | Authorization header |
+| Authentication | Validates token signature, expiry, and issuer. |
+| Error Handling | If invalid, Gateway rejects request with 401 Unaut... |
+| Performance | Typically < 50ms. |
+
+### 2.5.5.0 Request Routing
+
+#### 2.5.5.1 Source Id
+
+REPO-API-GATEWAY
+
+#### 2.5.5.2 Target Id
+
+REPO-APP-USER-DATA
+
+#### 2.5.5.3 Message
+
+5. Forward validated request
+
+#### 2.5.5.4 Sequence Number
+
+5
+
+#### 2.5.5.5 Type
+
+🔹 Request Routing
+
+#### 2.5.5.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.5.7 Return Message
+
+
+
+#### 2.5.5.8 Has Return
+
+✅ Yes
+
+#### 2.5.5.9 Is Activation
+
+✅ Yes
+
+#### 2.5.5.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTP |
+| Method | POST |
+| Parameters | Adds 'X-Correlation-ID' header for distributed tra... |
+| Authentication | N/A (Trust established via VPC link and IAM roles)... |
+| Error Handling | If service is unhealthy, Gateway returns 503 Servi... |
+| Performance | Network latency within VPC. |
+
+### 2.5.6.0 Controller Logic
+
+#### 2.5.6.1 Source Id
+
+REPO-APP-USER-DATA
+
+#### 2.5.6.2 Target Id
+
+REPO-APP-USER-DATA
+
+#### 2.5.6.3 Message
+
+6. HistoryController.addHistory(dto, user)
+
+#### 2.5.6.4 Sequence Number
+
+6
+
+#### 2.5.6.5 Type
+
+🔹 Controller Logic
+
+#### 2.5.6.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.6.7 Return Message
+
+
+
+#### 2.5.6.8 Has Return
+
+✅ Yes
+
+#### 2.5.6.9 Is Activation
+
+❌ No
+
+#### 2.5.6.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | Internal Method Call |
+| Method | NestJS Controller method |
+| Parameters | dto: CreateHistoryDto, user: { userId: 'uuid-...' ... |
+| Authentication | Extracts user context from request object populate... |
+| Error Handling | NestJS ValidationPipe automatically returns 400 Ba... |
+| Performance | < 5ms |
+
+### 2.5.7.0 Database Write
+
+#### 2.5.7.1 Source Id
+
+REPO-APP-USER-DATA
+
+#### 2.5.7.2 Target Id
+
+REPO-DB-POSTGRES
+
+#### 2.5.7.3 Message
+
+7. INSERT INTO calculation_history
+
+#### 2.5.7.4 Sequence Number
+
+7
+
+#### 2.5.7.5 Type
+
+🔹 Database Write
+
+#### 2.5.7.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.7.7 Return Message
+
+New row with generated ID
+
+#### 2.5.7.8 Has Return
+
+✅ Yes
+
+#### 2.5.7.9 Is Activation
+
+✅ Yes
+
+#### 2.5.7.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | TCP/IP (PostgreSQL Wire Protocol) |
+| Method | SQL INSERT via TypeORM repository.save() |
+| Parameters | SQL: INSERT INTO calculation_history (user_id, exp... |
+| Authentication | Credentials retrieved from AWS Secrets Manager. |
+| Error Handling | Database connection errors or constraint violation... |
+| Performance | P99 < 20ms. Requires index on `calculation_history... |
+
+### 2.5.8.0 Database Response
+
+#### 2.5.8.1 Source Id
+
+REPO-DB-POSTGRES
+
+#### 2.5.8.2 Target Id
+
+REPO-APP-USER-DATA
+
+#### 2.5.8.3 Message
+
+8. Return new record
+
+#### 2.5.8.4 Sequence Number
+
+8
+
+#### 2.5.8.5 Type
+
+🔹 Database Response
+
+#### 2.5.8.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.8.7 Return Message
+
+CalculationHistory Entity
+
+#### 2.5.8.8 Has Return
+
+✅ Yes
+
+#### 2.5.8.9 Is Activation
+
+❌ No
+
+#### 2.5.8.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | TCP/IP |
+| Method |  |
+| Parameters | Serialized database row |
+| Authentication | N/A |
+| Error Handling | N/A |
+| Performance | Included in Step 7. |
+
+### 2.5.9.0 API Response
+
+#### 2.5.9.1 Source Id
+
+REPO-APP-USER-DATA
+
+#### 2.5.9.2 Target Id
+
+REPO-API-GATEWAY
+
+#### 2.5.9.3 Message
+
+9. HTTP 201 Created
+
+#### 2.5.9.4 Sequence Number
+
+9
+
+#### 2.5.9.5 Type
+
+🔹 API Response
+
+#### 2.5.9.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.9.7 Return Message
+
+Body: { id: '...', userId: '...', expression: '...', result: '...', createdAt: '...' }
+
+#### 2.5.9.8 Has Return
+
+✅ Yes
+
+#### 2.5.9.9 Is Activation
+
+❌ No
+
+#### 2.5.9.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTP |
+| Method |  |
+| Parameters | Full serialized DTO of the newly created resource. |
+| Authentication | N/A |
+| Error Handling | N/A |
+| Performance | Serialization time < 5ms. |
+
+### 2.5.10.0 API Response
+
+#### 2.5.10.1 Source Id
+
+REPO-API-GATEWAY
+
+#### 2.5.10.2 Target Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.10.3 Message
+
+10. Forward HTTP 201 Created
+
+#### 2.5.10.4 Sequence Number
+
+10
+
+#### 2.5.10.5 Type
+
+🔹 API Response
+
+#### 2.5.10.6 Is Synchronous
+
+❌ No
+
+#### 2.5.10.7 Return Message
+
+Body: { id: '...', ... }
+
+#### 2.5.10.8 Has Return
+
+✅ Yes
+
+#### 2.5.10.9 Is Activation
+
+❌ No
+
+#### 2.5.10.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTPS |
+| Method |  |
+| Parameters | JSON payload |
+| Authentication | N/A |
+| Error Handling | N/A |
+| Performance | Network latency. |
+
+### 2.5.11.0 State Update
+
+#### 2.5.11.1 Source Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.11.2 Target Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.11.3 Message
+
+11. updateHistoryItemInState(response)
+
+#### 2.5.11.4 Sequence Number
+
+11
+
+#### 2.5.11.5 Type
+
+🔹 State Update
+
+#### 2.5.11.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.11.7 Return Message
+
+
+
+#### 2.5.11.8 Has Return
+
+❌ No
+
+#### 2.5.11.9 Is Activation
+
+❌ No
+
+#### 2.5.11.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | Internal Function Call |
+| Method | Redux dispatch action |
+| Parameters | The server response payload |
+| Authentication | N/A |
+| Error Handling | Logs potential state update errors to the console. |
+| Performance | Updates the local state with the server-confirmed ... |
+
+## 2.6.0.0 Notes
+
+### 2.6.1.0 Content
+
+#### 2.6.1.1 Content
+
+The initial calculation (Step 2) is performed client-side to provide instant feedback to the user, fulfilling REQ-NFP-001. The API call to persist history (Step 3) is asynchronous and non-blocking.
+
+#### 2.6.1.2 Position
+
+top
+
+#### 2.6.1.3 Participant Id
+
+*Not specified*
+
+#### 2.6.1.4 Sequence Number
+
+2
+
+### 2.6.2.0 Content
+
+#### 2.6.2.1 Content
+
+Security Checkpoint: The API Gateway acts as the authoritative gatekeeper, strictly enforcing that only authenticated users can access the history persistence endpoint. It offloads the authentication concern from the application service.
+
+#### 2.6.2.2 Position
+
+right
+
+#### 2.6.2.3 Participant Id
+
+REPO-API-GATEWAY
+
+#### 2.6.2.4 Sequence Number
+
+4
+
+### 2.6.3.0 Content
+
+#### 2.6.3.1 Content
+
+Domain Logic: The User & Data Service is responsible for enforcing the business rule that a history item must be associated with the `user_id` extracted from the validated JWT, preventing data from being attributed to the wrong user.
+
+#### 2.6.3.2 Position
+
+right
+
+#### 2.6.3.3 Participant Id
+
+REPO-APP-USER-DATA
+
+#### 2.6.3.4 Sequence Number
+
+6
+
+## 2.7.0.0 Implementation Guidance
+
+| Property | Value |
+|----------|-------|
+| Security Requirements | The API Gateway JWT Authorizer must be configured ... |
+| Performance Targets | The end-to-end P95 latency for the history persist... |
+| Error Handling Strategy | The client must gracefully handle API failures by ... |
+| Testing Considerations | Unit tests should cover the client-side calculatio... |
+| Monitoring Requirements | A CloudWatch Alarm must be created for the API Gat... |
+| Deployment Considerations | This feature does not require a feature flag as it... |
+

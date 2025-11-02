@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docs Site Header</title>
+    <style>
+        /* CSS Reset */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Design System Foundation (Tokens) */
+        :root {
+            --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            
+            --color-primary: #4A90E2;
+            --color-primary-hover: #357ABD;
+            
+            /* Light Theme */
+            --color-bg-light: #FFFFFF;
+            --color-text-light: #1C1E21;
+            --color-text-secondary-light: #606770;
+            --color-border-light: #E0E0E0;
+            --color-bg-hover-light: #F2F3F5;
+            --color-bg-input-light: #F0F2F5;
+
+            /* Dark Theme */
+            --color-bg-dark: #18191A;
+            --color-text-dark: #E4E6EB;
+            --color-text-secondary-dark: #B0B3B8;
+            --color-border-dark: #3A3B3C;
+            --color-bg-hover-dark: #3A3B3C;
+            --color-bg-input-dark: #3A3B3C;
+            
+            --spacing-xs: 4px;
+            --spacing-s: 8px;
+            --spacing-m: 16px;
+            --spacing-l: 24px;
+
+            --border-radius: 6px;
+            --header-height: 60px;
+        }
+
+        /* Default to light theme */
+        body {
+            --color-bg: var(--color-bg-light);
+            --color-text: var(--color-text-light);
+            --color-text-secondary: var(--color-text-secondary-light);
+            --color-border: var(--color-border-light);
+            --color-bg-hover: var(--color-bg-hover-light);
+            --color-bg-input: var(--color-bg-input-light);
+        }
+
+        /* Dark theme override */
+        body.dark-theme {
+            --color-bg: var(--color-bg-dark);
+            --color-text: var(--color-text-dark);
+            --color-text-secondary: var(--color-text-secondary-dark);
+            --color-border: var(--color-border-dark);
+            --color-bg-hover: var(--color-bg-hover-dark);
+            --color-bg-input: var(--color-bg-input-dark);
+        }
+
+        body {
+            font-family: var(--font-family-sans);
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            transition: background-color 0.2s, color 0.2s;
+        }
+        
+        /* Mockup container styles */
+        .screen-container {
+            border: 1px dashed var(--color-border);
+            margin: var(--spacing-l);
+        }
+        .screen-header h1 {
+            font-size: 1.2rem;
+            padding: var(--spacing-m);
+            background-color: var(--color-bg-hover);
+        }
+
+        /* Icon Base Styles */
+        .icon {
+            width: 20px;
+            height: 20px;
+            stroke: var(--color-text-secondary);
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* Focus Styles */
+        a:focus-visible, button:focus-visible, input:focus-visible {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
+            border-radius: 2px;
+        }
+
+        /* Docs Site Header Implementation */
+        .docs-header {
+            height: var(--header-height);
+            width: 100%;
+            background-color: var(--color-bg);
+            border-bottom: 1px solid var(--color-border);
+            padding: 0 var(--spacing-m);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .header-container {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header-left, .header-right {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-m);
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-s);
+            text-decoration: none;
+            color: var(--color-text);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .header-logo:hover {
+            color: var(--color-primary);
+        }
+        .header-logo .icon {
+            stroke: var(--color-primary);
+            width: 28px;
+            height: 28px;
+        }
+        .header-logo:hover .icon {
+            stroke: var(--color-primary-hover);
+        }
+
+        .header-nav {
+            display: none; /* Hidden on mobile by default */
+        }
+        
+        .header-nav a {
+            padding: var(--spacing-s) var(--spacing-m);
+            text-decoration: none;
+            color: var(--color-text-secondary);
+            font-weight: 500;
+            font-size: 0.9rem;
+            border-radius: var(--border-radius);
+            transition: color 0.2s, background-color 0.2s;
+        }
+        .header-nav a:hover {
+            color: var(--color-text);
+            background-color: var(--color-bg-hover);
+        }
+        .header-nav a.active {
+            color: var(--color-primary);
+        }
+        
+        .hamburger-menu {
+            display: flex;
+            padding: var(--spacing-s);
+            background: none;
+            border: none;
+            cursor: pointer;
+            border-radius: var(--border-radius);
+            transition: background-color 0.2s;
+        }
+        .hamburger-menu:hover {
+            background-color: var(--color-bg-hover);
+        }
+        .hamburger-menu .icon {
+            width: 24px;
+            height: 24px;
+            stroke: var(--color-text);
+        }
+
+        .search-bar-container {
+            position: relative;
+        }
+        .search-bar-container .icon {
+            position: absolute;
+            left: var(--spacing-m);
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+        .search-input {
+            height: 38px;
+            width: 240px;
+            background-color: var(--color-bg-input);
+            border: 1px solid var(--color-border);
+            border-radius: var(--border-radius);
+            padding-left: 40px;
+            font-family: var(--font-family-sans);
+            color: var(--color-text);
+            font-size: 0.9rem;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+        .search-input:focus {
+            border-color: var(--color-primary);
+            background-color: var(--color-bg);
+            outline: none;
+        }
+
+        .icon-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            background-color: transparent;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .icon-button:hover {
+            background-color: var(--color-bg-hover);
+        }
+        .icon-button .icon {
+             stroke: var(--color-text-secondary);
+        }
+        .icon-button:hover .icon {
+             stroke: var(--color-text);
+        }
+
+        /* Docusaurus Breakpoint for mobile nav */
+        @media (min-width: 997px) {
+            .header-nav {
+                display: flex;
+                align-items: center;
+                gap: var(--spacing-s);
+                margin-left: var(--spacing-l);
+            }
+            .hamburger-menu {
+                display: none;
+            }
+            .header-left {
+                flex: 1 0 0;
+            }
+            .header-right {
+                flex: 1 0 0;
+                justify-content: flex-end;
+            }
+        }
+        
+        /* Variation styles */
+        .screen-variations {
+            padding: var(--spacing-l);
+            margin-top: var(--spacing-l);
+        }
+        .variation-group {
+            margin-bottom: var(--spacing-l);
+            padding: var(--spacing-m);
+            border: 1px solid var(--color-border);
+            border-radius: var(--border-radius);
+        }
+        .variation-group h3 {
+            margin-bottom: var(--spacing-m);
+            font-size: 1rem;
+        }
+        .variation-group h3 normal {
+             font-size: 0.9rem;
+             color: var(--color-text-secondary);
+             font-weight: 400;
+        }
+        .mobile-variant-container {
+            width: 375px;
+            margin: 0 auto;
+            border: 2px solid var(--color-primary);
+            overflow: hidden;
+        }
+
+    </style>
+</head>
+<body class="dark-theme">
+
+    <div class="screen-container">
+        <header class="screen-header">
+            <h1>Component: Docs Site Header</h1>
+        </header>
+
+        <header class="docs-header" id="header-default">
+            <div class="header-container">
+                <div class="header-left">
+                    <button class="hamburger-menu" aria-label="Toggle navigation menu">
+                        <svg class="icon" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"></path></svg>
+                    </button>
+                    <a href="#" class="header-logo">
+                        <svg class="icon" viewBox="0 0 24 24"><path d="M9 3L5 6.99h3V14h2V6.99h3L9 3zm7 14.01V10h-2v7.01h-3L15 21l4-3.99h-3z"></path></svg>
+                        <span>ElecCalc Docs</span>
+                    </a>
+                    <nav class="header-nav" aria-label="Main Navigation">
+                        <a href="#">Calculator App</a>
+                        <a href="#" class="active">API Docs</a>
+                        <a href="#">GitHub</a>
+                    </nav>
+                </div>
+                <div class="header-right">
+                    <div class="search-bar-container" role="search">
+                         <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                         <input type="search" class="search-input" placeholder="Search documentation...">
+                    </div>
+                    <button class="icon-button" id="theme-toggle-default" aria-label="Toggle light/dark theme">
+                        <svg class="icon icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+    </div>
+
+    <div class="screen-variations">
+        <h2>Screen Variations</h2>
+        
+        <div class="variation-group">
+            <h3>Variant Name: "Default (Desktop)"</h3>
+            <normal>Standard header appearance on viewports wider than 996px. Navigation links are visible, and the hamburger menu is hidden.</normal>
+            <p style="margin-top: 8px; font-size: 0.9rem; color: var(--color-text-secondary);">The main example above demonstrates the desktop view. Resize your browser window to see it adapt.</p>
+        </div>
+        
+        <div class="variation-group">
+            <h3>Variant Name: "Mobile Collapsed"</h3>
+            <normal>Appearance on viewports narrower than 997px. Navigation links are hidden, and the hamburger menu button is visible.</normal>
+            <div class="mobile-variant-container">
+                 <header class="docs-header" id="header-mobile">
+                    <div class="header-container">
+                        <div class="header-left">
+                            <button class="hamburger-menu" aria-label="Toggle navigation menu">
+                                <svg class="icon" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"></path></svg>
+                            </button>
+                            <a href="#" class="header-logo">
+                               <svg class="icon" viewBox="0 0 24 24"><path d="M9 3L5 6.99h3V14h2V6.99h3L9 3zm7 14.01V10h-2v7.01h-3L15 21l4-3.99h-3z"></path></svg>
+                                <span>ElecCalc</span>
+                            </a>
+                        </div>
+                        <div class="header-right">
+                             <div class="search-bar-container" role="search">
+                                 <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                 <input type="search" class="search-input" placeholder="Search...">
+                            </div>
+                            <button class="icon-button" id="theme-toggle-mobile" aria-label="Toggle light/dark theme">
+                               <svg class="icon icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                </header>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Simple script for theme toggling in the mockup
+        const toggleButtons = document.querySelectorAll('#theme-toggle-default, #theme-toggle-mobile');
+        toggleButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                document.body.classList.toggle('dark-theme');
+                const isDark = document.body.classList.contains('dark-theme');
+                const sunIcon = `<svg class="icon icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+                const moonIcon = `<svg class="icon icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+                
+                toggleButtons.forEach(btn => {
+                    btn.innerHTML = isDark ? moonIcon : sunIcon;
+                });
+            });
+        });
+        
+        // Initialize buttons with correct icon
+        const isDarkInitial = document.body.classList.contains('dark-theme');
+        const initialIcon = isDarkInitial 
+            ? `<svg class="icon icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`
+            : `<svg class="icon icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+        toggleButtons.forEach(btn => {
+            btn.innerHTML = initialIcon;
+        });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+name: User Data Service CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint-and-test:
+    name: Lint & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run tests with coverage
+        run: npm run test:cov
+
+      - name: Check coverage threshold
+        uses: anuraagajdl/jest-coverage-threshold-action@v1.2.0
+        with:
+          coverage-threshold: 85
+
+  security-scan:
+    name: Security Scan
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Software Composition Analysis (SCA)
+        run: npm audit --audit-level=high
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: typescript
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis (SAST)
+        uses: github/codeql-action/analyze@v3
+
+  build-and-push:
+    name: Build & Push Docker Image
+    needs: security-scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsECRAccessRole # Replace with your IAM Role ARN
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ secrets.AWS_ECR_REGISTRY }}
+          ECR_REPOSITORY: user-data-service
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+  deploy-to-staging:
+    name: Deploy to Staging
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: staging
+    if: github.ref != 'refs/heads/main' # Deploy to staging on pull requests
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsDeployRole # Replace with your IAM Role ARN
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Workspace
+        run: terraform workspace select staging || terraform workspace new staging
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve -var="image_tag=${{ needs.build-and-push.outputs.image_tag }}"
+
+      - name: Run Database Migrations
+        # This step would typically run a one-off ECS task with the new image tag and a command override
+        run: echo "Running migrations against staging DB... (implementation depends on setup)"
+
+  deploy-to-prod:
+    name: Deploy to Production
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: production
+    if: github.ref == 'refs/heads/main' # Deploy to prod on merge to main
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsDeployRole # Replace with your IAM Role ARN
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Workspace
+        run: terraform workspace select prod
+
+      - name: Run Database Migrations
+        run: echo "Running migrations against prod DB..."
+
+      - name: Deploy using Blue/Green strategy
+        # This step would interact with AWS CodeDeploy or use Terraform to update ECS service
+        run: |
+          echo "Starting Blue/Green deployment for image: ${{ needs.build-and-push.outputs.image_tag }}"
+          # terraform apply -auto-approve -var="image_tag=${{ needs.build-and-push.outputs.image_tag }}"

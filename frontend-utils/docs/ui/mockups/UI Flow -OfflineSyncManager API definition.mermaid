@@ -1,0 +1,24 @@
+classDiagram
+    direction LR
+
+    class OfflineSyncManager {
+        -IDBDatabase db
+        -Array~Request~ queue
+        +String state
+        +init() void
+        +queueRequest(request: Request) Promise
+        +startSync() void
+        +getState() String
+        +on(event: String, callback: Function) void
+        -processQueue() void
+        -handleConnectionChange() void
+    }
+
+    class Request {
+        String endpoint
+        String method
+        Object payload
+        Number timestamp
+    }
+
+    note for OfflineSyncManager "States: \n'IDLE': Online, queue empty\n'OFFLINE': Network disconnected, queueing requests\n'SYNCING': Online, processing queued requests\n'ERROR': Sync failed, will retry"

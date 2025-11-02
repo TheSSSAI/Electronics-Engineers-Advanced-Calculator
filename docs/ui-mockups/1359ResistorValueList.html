@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Molecular Component: ResistorValueList</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* 1. DESIGN SYSTEM & BASE STYLES */
+        :root {
+            /* Colors */
+            --color-primary-50: #E3F2FD;
+            --color-primary-500: #2196F3;
+            --color-primary-700: #1976D2;
+            --color-neutral-100: #F1F3F5;
+            --color-neutral-200: #E9ECEF;
+            --color-neutral-300: #DEE2E6;
+            --color-neutral-500: #ADB5BD;
+            --color-neutral-700: #495057;
+            --color-neutral-900: #212529;
+            --color-white: #FFFFFF;
+            --color-error: #D32F2F;
+            --color-error-bg: #FDEDED;
+
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+
+            /* Typography */
+            --font-primary: 'Roboto', sans-serif;
+            --font-size-sm: 14px;
+            --font-size-md: 16px;
+
+            /* Borders */
+            --border-radius: 8px;
+
+            /* Transitions */
+            --transition-fast: 150ms ease-in-out;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background-color: var(--color-neutral-100);
+            color: var(--color-neutral-900);
+            padding: var(--space-lg);
+        }
+
+        /* Showcase Layout */
+        .showcase {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .showcase-section {
+            background-color: var(--color-white);
+            padding: var(--space-lg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .showcase-section:not(:last-child) {
+            margin-bottom: var(--space-xl);
+        }
+
+        .showcase-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: var(--space-sm);
+        }
+
+        .showcase-section p {
+            font-size: var(--font-size-md);
+            color: var(--color-neutral-700);
+            margin-bottom: var(--space-lg);
+        }
+        
+        /* 2. ATOMIC COMPONENT STYLES (Simplified for showcase) */
+
+        /* Button */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--border-radius);
+            font-size: var(--font-size-md);
+            font-weight: 500;
+            text-align: center;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: background-color var(--transition-fast), transform var(--transition-fast);
+            min-height: 44px; /* Touch target */
+        }
+        .btn--primary {
+            background-color: var(--color-primary-700);
+            color: var(--color-white);
+        }
+        .btn--primary:hover {
+            background-color: var(--color-neutral-900, #1565C0);
+        }
+        .btn:focus-visible {
+            outline: 2px solid var(--color-primary-500);
+            outline-offset: 2px;
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .btn:disabled {
+            background-color: var(--color-neutral-200);
+            color: var(--color-neutral-500);
+            cursor: not-allowed;
+        }
+        
+        /* Icon Button */
+        .btn--icon {
+            background: none;
+            border: none;
+            padding: var(--space-xs);
+            color: var(--color-neutral-700);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            min-height: 36px;
+        }
+        .btn--icon svg {
+            width: 20px;
+            height: 20px;
+        }
+        .btn--icon:hover {
+            background-color: var(--color-neutral-200);
+            color: var(--color-neutral-900);
+        }
+        .btn--icon--danger:hover {
+            background-color: var(--color-error-bg);
+            color: var(--color-error);
+        }
+
+        /* Numeric Input */
+        .numeric-input__field {
+            font-family: var(--font-primary);
+            font-size: var(--font-size-md);
+            padding: var(--space-sm) var(--space-md);
+            border: 1px solid var(--color-neutral-500);
+            border-radius: var(--border-radius);
+            width: 100%;
+            transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+            min-height: 44px; /* Touch target */
+        }
+        .numeric-input__field:focus {
+            outline: none;
+            border-color: var(--color-primary-500);
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+        }
+        .numeric-input__field--error {
+            border-color: var(--color-error);
+        }
+        .numeric-input__field--error:focus {
+            box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.2);
+        }
+
+
+        /* 3. MOLECULAR COMPONENT: ResistorValueList */
+        
+        .resistor-list-manager {
+            width: 100%;
+        }
+        
+        /* Add Form */
+        .resistor-list-manager__add-form {
+            display: flex;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+        }
+
+        .resistor-list-manager__input-group {
+            flex-grow: 1;
+        }
+
+        .resistor-list-manager__error-msg {
+            font-size: var(--font-size-sm);
+            color: var(--color-error);
+            margin-top: var(--space-xs);
+            padding-left: var(--space-xs);
+        }
+
+        .resistor-list-manager__add-btn {
+            flex-shrink: 0;
+        }
+
+        /* List & States */
+        .resistor-list-manager__list-container {
+            border: 1px solid var(--color-neutral-300);
+            border-radius: var(--border-radius);
+            background-color: var(--color-white);
+            min-height: 100px;
+        }
+
+        .resistor-list-manager__empty-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100px;
+            text-align: center;
+            color: var(--color-neutral-700);
+            font-style: italic;
+        }
+
+        .resistor-list-manager__list {
+            list-style: none;
+            padding: var(--space-sm);
+            margin: 0;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        /* List Item */
+        .resistor-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space-sm);
+            border-radius: var(--border-radius);
+            transition: background-color var(--transition-fast);
+        }
+
+        .resistor-item:not(:last-child) {
+            margin-bottom: var(--space-sm);
+        }
+        
+        .resistor-item:hover {
+            background-color: var(--color-neutral-100);
+        }
+
+        .resistor-item__value {
+            font-size: var(--font-size-md);
+            color: var(--color-neutral-900);
+        }
+
+        .resistor-item__actions {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            /* Hide actions by default, show on hover/focus-within */
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+        }
+        
+        .resistor-item:hover .resistor-item__actions,
+        .resistor-item:focus-within .resistor-item__actions {
+            opacity: 1;
+        }
+
+        /* Editing State */
+        .resistor-item--editing {
+            background-color: var(--color-primary-50);
+        }
+        
+        .resistor-item--editing .resistor-item__actions {
+             opacity: 1; /* Always show actions when editing */
+        }
+
+        .resistor-item__edit-form {
+            display: flex;
+            flex-grow: 1;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .resistor-item__edit-input {
+            flex-grow: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <main class="showcase">
+
+        <section class="showcase-section">
+            <h2>Resistor Value List</h2>
+            <p>A molecular component for managing a list of resistor values. It demonstrates empty, populated, editing, and error states.</p>
+
+            <div id="variant-default">
+              <h3>Default</h3>
+              <p>Default variant of the ResistorValueList component.</p>
+            </div>
+            
+            <!-- STATE: Empty -->
+            <div class="component-demo">
+                <h4>State: Empty</h4>
+                <div class="resistor-list-manager">
+                    <form class="resistor-list-manager__add-form" onsubmit="event.preventDefault();">
+                        <div class="resistor-list-manager__input-group">
+                           <label for="res-input-1" class="sr-only">New Resistor Value</label>
+                           <input type="text" id="res-input-1" class="numeric-input__field" placeholder="Enter value (e.g., 4.7k)">
+                        </div>
+                        <button type="submit" class="btn btn--primary resistor-list-manager__add-btn" aria-label="Add Resistor">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        </button>
+                    </form>
+                    <div class="resistor-list-manager__list-container">
+                        <div class="resistor-list-manager__empty-state">
+                           Add resistor values to begin.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- STATE: Populated -->
+            <div class="component-demo" style="margin-top: var(--space-xl);">
+                <h4>State: Populated</h4>
+                <div class="resistor-list-manager">
+                    <form class="resistor-list-manager__add-form" onsubmit="event.preventDefault();">
+                        <div class="resistor-list-manager__input-group">
+                            <label for="res-input-2" class="sr-only">New Resistor Value</label>
+                           <input type="text" id="res-input-2" class="numeric-input__field" placeholder="Enter value (e.g., 4.7k)">
+                        </div>
+                         <button type="submit" class="btn btn--primary resistor-list-manager__add-btn" aria-label="Add Resistor">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        </button>
+                    </form>
+                    <div class="resistor-list-manager__list-container">
+                        <ul class="resistor-list-manager__list">
+                           <li class="resistor-item" tabindex="0">
+                               <span class="resistor-item__value">1 kΩ</span>
+                               <div class="resistor-item__actions">
+                                   <button class="btn btn--icon" aria-label="Edit value 1 kΩ">
+                                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                   </button>
+                                   <button class="btn btn--icon btn--icon--danger" aria-label="Remove value 1 kΩ">
+                                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                   </button>
+                               </div>
+                           </li>
+                           <li class="resistor-item" tabindex="0">
+                               <span class="resistor-item__value">2.2 kΩ</span>
+                               <div class="resistor-item__actions">
+                                    <button class="btn btn--icon" aria-label="Edit value 2.2 kΩ">
+                                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                   </button>
+                                   <button class="btn btn--icon btn--icon--danger" aria-label="Remove value 2.2 kΩ">
+                                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                   </button>
+                               </div>
+                           </li>
+                           <li class="resistor-item" tabindex="0">
+                               <span class="resistor-item__value">470 Ω</span>
+                               <div class="resistor-item__actions">
+                                    <button class="btn btn--icon" aria-label="Edit value 470 Ω">
+                                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                   </button>
+                                   <button class="btn btn--icon btn--icon--danger" aria-label="Remove value 470 Ω">
+                                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                   </button>
+                               </div>
+                           </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STATE: Editing Item -->
+            <div class="component-demo" style="margin-top: var(--space-xl);">
+                <h4>State: Editing Item</h4>
+                <div class="resistor-list-manager">
+                     <!-- Form omitted for brevity -->
+                     <div class="resistor-list-manager__list-container">
+                        <ul class="resistor-list-manager__list">
+                           <li class="resistor-item" tabindex="0">
+                               <span class="resistor-item__value">1 kΩ</span>
+                                <!-- actions hidden -->
+                           </li>
+                           <li class="resistor-item resistor-item--editing">
+                                <form class="resistor-item__edit-form" onsubmit="event.preventDefault();">
+                                    <label for="edit-input-1" class="sr-only">Edit value 2.2 kΩ</label>
+                                    <input id="edit-input-1" type="text" class="numeric-input__field resistor-item__edit-input" value="2.2k">
+                                    <div class="resistor-item__actions">
+                                        <button class="btn btn--icon" aria-label="Save changes">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                        </button>
+                                        <button class="btn btn--icon btn--icon--danger" aria-label="Cancel edit">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                        </button>
+                                    </div>
+                                </form>
+                           </li>
+                           <li class="resistor-item" tabindex="0">
+                               <span class="resistor-item__value">470 Ω</span>
+                               <!-- actions hidden -->
+                           </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+             <!-- STATE: Input Error -->
+            <div class="component-demo" style="margin-top: var(--space-xl);">
+                <h4>State: Input Error</h4>
+                <div class="resistor-list-manager">
+                    <form class="resistor-list-manager__add-form" onsubmit="event.preventDefault();">
+                        <div class="resistor-list-manager__input-group">
+                           <label for="res-input-3" class="sr-only">New Resistor Value</label>
+                           <input type="text" id="res-input-3" class="numeric-input__field numeric-input__field--error" value="-100" aria-describedby="res-error-msg">
+                           <div id="res-error-msg" class="resistor-list-manager__error-msg">Value must be positive.</div>
+                        </div>
+                        <button type="submit" class="btn btn--primary resistor-list-manager__add-btn" aria-label="Add Resistor" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        </button>
+                    </form>
+                    <div class="resistor-list-manager__list-container">
+                         <div class="resistor-list-manager__empty-state">
+                           Add resistor values to begin.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+	<div>
+        <h2>Component Variations</h2>
+        <div>
+            <h3>Variant Name: default</h3>
+            <normal>The standard implementation of the resistor value list manager.</normal>
+            <!-- Variant HTML already shown above in the showcase -->
+        </div>
+    </div>
+
+</body>
+</html>

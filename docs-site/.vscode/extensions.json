@@ -1,0 +1,20 @@
+{
+  "recommendations": [
+    // Core for TypeScript and JavaScript IntelliSense
+    "ms-vscode.vscode-typescript-next",
+    // Linter for code quality and consistency
+    "dbaeumer.vscode-eslint",
+    // Formatter for consistent code style
+    "esbenp.prettier-vscode",
+    // Docusaurus uses MDX (Markdown with JSX)
+    "mdx-js.mdx",
+    // Enhanced Git capabilities within VS Code
+    "eamodio.gitlens",
+    // Grammar and spell checker for documentation
+    "znck.grammarly",
+    // For editing .editorconfig files
+    "editorconfig.editorconfig",
+    // For editing .github/workflows/*.yml files
+    "redhat.vscode-yaml"
+  ]
+}

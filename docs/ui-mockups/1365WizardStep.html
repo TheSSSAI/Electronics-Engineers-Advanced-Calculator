@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Molecular Component: WizardStep</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* 1. Design System & Base Styles */
+        :root {
+            /* Colors */
+            --color-primary-50: #E3F2FD;
+            --color-primary-700: #1976D2;
+            --color-primary-800: #1565C0;
+            --color-neutral-100: #F1F3F5;
+            --color-neutral-300: #DEE2E6;
+            --color-neutral-500: #ADB5BD;
+            --color-neutral-700: #495057;
+            --color-neutral-900: #212529;
+            --color-white: #FFFFFF;
+
+            /* Typography */
+            --font-primary: 'Roboto', sans-serif;
+            --font-size-sm: 14px;
+            --font-size-md: 16px;
+            --font-size-lg: 20px;
+
+            /* Spacing */
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+
+            /* Borders */
+            --border-radius: 4px;
+            --border-radius-lg: 8px;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background-color: var(--color-white);
+            color: var(--color-neutral-900);
+            line-height: 1.6;
+            padding: var(--space-lg);
+        }
+        
+        /* Visually hidden class for accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+
+        /* 2. Showcase Layout Styles */
+        .showcase {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .showcase-header {
+            border-bottom: 1px solid var(--color-neutral-300);
+            padding-bottom: var(--space-md);
+            margin-bottom: var(--space-xl);
+        }
+
+        .showcase-header h1 {
+            font-size: 2rem;
+            margin-bottom: var(--space-sm);
+        }
+
+        .showcase-section {
+            margin-bottom: var(--space-xl);
+        }
+
+        .showcase-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: var(--space-md);
+        }
+        
+        .component-states {
+            display: flex;
+            gap: var(--space-lg);
+            padding: var(--space-lg);
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius-lg);
+            border: 1px solid var(--color-neutral-300);
+            align-items: flex-start;
+        }
+
+
+        /* 3. Component CSS: WizardStep & Button */
+
+        /* == Button Component (Dependency) == */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            padding: 10px 22px;
+            border: 1px solid transparent;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            font-size: var(--font-size-md);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 150ms ease-in-out;
+            min-height: 44px; /* Touch-friendly */
+        }
+
+        .btn:focus-visible {
+            outline: 2px solid var(--color-primary-700);
+            outline-offset: 2px;
+        }
+
+        .btn:disabled {
+            background-color: var(--color-neutral-300);
+            color: var(--color-neutral-500);
+            cursor: not-allowed;
+        }
+
+        /* Primary Button */
+        .btn--primary {
+            background-color: var(--color-primary-700);
+            color: var(--color-white);
+        }
+        .btn--primary:hover:not(:disabled) {
+            background-color: var(--color-primary-800);
+        }
+
+        /* Secondary Button */
+        .btn--secondary {
+            background-color: var(--color-white);
+            color: var(--color-primary-700);
+            border-color: var(--color-neutral-300);
+        }
+        .btn--secondary:hover:not(:disabled) {
+            background-color: var(--color-primary-50);
+        }
+
+
+        /* == WizardStep Component == */
+        .wizard-stepper {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            list-style: none;
+            padding: 0;
+            margin-bottom: var(--space-xl);
+            position: relative;
+            width: 100%;
+        }
+
+        /* Connecting Line */
+        .wizard-stepper::before {
+            content: '';
+            position: absolute;
+            top: 15px; /* Vertically center with the indicator */
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--color-neutral-300);
+            z-index: 1;
+        }
+        
+        .wizard-step {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            flex: 1;
+        }
+
+        .wizard-step__indicator {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: var(--font-size-md);
+            margin-bottom: var(--space-sm);
+            transition: all 150ms ease-in-out;
+            position: relative;
+        }
+
+        .wizard-step__label {
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            max-width: 120px; /* Prevent long labels from overlapping */
+        }
+        
+        .wizard-step__indicator .icon-check {
+            display: none;
+            width: 20px;
+            height: 20px;
+        }
+
+        /* --- States --- */
+
+        /* Inactive State */
+        .wizard-step--inactive .wizard-step__indicator {
+            background-color: var(--color-white);
+            border: 2px solid var(--color-neutral-300);
+            color: var(--color-neutral-500);
+        }
+        .wizard-step--inactive .wizard-step__label {
+            color: var(--color-neutral-500);
+        }
+
+        /* Active State */
+        .wizard-step--active .wizard-step__indicator {
+            background-color: var(--color-primary-700);
+            border: 2px solid var(--color-primary-700);
+            color: var(--color-white);
+            transform: scale(1.1);
+            box-shadow: 0 0 0 4px var(--color-primary-50);
+        }
+        .wizard-step--active .wizard-step__label {
+            color: var(--color-primary-700);
+            font-weight: 700;
+        }
+
+        /* Complete State */
+        .wizard-step--complete .wizard-step__indicator {
+            background-color: var(--color-white);
+            border: 2px solid var(--color-primary-700);
+            color: var(--color-primary-700);
+            cursor: pointer;
+        }
+        .wizard-step--complete .wizard-step__indicator .icon-check {
+            display: block;
+        }
+        .wizard-step--complete .wizard-step__indicator .step-number {
+            display: none;
+        }
+        .wizard-step--complete:hover .wizard-step__indicator {
+            background-color: var(--color-primary-50);
+        }
+        .wizard-step--complete .wizard-step__label {
+            color: var(--color-neutral-900);
+        }
+
+        /* Step Content Area */
+        .wizard-content-wrapper {
+            background-color: var(--color-white);
+            border: 1px solid var(--color-neutral-300);
+            border-radius: var(--border-radius-lg);
+            padding: var(--space-lg);
+            margin-top: var(--space-md);
+        }
+
+        .wizard-content__header h3 {
+            font-size: var(--font-size-lg);
+            margin-bottom: var(--space-md);
+            color: var(--color-neutral-900);
+        }
+
+        .wizard-content__body {
+            margin-bottom: var(--space-lg);
+            color: var(--color-neutral-700);
+        }
+        
+        .wizard-content__body p:not(:last-child) {
+            margin-bottom: var(--space-md);
+        }
+
+        .wizard-content__footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--color-neutral-300);
+            padding-top: var(--space-md);
+        }
+
+        /* Responsive Adaptations */
+        @media (max-width: 768px) {
+            .wizard-step__label {
+                display: none; /* Hide labels on mobile to save space */
+            }
+            .wizard-content-wrapper {
+                padding: var(--space-md);
+            }
+            .wizard-content__body {
+                max-height: 50vh; /* Make content scrollable per spec */
+                overflow-y: auto;
+                padding-right: var(--space-sm); /* Add space for scrollbar */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="showcase">
+        <header class="showcase-header">
+            <h1>Molecular Component: WizardStep</h1>
+            <p>Represents a single step in a multi-step process, indicating its state (inactive, active, complete) and containing the content for that step.</p>
+        </header>
+
+        <main>
+            <section class="showcase-section">
+                <h2>Live Example</h2>
+                <p>This example demonstrates the WizardStep component within its typical parent organism, the Custom Mode Wizard. Step 2 is currently active.</p>
+
+                <!-- Full Wizard Example -->
+                <nav aria-label="Custom Mode Creation Steps">
+                    <ol class="wizard-stepper">
+                        <li class="wizard-step wizard-step--complete">
+                            <button class="wizard-step__indicator" aria-label="Go to Step 1: Basic Information">
+                                <span class="sr-only">Step 1, Basic Information, Complete</span>
+                                <svg class="icon-check" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                <span class="step-number">1</span>
+                            </button>
+                            <span class="wizard-step__label">Basic Information</span>
+                        </li>
+                        <li class="wizard-step wizard-step--active">
+                            <div class="wizard-step__indicator" aria-current="step">
+                                <span class="sr-only">Step 2, Define Variables, Active</span>
+                                <span class="step-number">2</span>
+                            </div>
+                            <span class="wizard-step__label">Define Variables</span>
+                        </li>
+                        <li class="wizard-step wizard-step--inactive">
+                            <div class="wizard-step__indicator">
+                                <span class="sr-only">Step 3, Write Formulas, Inactive</span>
+                                <span class="step-number">3</span>
+                            </div>
+                            <span class="wizard-step__label">Write Formulas</span>
+                        </li>
+                    </ol>
+                </nav>
+
+                <div class="wizard-content-wrapper" role="tabpanel" id="step2-panel" aria-labelledby="step2-tab">
+                    <div class="wizard-content__header">
+                        <h3 id="step2-tab">Step 2: Define Variables</h3>
+                    </div>
+                    <div class="wizard-content__body">
+                        <p>Define the inputs and outputs for your calculation. Inputs are the values you will provide, and outputs are the values the calculator will compute.</p>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor. Cras elementum ultrices diam. Maecenas ligula massa, varius a, semper congue, euismod non, mi.</p>
+                        <p>Proin porttitor, orci nec nonummy molestie, enim est eleifend mi, non fermentum diam nisl sit amet erat. Duis semper. Duis arcu massa, scelerisque vitae, consequat in, pretium a, enim. Pellentesque congue. Ut in risus volutpat libero pharetra tempor. Cras vestibulum bibendum augue. Praesent egestas leo in pede.</p>
+                        <p>Praesent blandit odio eu enim. Pellentesque sed dui ut augue blandit sodales. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Aliquam nibh. Mauris ac mauris sed pede pellentesque fermentum. Maecenas adipiscing ante non diam. Proin condimentum fermentum nunc. Etiam pharetra, erat sed fermentum feugiat, velit mauris egestas quam, ut aliquam massa nisl quis neque. Suspendisse in orci enim.</p>
+                    </div>
+                    <div class="wizard-content__footer">
+                        <button type="button" class="btn btn--secondary">Back</button>
+                        <button type="button" class="btn btn--primary">Next: Write Formulas</button>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="showcase-section">
+                <h2>States</h2>
+                <p>The three primary states of a single WizardStep indicator and label.</p>
+                <div class="component-states">
+                     <div class="wizard-step wizard-step--complete">
+                        <div class="wizard-step__indicator">
+                            <svg class="icon-check" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <span class="step-number">1</span>
+                        </div>
+                        <span class="wizard-step__label">Complete Step</span>
+                    </div>
+                    <div class="wizard-step wizard-step--active">
+                        <div class="wizard-step__indicator" aria-current="step">
+                            <span class="step-number">2</span>
+                        </div>
+                        <span class="wizard-step__label">Active Step</span>
+                    </div>
+                    <div class="wizard-step wizard-step--inactive">
+                        <div class="wizard-step__indicator">
+                            <span class="step-number">3</span>
+                        </div>
+                        <span class="wizard-step__label">Inactive Step</span>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+	
+	<div> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : "default"<h3>
+		<!--description--><normal> The default variant is used for all wizard steps and is controlled by its state (active, inactive, complete). </normal>
+		<!-- vrient 1 html -->
+        <nav aria-label="Custom Mode Creation Steps">
+                    <ol class="wizard-stepper">
+                        <li class="wizard-step wizard-step--complete">
+                            <button class="wizard-step__indicator" aria-label="Go to Step 1: Basic Information">
+                                <span class="sr-only">Step 1, Basic Information, Complete</span>
+                                <svg class="icon-check" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                <span class="step-number">1</span>
+                            </button>
+                            <span class="wizard-step__label">Basic Information</span>
+                        </li>
+                        <li class="wizard-step wizard-step--active">
+                            <div class="wizard-step__indicator" aria-current="step">
+                                <span class="sr-only">Step 2, Define Variables, Active</span>
+                                <span class="step-number">2</span>
+                            </div>
+                            <span class="wizard-step__label">Define Variables</span>
+                        </li>
+                        <li class="wizard-step wizard-step--inactive">
+                            <div class="wizard-step__indicator">
+                                <span class="sr-only">Step 3, Write Formulas, Inactive</span>
+                                <span class="step-number">3</span>
+                            </div>
+                            <span class="wizard-step__label">Write Formulas</span>
+                        </li>
+                    </ol>
+                </nav>     
+		
+      <div>
+	 </div>
+	
+</body>
+</html>

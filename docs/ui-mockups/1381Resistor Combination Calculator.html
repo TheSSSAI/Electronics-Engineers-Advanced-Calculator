@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resistor Combination Calculator</title>
+  <style>
+    /* CSS Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Design System Tokens */
+    :root {
+      /* Typography */
+      --font-primary: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      --font-monospace: 'Roboto Mono', 'Fira Code', 'Courier New', monospace;
+      --font-size-body: 16px;
+      --font-size-h2: 28px;
+      --font-size-h3: 20px;
+      --font-size-caption: 14px;
+      --font-weight-normal: 400;
+      --font-weight-bold: 600;
+
+      /* Colors */
+      --color-primary-50: #E3F2FD;
+      --color-primary-700: #1976D2;
+      --color-primary-800: #1565C0;
+      --color-primary-900: #0D47A1;
+      --color-neutrals-white: #FFFFFF;
+      --color-neutrals-gray-50: #F8F9FA;
+      --color-neutrals-gray-100: #F1F3F5;
+      --color-neutrals-gray-200: #E9ECEF;
+      --color-neutrals-gray-400: #CED4DA;
+      --color-neutrals-gray-500: #ADB5BD;
+      --color-neutrals-gray-700: #495057;
+      --color-neutrals-gray-900: #212529;
+      --color-semantic-error: #D32F2F;
+      --color-semantic-success: #2E7D32;
+
+      /* Spacing */
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+
+      /* Borders */
+      --border-radius-sm: 4px;
+      --border-radius-md: 8px;
+
+      /* Shadows */
+      --shadow-md: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    }
+    
+    /* Base Styles */
+    body {
+      font-family: var(--font-primary);
+      font-size: var(--font-size-body);
+      line-height: 1.6;
+      background-color: var(--color-neutrals-gray-100);
+      color: var(--color-neutrals-gray-900);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Screen Layout */
+    .screen-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--space-lg);
+      min-height: 100vh;
+    }
+    
+    .screen-header {
+      width: 100%;
+      max-width: 900px;
+      margin-bottom: var(--space-lg);
+    }
+    
+    h1, h2, h3 {
+       font-weight: var(--font-weight-bold);
+    }
+
+    h1 {
+      font-size: 32px;
+    }
+
+    h2 {
+       font-size: var(--font-size-h2);
+    }
+    
+    h3 {
+       font-size: var(--font-size-h3);
+    }
+
+
+    /* Calculator Card Component */
+    .calculator-card {
+      background: var(--color-neutrals-white);
+      border-radius: var(--border-radius-md);
+      box-shadow: var(--shadow-md);
+      padding: var(--space-lg);
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .calculator-card__title {
+      margin-bottom: var(--space-lg);
+      padding-bottom: var(--space-md);
+      border-bottom: 1px solid var(--color-neutrals-gray-200);
+    }
+
+    .calculator-card__content {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-xl);
+    }
+    
+    @media (min-width: 768px) {
+      .calculator-card__content {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    
+    /* Input Section Styles */
+    .input-section {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+    }
+    
+    .add-resistor-form {
+      display: flex;
+      gap: var(--space-sm);
+    }
+    
+    .form-group {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .text-input {
+      font-family: var(--font-primary);
+      font-size: var(--font-size-body);
+      padding: 10px 16px;
+      border: 1px solid var(--color-neutrals-gray-400);
+      border-radius: var(--border-radius-sm);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .text-input:focus, .text-input:focus-visible {
+      outline: none;
+      border-color: var(--color-primary-700);
+      box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.2);
+    }
+    
+    .text-input.input-error {
+       border-color: var(--color-semantic-error);
+    }
+
+    .error-message {
+      color: var(--color-semantic-error);
+      font-size: var(--font-size-caption);
+      margin-top: var(--space-xs);
+    }
+
+    /* Button Component */
+    .btn {
+      font-family: var(--font-primary);
+      font-size: var(--font-size-body);
+      font-weight: var(--font-weight-bold);
+      padding: 10px 22px;
+      border: none;
+      border-radius: var(--border-radius-sm);
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn:focus-visible {
+      outline: 2px solid var(--color-primary-700);
+      outline-offset: 2px;
+    }
+
+    .btn--primary {
+      background-color: var(--color-primary-700);
+      color: var(--color-neutrals-white);
+    }
+
+    .btn--primary:hover {
+      background-color: var(--color-primary-800);
+    }
+
+    .btn--primary:active {
+      background-color: var(--color-primary-900);
+      transform: scale(0.98);
+    }
+    
+    .btn--secondary {
+       background-color: var(--color-neutrals-gray-200);
+       color: var(--color-neutrals-gray-900);
+    }
+    
+    .btn--secondary:hover {
+       background-color: #d8dde2;
+    }
+    
+    .btn--secondary:active {
+       background-color: #c1c8cf;
+       transform: scale(0.98);
+    }
+
+    .btn--icon {
+      background: none;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border-radius: 50%;
+      color: var(--color-neutrals-gray-700);
+    }
+    
+    .btn--icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .btn--icon:hover {
+      background-color: var(--color-neutrals-gray-100);
+    }
+    
+    .btn:disabled {
+       background-color: var(--color-neutrals-gray-200);
+       color: var(--color-neutrals-gray-500);
+       cursor: not-allowed;
+    }
+    
+    /* Resistor List Styles */
+    .resistor-list-container {
+       border: 1px solid var(--color-neutrals-gray-200);
+       border-radius: var(--border-radius-md);
+       min-height: 200px;
+       display: flex;
+       flex-direction: column;
+    }
+
+    .resistor-list-header {
+      padding: var(--space-sm) var(--space-md);
+      font-weight: var(--font-weight-bold);
+      border-bottom: 1px solid var(--color-neutrals-gray-200);
+      color: var(--color-neutrals-gray-700);
+    }
+
+    .resistor-list {
+      list-style: none;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+    
+    .resistor-list__item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-sm) var(--space-md);
+      border-bottom: 1px solid var(--color-neutrals-gray-100);
+    }
+    
+    .resistor-list__item:last-child {
+      border-bottom: none;
+    }
+    
+    .resistor-list__value {
+       font-family: var(--font-monospace);
+    }
+
+    .resistor-list__actions {
+      display: flex;
+      gap: var(--space-xs);
+    }
+    
+    .resistor-list__empty-state {
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       text-align: center;
+       padding: var(--space-xl);
+       color: var(--color-neutrals-gray-500);
+       flex-grow: 1;
+    }
+
+    /* Results Section Styles */
+    .results-section {
+       background-color: var(--color-neutrals-gray-50);
+       border-radius: var(--border-radius-md);
+       padding: var(--space-lg);
+       display: flex;
+       flex-direction: column;
+       gap: var(--space-lg);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: var(--space-md);
+    }
+
+    .action-buttons .btn {
+      flex-grow: 1;
+    }
+    
+    .results-display {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+      border-top: 1px solid var(--color-neutrals-gray-200);
+      padding-top: var(--space-lg);
+    }
+    
+    .result {
+       display: flex;
+       justify-content: space-between;
+       align-items: baseline;
+       padding: var(--space-sm) var(--space-md);
+       background-color: var(--color-neutrals-white);
+       border-radius: var(--border-radius-sm);
+       border: 1px solid var(--color-neutrals-gray-200);
+    }
+
+    .result__label {
+      font-weight: var(--font-weight-bold);
+      color: var(--color-neutrals-gray-700);
+    }
+
+    .result__value {
+      font-family: var(--font-monospace);
+      font-size: 1.25em;
+      font-weight: var(--font-weight-bold);
+      color: var(--color-semantic-success);
+    }
+    
+    .screen-variations {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px dashed var(--color-neutrals-gray-400);
+        width: 100%;
+        max-width: 900px;
+    }
+    .screen-variations h2 {
+        margin-bottom: 1.5rem;
+    }
+    .variation-group {
+        margin-bottom: 2.5rem;
+    }
+    .variation-group h3 {
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--color-neutrals-gray-200);
+    }
+    .variation-group normal {
+        color: var(--color-neutrals-gray-700);
+        display: block;
+        margin-bottom: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="screen-container">
+    <header class="screen-header">
+      <h1>Specialized Calculator</h1>
+    </header>
+    
+    <main class="calculator-card">
+      <h2 class="calculator-card__title">Resistor Combinations</h2>
+      <div class="calculator-card__content">
+        <!-- LEFT COLUMN: INPUT AND LIST -->
+        <section class="input-section" aria-labelledby="input-section-title">
+          <h3 id="input-section-title" class="sr-only">Resistor Input</h3>
+          <form class="add-resistor-form" onsubmit="event.preventDefault();">
+            <div class="form-group">
+              <label for="resistor-value" class="sr-only">Resistor Value (e.g., 10k)</label>
+              <input type="text" id="resistor-value" class="text-input" placeholder="Enter value (e.g., 10k)">
+            </div>
+            <button class="btn btn--primary" type="submit">Add</button>
+          </form>
+
+          <div class="resistor-list-container">
+            <div class="resistor-list-header">Resistor List</div>
+            <ul class="resistor-list" aria-live="polite">
+              <li class="resistor-list__item">
+                <span class="resistor-list__value">1 kΩ</span>
+                <div class="resistor-list__actions">
+                  <button class="btn btn--icon" aria-label="Edit 1 kΩ resistor">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                  </button>
+                  <button class="btn btn--icon" aria-label="Remove 1 kΩ resistor">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                  </button>
+                </div>
+              </li>
+              <li class="resistor-list__item">
+                <span class="resistor-list__value">2.2 kΩ</span>
+                <div class="resistor-list__actions">
+                  <button class="btn btn--icon" aria-label="Edit 2.2 kΩ resistor">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                  </button>
+                  <button class="btn btn--icon" aria-label="Remove 2.2 kΩ resistor">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                  </button>
+                </div>
+              </li>
+              <li class="resistor-list__item">
+                <span class="resistor-list__value">470 Ω</span>
+                <div class="resistor-list__actions">
+                  <button class="btn btn--icon" aria-label="Edit 470 Ω resistor">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                  </button>
+                  <button class="btn btn--icon" aria-label="Remove 470 Ω resistor">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                  </button>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- RIGHT COLUMN: RESULTS -->
+        <section class="results-section" aria-labelledby="results-section-title">
+          <h3 id="results-section-title">Calculations</h3>
+          <div class="action-buttons">
+            <button class="btn btn--secondary" type="button">Calculate Series</button>
+            <button class="btn btn--secondary" type="button">Calculate Parallel</button>
+          </div>
+          <div class="results-display" aria-live="polite" role="status">
+            <div class="result">
+              <span class="result__label">Series (Rₜ)</span>
+              <span class="result__value">3.67 kΩ</span>
+            </div>
+            <div class="result">
+              <span class="result__label">Parallel (Rₜ)</span>
+              <span class="result__value">298.14 Ω</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+    
+    <!-- Screen Variations Section for documentation -->
+    <div class="screen-variations">
+        <h2>Screen Variations</h2>
+
+        <div class="variation-group">
+            <h3>Variant Name: "Empty State"</h3>
+            <normal>The initial view of the component before any resistors have been added. Calculation buttons are disabled.</normal>
+            <div class="calculator-card">
+              <h2 class="calculator-card__title">Resistor Combinations</h2>
+              <div class="calculator-card__content">
+                <section class="input-section">
+                  <form class="add-resistor-form" onsubmit="event.preventDefault();">
+                    <div class="form-group">
+                       <label for="resistor-value-empty" class="sr-only">Resistor Value (e.g., 10k)</label>
+                       <input type="text" id="resistor-value-empty" class="text-input" placeholder="Enter value (e.g., 10k)">
+                    </div>
+                    <button class="btn btn--primary" type="submit">Add</button>
+                  </form>
+                  <div class="resistor-list-container">
+                    <div class="resistor-list-header">Resistor List</div>
+                    <div class="resistor-list__empty-state">Add resistor values to begin.</div>
+                  </div>
+                </section>
+                <section class="results-section">
+                  <h3>Calculations</h3>
+                  <div class="action-buttons">
+                    <button class="btn btn--secondary" type="button" disabled>Calculate Series</button>
+                    <button class="btn btn--secondary" type="button" disabled>Calculate Parallel</button>
+                  </div>
+                   <div class="results-display">
+                     <div class="result">
+                       <span class="result__label">Series (Rₜ)</span>
+                       <span class="result__value">--</span>
+                     </div>
+                     <div class="result">
+                       <span class="result__label">Parallel (Rₜ)</span>
+                       <span class="result__value">--</span>
+                     </div>
+                   </div>
+                </section>
+              </div>
+            </div>
+        </div>
+
+        <div class="variation-group">
+            <h3>Variant Name: "Input Error State"</h3>
+            <normal>Shows how the UI provides feedback when the user attempts to enter an invalid value (e.g., negative number).</normal>
+            <div class="calculator-card">
+              <h2 class="calculator-card__title">Resistor Combinations</h2>
+              <div class="calculator-card__content">
+                <section class="input-section">
+                  <form class="add-resistor-form" onsubmit="event.preventDefault();">
+                    <div class="form-group">
+                       <label for="resistor-value-error" class="sr-only">Resistor Value (e.g., 10k)</label>
+                       <input type="text" id="resistor-value-error" class="text-input input-error" value="-100" aria-describedby="resistor-error-msg">
+                       <div id="resistor-error-msg" class="error-message">Resistance must be a positive value.</div>
+                    </div>
+                    <button class="btn btn--primary" type="submit">Add</button>
+                  </form>
+                  <div class="resistor-list-container">
+                    <div class="resistor-list-header">Resistor List</div>
+                    <div class="resistor-list__empty-state">Add resistor values to begin.</div>
+                  </div>
+                </section>
+                <section class="results-section">
+                  <h3>Calculations</h3>
+                  <div class="action-buttons">
+                    <button class="btn btn--secondary" type="button" disabled>Calculate Series</button>
+                    <button class="btn btn--secondary" type="button" disabled>Calculate Parallel</button>
+                  </div>
+                   <div class="results-display">
+                     <div class="result">
+                       <span class="result__label">Series (Rₜ)</span>
+                       <span class="result__value">--</span>
+                     </div>
+                     <div class="result">
+                       <span class="result__label">Parallel (Rₜ)</span>
+                       <span class="result__value">--</span>
+                     </div>
+                   </div>
+                </section>
+              </div>
+            </div>
+        </div>
+    </div>
+
+  </div>
+
+  <style>
+  /* Screen-reader only class */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+  </style>
+
+</body>
+</html>

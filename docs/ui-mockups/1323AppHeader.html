@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organism: AppHeader</title>
+  <style>
+    /* --- BOILERPLATE & DEMO STYLES --- */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f1f3f5;
+    }
+    .showcase {
+        padding: 2rem;
+    }
+    .showcase h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: #495057;
+    }
+    .showcase p {
+        font-size: 1rem;
+        color: #495057;
+        margin-bottom: 1rem;
+        max-width: 65ch;
+    }
+    .mobile-frame {
+        width: 100%;
+        max-width: 414px; /* iPhone 11 Pro Max width */
+        border: 8px solid #212529;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        margin-top: 1rem;
+    }
+    .icon {
+        display: inline-block;
+        width: 1.25em;
+        height: 1.25em;
+        stroke-width: 0;
+        stroke: currentColor;
+        fill: currentColor;
+        vertical-align: middle;
+    }
+
+    /* Component: AppHeader CSS */
+    
+    /* --- DESIGN SYSTEM TOKENS --- */
+    :root {
+      /* Colors */
+      --color-primary-500: #2196F3;
+      --color-primary-700: #1976D2;
+      --color-neutral-white: #FFFFFF;
+      --color-neutral-gray-50: #F8F9FA;
+      --color-neutral-gray-100: #F1F3F5;
+      --color-neutral-gray-200: #E9ECEF;
+      --color-neutral-gray-700: #495057;
+      --color-neutral-gray-900: #212529;
+    
+      /* Typography */
+      --font-family-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      --font-family-monospace: 'Roboto Mono', 'Fira Code', 'Courier New', monospace;
+      --font-size-small: 14px;
+      --font-size-body: 16px;
+      --font-size-h3: 20px;
+    
+      /* Spacing */
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+    
+      /* Borders & Radius */
+      --border-radius: 6px;
+    }
+    
+    /* --- ORGANISM: AppHeader --- */
+    .app-header {
+      display: flex;
+      align-items: center;
+      padding: 0 var(--space-md);
+      height: 64px;
+      background-color: var(--color-neutral-white);
+      border-bottom: 1px solid var(--color-neutral-gray-200);
+      color: var(--color-neutral-gray-900);
+    }
+    
+    .app-header__section {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    
+    .app-header__section--left { flex: 1 1 0; justify-content: flex-start; }
+    .app-header__section--center { flex: 0 1 auto; justify-content: center; }
+    .app-header__section--right { flex: 1 1 0; justify-content: flex-end; }
+    
+    /* Brand/Logo */
+    .app-header__brand {
+      font-size: var(--font-size-h3);
+      font-weight: 700;
+      color: var(--color-neutral-gray-900);
+      text-decoration: none;
+      display: none; /* Hidden on mobile, shown on desktop */
+    }
+    
+    /* Nav Toggle (Hamburger) */
+    .app-header__nav-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border: none;
+      background-color: transparent;
+      border-radius: 50%;
+      cursor: pointer;
+      color: var(--color-neutral-gray-700);
+      transition: background-color 0.2s ease;
+    }
+    .app-header__nav-toggle:hover {
+      background-color: var(--color-neutral-gray-100);
+    }
+    .app-header__nav-toggle:focus-visible {
+      outline: 2px solid var(--color-primary-700);
+      outline-offset: 2px;
+    }
+    .app-header__nav-toggle .icon {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .app-header__nav-toggle .icon-close {
+        display: none;
+    }
+    
+    .app-header--sidebar-open .app-header__nav-toggle .icon-menu {
+        display: none;
+    }
+    .app-header--sidebar-open .app-header__nav-toggle .icon-close {
+        display: block;
+    }
+    
+    
+    /* --- MOLECULAR DEPENDENCIES (Mocks) --- */
+    /* ModeSwitcher Mock */
+    .mode-switcher {
+      display: inline-flex;
+      align-items: center;
+      background-color: var(--color-neutral-gray-100);
+      border-radius: var(--border-radius);
+      padding: var(--space-xs);
+      border: 1px solid var(--color-neutral-gray-200);
+    }
+    .mode-switcher__button {
+      font-family: var(--font-family-primary);
+      font-size: var(--font-size-small);
+      font-weight: 600;
+      color: var(--color-neutral-gray-700);
+      background-color: transparent;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .mode-switcher__button[aria-pressed=\"true\"] {
+      background-color: var(--color-neutral-white);
+      color: var(--color-primary-700);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    /* UserMenu Mock */
+    .user-menu__trigger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: var(--color-neutral-gray-200);
+      color: var(--color-neutral-gray-700);
+      border: none;
+      cursor: pointer;
+    }
+    
+    /* Utility Icon Button Mock */
+    .app-header__utility-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border: none;
+        background-color: transparent;
+        border-radius: 50%;
+        cursor: pointer;
+        color: var(--color-neutral-gray-700);
+    }
+    .app-header__utility-btn:focus-visible {
+      outline: 2px solid var(--color-primary-700);
+      outline-offset: 2px;
+    }
+    
+    
+    /* --- RESPONSIVE ADAPTATIONS (Mobile-First) --- */
+    
+    /* Hide utility icons on very small screens */
+    @media (max-width: 480px) {
+        .app-header__utility-btn--hide-mobile {
+            display: none;
+        }
+    }
+    
+    /* Tablet and up */
+    @media (min-width: 768px) {
+      .app-header {
+        padding: 0 var(--space-lg);
+      }
+    }
+    
+    /* Desktop and up */
+    @media (min-width: 1024px) {
+      .app-header__nav-toggle {
+        display: none; /* Hide hamburger on desktop */
+      }
+      .app-header__brand {
+          display: block; /* Show brand on desktop */
+      }
+    }
+    
+    /* Accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      .app-header__nav-toggle {
+        transition: none;
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+  <main class="showcase">
+    <h1>Organism: AppHeader</h1>
+
+    <h2>Desktop View</h2>
+    <p>On larger screens (1024px and up), the hamburger menu is hidden and the app brand/title is shown.</p>
+    <header class="app-header">
+      <div class="app-header__section app-header__section--left">
+        <button class="app-header__nav-toggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="app-sidebar">
+            <svg class="icon icon-menu" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path></svg>
+            <svg class="icon icon-close" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+        </button>
+        <a href="#" class="app-header__brand">CalcEngine</a>
+      </div>
+  
+      <div class="app-header__section app-header__section--center">
+        <!-- Mock ModeSwitcher Component -->
+        <div class="mode-switcher" role="group" aria-label="Main Calculator Modes">
+          <button class="mode-switcher__button" aria-pressed="true">Scientific</button>
+          <button class="mode-switcher__button" aria-pressed="false">Ohm's Law</button>
+          <button class="mode-switcher__button" aria-pressed="false">Resistors</button>
+        </div>
+      </div>
+  
+      <div class="app-header__section app-header__section--right">
+        <button class="app-header__utility-btn" aria-label="Help">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"></path></svg>
+        </button>
+        <!-- Mock UserMenu Component -->
+        <button class="user-menu__trigger" aria-label="Open user menu">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
+        </button>
+      </div>
+    </header>
+
+    <h2>Mobile View & States</h2>
+    <p>On smaller screens (below 1024px), the hamburger menu is visible and the brand is hidden. The `.app-header--sidebar-open` class changes the hamburger icon to a close icon.</p>
+    
+    <div class="mobile-frame">
+        <!-- Default Mobile State -->
+        <header class="app-header">
+            <div class="app-header__section app-header__section--left">
+                <button class="app-header__nav-toggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="app-sidebar-mobile">
+                    <svg class="icon icon-menu" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path></svg>
+                    <svg class="icon icon-close" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+                </button>
+                <a href="#" class="app-header__brand">CalcEngine</a>
+            </div>
+        
+            <div class="app-header__section app-header__section--center">
+                <div class="mode-switcher" role="group" aria-label="Main Calculator Modes">
+                  <button class="mode-switcher__button" aria-pressed="true">Sci</button>
+                  <button class="mode-switcher__button" aria-pressed="false">Ohm</button>
+                </div>
+            </div>
+        
+            <div class="app-header__section app-header__section--right">
+                <button class="app-header__utility-btn app-header__utility-btn--hide-mobile" aria-label="Help">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"></path></svg>
+                </button>
+                <button class="user-menu__trigger" aria-label="Open user menu">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Sidebar Open State -->
+        <header class="app-header app-header--sidebar-open" style="margin-top: 1rem; border-top: 1px dashed #ccc;">
+            <div class="app-header__section app-header__section--left">
+                <button class="app-header__nav-toggle" aria-label="Close navigation menu" aria-expanded="true" aria-controls="app-sidebar-mobile">
+                    <svg class="icon icon-menu" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path></svg>
+                    <svg class="icon icon-close" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+                </button>
+                <a href="#" class="app-header__brand">CalcEngine</a>
+            </div>
+        
+            <div class="app-header__section app-header__section--center">
+                <div class="mode-switcher" role="group" aria-label="Main Calculator Modes">
+                  <button class="mode-switcher__button" aria-pressed="true">Sci</button>
+                  <button class="mode-switcher__button" aria-pressed="false">Ohm</button>
+                </div>
+            </div>
+        
+            <div class="app-header__section app-header__section--right">
+                <button class="app-header__utility-btn app-header__utility-btn--hide-mobile" aria-label="Help">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"></path></svg>
+                </button>
+                <button class="user-menu__trigger" aria-label="Open user menu">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
+                </button>
+            </div>
+        </header>
+
+    </div>
+  </main>
+	
+	<div> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : "default"<h3>
+		<!--description--><normal> The standard appearance of the application header. </normal>
+		<!-- vrient 1 html -->
+        <header class="app-header">      <div class="app-header__section app-header__section--left">        <button class="app-header__nav-toggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="app-sidebar">            <svg class="icon icon-menu" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path></svg>            <svg class="icon icon-close" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>        </button>        <a href="#" class="app-header__brand">CalcEngine</a>      </div>        <div class="app-header__section app-header__section--center">        <!-- Mock ModeSwitcher Component -->        <div class="mode-switcher" role="group" aria-label="Main Calculator Modes">          <button class="mode-switcher__button" aria-pressed="true">Scientific</button>          <button class="mode-switcher__button" aria-pressed="false">Ohm's Law</button>          <button class="mode-switcher__button" aria-pressed="false">Resistors</button>        </div>      </div>        <div class="app-header__section app-header__section--right">        <button class="app-header__utility-btn" aria-label="Help">            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"></path></svg>        </button>        <!-- Mock UserMenu Component -->        <button class="user-menu__trigger" aria-label="Open user menu">            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>        </button>      </div>    </header>"     
+		
+      <div>
+	 </div>    
+	
+	</body>
+</html>

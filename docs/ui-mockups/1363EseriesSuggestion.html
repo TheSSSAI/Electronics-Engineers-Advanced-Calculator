@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Molecular Component: E-series Suggestion</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* 1. Design System Foundation (CSS Custom Properties) */
+        :root {
+            /* Color Palette */
+            --color-primary-50: #E3F2FD;
+            --color-primary-100: #BBDEFB;
+            --color-primary-200: #90CAF9;
+            --color-primary-500: #2196F3;
+            --color-primary-600: #1E88E5;
+            --color-primary-700: #1976D2;
+            --color-neutral-100: #F1F3F5;
+            --color-neutral-300: #DEE2E6;
+            --color-neutral-500: #ADB5BD;
+            --color-neutral-700: #495057;
+            --color-neutral-900: #212529;
+            --color-white: #FFFFFF;
+            --color-error: #D32F2F;
+            
+            /* Typography */
+            --font-primary: 'Roboto', sans-serif;
+            --font-size-sm: 13px;
+            --font-size-md: 16px;
+
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            
+            /* Borders */
+            --border-radius: 6px;
+        }
+
+        /* 2. Base & Showcase Styles */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background-color: var(--color-neutral-100);
+            color: var(--color-neutral-900);
+            padding: var(--space-xl);
+        }
+
+        .showcase {
+            max-width: 800px;
+            margin: auto;
+            background-color: var(--color-white);
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .showcase-header {
+            padding: var(--space-lg);
+            background-color: var(--color-neutral-900);
+            color: var(--color-white);
+        }
+
+        .showcase-header h1 {
+            font-size: 1.5rem;
+            margin-bottom: var(--space-xs);
+        }
+        
+        .showcase-header p {
+            font-size: 0.9rem;
+            color: var(--color-neutral-300);
+        }
+
+        .showcase-content {
+            padding: var(--space-lg);
+        }
+
+        .component-group {
+            margin-bottom: var(--space-xl);
+        }
+
+        .component-group h2 {
+            font-size: 1.25rem;
+            margin-bottom: var(--space-md);
+            padding-bottom: var(--space-sm);
+            border-bottom: 1px solid var(--color-neutral-300);
+        }
+
+        .form-group {
+            max-width: 300px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: var(--space-sm);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: var(--space-sm) var(--space-md);
+            font-size: var(--font-size-md);
+            border: 1px solid var(--color-neutral-500);
+            border-radius: var(--border-radius);
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--color-primary-500);
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+        }
+
+        /* 3. Component CSS: EseriesSuggestion */
+        .eseries-suggestion {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-xs) var(--space-sm);
+            margin-top: var(--space-sm);
+            font-size: var(--font-size-sm);
+            font-family: var(--font-primary);
+            color: var(--color-primary-700);
+            background-color: var(--color-primary-50);
+            border: 1px solid var(--color-primary-100);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            text-align: left; /* for button element */
+            transition: background-color 150ms ease-in-out, transform 150ms ease-in-out, opacity 200ms ease-in-out, visibility 200ms ease-in-out;
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .eseries-suggestion__label {
+            color: var(--color-primary-600);
+        }
+
+        .eseries-suggestion__value {
+            font-weight: 700;
+        }
+
+        /* States */
+        .eseries-suggestion:hover {
+            background-color: var(--color-primary-100);
+            transform: translateY(-1px);
+        }
+
+        .eseries-suggestion:focus-visible {
+            outline: 2px solid var(--color-primary-500);
+            outline-offset: 2px;
+        }
+
+        .eseries-suggestion:active {
+            background-color: var(--color-primary-200);
+            transform: translateY(0);
+        }
+
+        .eseries-suggestion--hidden {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-4px);
+            pointer-events: none;
+        }
+
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            .eseries-suggestion {
+                transition: background-color 150ms ease-in-out, opacity 200ms ease-in-out, visibility 200ms ease-in-out;
+                transform: none;
+            }
+            .eseries-suggestion:hover {
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="showcase">
+        <header class="showcase-header">
+            <h1>Molecular Component: E-series Suggestion</h1>
+            <p>Provides feedback and an interactive suggestion for a related input.</p>
+        </header>
+
+        <div class="showcase-content">
+            <div class="component-group">
+                <h2>States</h2>
+                <p>This component has two primary states: visible and hidden. The visible state is interactive.</p>
+
+                <h3>Visible State</h3>
+                <p>Shown when a non-standard value is entered. The input should use <code>aria-describedby</code> to link to this component's ID for accessibility.</p>
+                <div class="form-group">
+                    <label for="resistor-value-1">Resistance Value</label>
+                    <input type="text" id="resistor-value-1" value="480" aria-describedby="suggestion-1">
+                    <button class="eseries-suggestion" id="suggestion-1">
+                        <span class="eseries-suggestion__label">Nearest standard value:</span>
+                        <span class="eseries-suggestion__value">470 Ω</span>
+                    </button>
+                </div>
+
+                <br><br>
+
+                <h3>Hidden State</h3>
+                <p>Shown when the input value is standard, or no suggestion is needed. The <code>.eseries-suggestion--hidden</code> class is applied.</p>
+                <div class="form-group">
+                    <label for="resistor-value-2">Resistance Value</label>
+                    <input type="text" id="resistor-value-2" value="470" aria-describedby="suggestion-2">
+                    <button class="eseries-suggestion eseries-suggestion--hidden" id="suggestion-2" aria-hidden="true" tabindex="-1">
+                        <span class="eseries-suggestion__label">Nearest standard value:</span>
+                        <span class="eseries-suggestion__value">470 Ω</span>
+                    </button>
+                </div>
+            </div>
+             <div class="variations-container">
+                <h2>Component Variations</h2>
+                
+                <div class="variation-card">
+                    <h3>Default</h3>
+                    <p>The standard appearance of the suggestion component.</p>
+                    <div class="form-group">
+                        <label for="resistor-value-default">Resistance Value</label>
+                        <input type="text" id="resistor-value-default" value="101" aria-describedby="suggestion-default">
+                        <button class="eseries-suggestion" id="suggestion-default">
+                            <span class="eseries-suggestion__label">Nearest standard value:</span>
+                            <span class="eseries-suggestion__value">100 Ω</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>

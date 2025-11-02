@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    // Linter for TypeScript and JavaScript
+    "dbaeumer.vscode-eslint",
+    // Code formatter
+    "esbenp.prettier-vscode",
+    // Git lens for enhanced git capabilities
+    "eamodio.gitlens",
+    // Jest/Vitest runner
+    "vitest.explorer"
+  ]
+}

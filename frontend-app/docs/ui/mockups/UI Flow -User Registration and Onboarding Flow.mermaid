@@ -1,0 +1,56 @@
+flowchart TD
+    subgraph Legend
+        direction LR
+        start([Start/End]) -.-> userInput[User Input]
+        userInput -.-> process[System Process]
+        process -.-> decision{Decision}
+        decision -.-> db[(Database)]
+    end
+
+    A[User navigates to Registration Page] --> B[Registration Form UI]
+
+    subgraph B
+        direction TB
+        B1[Enter Email]
+        B2[Enter Password]
+        B3[Confirm Password]
+        B4[Check 'Accept ToS & Privacy Policy']
+    end
+
+    B --> C{Client-Side Validation}
+    C -->|Invalid| D[Show Inline Error Messages]
+    D --> B
+
+    C -->|Valid| E[User clicks 'Create Account']
+    E --> F[Submit Registration to AWS Cognito]
+    F --> G{Cognito Response}
+    G -->|Error: Email exists, weak password, etc.| H[Show Form-Level Error]
+    H --> B
+
+    G -->|Success| I[Cognito creates user & returns JWT]
+    I --> J[Backend Service: Create corresponding user record in DB]
+    J --> K[(PostgreSQL: users table)]
+    J --> L[Frontend: Establish Authenticated Session]
+    L --> M[Redirect to Main Calculator View]
+
+    M --> N{First Login?}
+    N -->|No| R[User interacts with main app]
+    
+    N -->|Yes| O[Start Guided Tour]
+    O --> P{User Action}
+    P -->|Completes Tour| Q[Update user profile: set tour_completed = true]
+    P -->|Skips Tour| Q
+    Q --> R
+    
+    R --> S([End of Onboarding])
+
+    %% Styling
+    classDef decision fill:#FFF3E0,stroke:#FB8C00
+    classDef process fill:#E3F2FD,stroke:#2196F3
+    classDef error fill:#FFEBEE,stroke:#D32F2F
+    classDef db fill:#F3E5F5,stroke:#8E24AA
+
+    class C,G,N,P decision
+    class F,J,L,M,O,Q process
+    class D,H error
+    class K db

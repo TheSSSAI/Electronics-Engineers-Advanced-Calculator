@@ -1,0 +1,21 @@
+sequenceDiagram
+    participant "System Under Monitoring (e.g., API Gateway)" as SystemUnderMonitoringegAPIGateway
+    participant "Amazon CloudWatch" as AmazonCloudWatch
+    participant "Amazon SNS" as AmazonSNS
+    participant "On-Call Engineer Endpoint" as OnCallEngineerEndpoint
+
+    activate AmazonCloudWatch
+    SystemUnderMonitoringegAPIGateway->>AmazonCloudWatch: 1. Emit Performance Metric Data Point
+    AmazonCloudWatch->>AmazonCloudWatch: 2. Evaluate 'API_Performance_Degraded_Latency' Alarm
+    AmazonCloudWatch-->>AmazonCloudWatch: Evaluation Result: Threshold Breached
+    AmazonCloudWatch->>AmazonCloudWatch: 3. Threshold Breached: Transition State from 'OK' to 'ALARM'
+    activate AmazonSNS
+    AmazonCloudWatch->>AmazonSNS: 4. Invoke Alarm Action: Publish Notification
+    AmazonSNS->>AmazonSNS: 5. Fan-out Message to All Topic Subscribers
+    AmazonSNS->>OnCallEngineerEndpoint: 6. Deliver Alert Notification via Subscriber Protocol
+
+    note over AmazonCloudWatch: Alarm thresholds are not arbitrary; they are derived directly from the Non-Functional Requirement...
+    note over AmazonSNS: A DLQ (SQS Queue) should be configured on the SNS subscription to capture failed deliveries. This...
+
+    deactivate AmazonSNS
+    deactivate AmazonCloudWatch

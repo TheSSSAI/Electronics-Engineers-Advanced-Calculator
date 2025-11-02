@@ -1,0 +1,38 @@
+sequenceDiagram
+    actor "Client SPA" as ClientSPA
+    participant "API Gateway" as APIGateway
+    actor "User & Data Service" as UserDataService
+    participant "SQS Queue" as SQSQueue
+    participant "Export Worker Lambda" as ExportWorkerLambda
+    participant "PostgreSQL DB" as PostgreSQLDB
+    participant "S3 Storage" as S3Storage
+    participant "Email Service" as EmailService
+
+    activate APIGateway
+    ClientSPA->>APIGateway: 1. 1. POST /users/me/export-data
+    APIGateway-->>ClientSPA: 8. 202 Accepted
+    activate UserDataService
+    APIGateway->>UserDataService: 2. 2. Forward request
+    UserDataService-->>APIGateway: 7. Forward 202 Accepted
+    UserDataService->>PostgreSQLDB: 3. 3. Check for existing 'pending' request for user
+    PostgreSQLDB-->>UserDataService: 4. Return request status
+    UserDataService->>SQSQueue: 5. 5. SendMessage({ userId, email, correlationId })
+    SQSQueue-->>UserDataService: 6. Acknowledge message
+    activate ExportWorkerLambda
+    SQSQueue->>ExportWorkerLambda: 9. 9. Trigger Export Worker (async)
+    ExportWorkerLambda->>PostgreSQLDB: 10. 10. Query user data (users, history, variables, modes)
+    PostgreSQLDB-->>ExportWorkerLambda: 11. Return aggregated data sets
+    ExportWorkerLambda->>S3Storage: 12. 12. Upload aggregated data as JSON file
+    S3Storage-->>ExportWorkerLambda: 13. Confirm upload
+    ExportWorkerLambda->>S3Storage: 14. 14. Generate pre-signed URL for the object
+    S3Storage-->>ExportWorkerLambda: 15. Return secure, time-limited URL
+    ExportWorkerLambda->>EmailService: 16. 16. Send email with download link
+    EmailService-->>ExportWorkerLambda: 17. Confirm email sent
+
+    note over UserDataService: AC-001, AC-005: The initial API call is synchronous but only queues the job. It immediately retur...
+    note over ExportWorkerLambda: AC-002, AC-003, AC-004, AC-006: The core data aggregation and notification logic is handled by th...
+    note over ExportWorkerLambda: AC-007: If any step within the Lambda execution fails, a catch block will trigger a failure notif...
+
+    deactivate ExportWorkerLambda
+    deactivate UserDataService
+    deactivate APIGateway

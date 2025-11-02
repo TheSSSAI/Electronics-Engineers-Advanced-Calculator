@@ -1,0 +1,38 @@
+flowchart TD
+    subgraph Initialization Phase
+        A[Client Component e.g., React UI] -->|1. Initializes & Configures| B(SyncManager Service)
+        A -->|2. Subscribes to Events| B
+    end
+
+    subgraph Runtime API Call
+        C[User triggers an action e.g., save data] --> D[Client makes API Call]
+        D --> E{API Interceptor checks network status}
+        E -->|Online| F[Pass request directly to Backend]
+        E -->|Offline| G[Pass request to SyncManager]
+    end
+
+    subgraph Offline Handling by SyncManager
+        G --> H[Queue action in IndexedDB]
+        H --> I[Emit 'onSyncStart' event]
+        I --> J[Client Component updates UI e.g., show 'syncing...' icon]
+    end
+
+    subgraph Sync Execution Phase (on reconnection)
+        B -- Processes Queue --> K[Send queued requests to Backend]
+        K --> L{API Response}
+        L -->|Success| M[Emit 'onSyncSuccess' event]
+        L -->|Error| N[Emit 'onSyncError' event]
+        M --> O[Client Component updates UI e.g., show 'saved' toast]
+        N --> P[Client Component updates UI e.g., show 'sync failed' banner]
+    end
+
+    %% Styling
+    classDef service fill:#e3f2fd,stroke:#1976d2,color:#000
+    classDef component fill:#e8f5e9,stroke:#2e7d32,color:#000
+    classDef process fill:#f3e5f5,stroke:#7b1fa2,color:#000
+    classDef event fill:#fff3e0,stroke:#ed6c02,color:#000
+
+    class B,G,H,K,L service
+    class A,J,O,P component
+    class C,D,E,F process
+    class I,M,N event

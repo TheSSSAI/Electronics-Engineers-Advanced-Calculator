@@ -1,0 +1,47 @@
+# .github/workflows/publish.yml
+name: Publish Package to npmjs
+
+on:
+  push:
+    tags:
+      - 'v*.*.*' # Trigger this workflow when a tag matching v*.*.* (e.g., v1.0.0) is pushed
+
+jobs:
+  build-and-publish:
+    name: Build and Publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # Allow reading the repository content
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org' # Set the registry to npmjs
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Linter
+        run: pnpm lint
+        
+      - name: Run Tests
+        run: pnpm test
+
+      - name: Build package
+        run: pnpm build
+
+      - name: Publish to npmjs
+        run: pnpm publish --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

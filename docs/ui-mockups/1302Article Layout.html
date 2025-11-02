@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organism: Article Layout</title>
+  <style>
+    /* --- CSS Reset and Basic Setup --- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* --- Design System Tokens --- */
+:root {
+  /* Colors - Base */
+  --color-white: #ffffff;
+  --color-black: #1a1a1a;
+  --color-gray-50: #f8f9fa;
+  --color-gray-100: #f1f3f5;
+  --color-gray-200: #e9ecef;
+  --color-gray-400: #ced4da;
+  --color-gray-600: #868e96;
+  --color-gray-700: #495057;
+  --color-gray-800: #343a40;
+  --color-gray-900: #212529;
+
+  /* Colors - Semantic & Interactive */
+  --color-link: #0066cc;
+  --color-link-hover: #0052a3;
+  --color-link-visited: #551a8b;
+  --color-focus-ring: rgba(0, 102, 204, 0.5);
+
+  /* Admonition Colors */
+  --color-info-bg: #e7f5ff;
+  --color-info-border: #99d9ff;
+  --color-info-icon: #33aaff;
+  --color-tip-bg: #e6fcf5;
+  --color-tip-border: #96f2d7;
+  --color-tip-icon: #20c997;
+  --color-warning-bg: #fff9e6;
+  --color-warning-border: #ffe066;
+  --color-warning-icon: #fab005;
+  --color-danger-bg: #fff5f5;
+  --color-danger-border: #ffc9c9;
+  --color-danger-icon: #fa5252;
+  --color-note-bg: var(--color-gray-100);
+  --color-note-border: var(--color-gray-400);
+  --color-note-icon: var(--color-gray-600);
+
+  /* Code Block Colors */
+  --color-code-bg: var(--color-gray-900);
+  --color-code-text: #f8f8f2;
+  --color-code-title-bg: var(--color-gray-800);
+  --color-code-title-text: var(--color-gray-200);
+  --color-code-keyword: #ff79c6;
+  --color-code-string: #f1fa8c;
+  --color-code-function: #50fa7b;
+  --color-code-comment: #6272a4;
+  --color-code-number: #bd93f9;
+  --color-code-punctuation: #f8f8f2;
+
+  /* Typography */
+  --font-family-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-family-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  --font-size-base: 1rem;
+  --font-size-sm: 0.875rem;
+  --font-size-lg: 1.125rem;
+  --line-height-base: 1.7;
+  --line-height-heading: 1.3;
+
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-xxl: 3rem;
+
+  /* Borders & Shadows */
+  --border-radius-sm: 4px;
+  --border-radius-md: 6px;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* --- Showcase Page Styles --- */
+body {
+  font-family: var(--font-family-sans);
+  background-color: var(--color-gray-50);
+  color: var(--color-gray-800);
+  line-height: var(--line-height-base);
+}
+.showcase__header {
+  background-color: var(--color-white);
+  padding: var(--space-lg) var(--space-xl);
+  border-bottom: 1px solid var(--color-gray-200);
+  margin-bottom: var(--space-xl);
+}
+.showcase__header h1 { font-size: 2rem; }
+.showcase__header p { color: var(--color-gray-600); margin-top: var(--space-xs); }
+.variant-title {
+  font-size: 1.5rem;
+  margin-bottom: var(--space-md);
+  padding: var(--space-xl);
+}
+
+/* --- Organism: Article Layout --- */
+.article-layout {
+  display: grid;
+  gap: var(--space-xl);
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+}
+
+.article-layout--with-toc {
+  grid-template-columns: 1fr 240px;
+}
+
+.article-layout--without-toc {
+  grid-template-columns: 1fr;
+}
+
+/* --- Main Article Content --- */
+.article-content {
+  max-width: 80ch;
+  justify-self: center;
+}
+
+.article-content > * + * {
+  margin-top: var(--space-md);
+}
+
+.article-content h1, .article-content h2, .article-content h3 {
+  line-height: var(--line-height-heading);
+  color: var(--color-gray-900);
+}
+
+.article-content h1 { font-size: 2.5rem; margin-bottom: var(--space-lg); }
+.article-content h2 { font-size: 1.75rem; padding-bottom: var(--space-sm); border-bottom: 1px solid var(--color-gray-200); margin-top: var(--space-xl); }
+.article-content h3 { font-size: 1.25rem; margin-top: var(--space-lg); }
+.article-content p, .article-content ul, .article-content ol { font-size: var(--font-size-base); }
+.article-content ul, .article-content ol { padding-left: var(--space-lg); }
+
+/* --- Table of Contents --- */
+.article-toc {
+  position: sticky;
+  top: var(--space-xl);
+  align-self: start;
+  max-height: calc(100vh - 2 * var(--space-xl));
+  overflow-y: auto;
+}
+.toc__title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-gray-700);
+  margin-bottom: var(--space-md);
+}
+.toc__list {
+  list-style: none;
+}
+.toc__item {
+  margin-bottom: var(--space-sm);
+}
+.toc__link {
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-600);
+  text-decoration: none;
+  display: block;
+  padding: var(--space-xs) 0;
+  border-left: 2px solid var(--color-gray-200);
+  padding-left: var(--space-md);
+  transition: all 0.2s ease;
+}
+
+.toc__link:hover {
+  color: var(--color-link);
+  border-left-color: var(--color-link);
+}
+
+.toc__link.is-active {
+  color: var(--color-link);
+  font-weight: 600;
+  border-left-color: var(--color-link);
+  transform: translateX(4px);
+}
+
+/* ----- DEPENDENT COMPONENT STYLES ----- */
+
+/* --- Inline Link --- */
+.article-content .link {
+  color: var(--color-link);
+  text-decoration: none;
+  border-bottom: 1px solid var(--color-link-hover);
+  transition: all 0.2s ease-in-out;
+}
+.article-content .link:hover { color: var(--color-link-hover); }
+.article-content .link:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 2px; border-radius: var(--border-radius-sm); }
+.article-content .link--external::after { content: ' ↗'; font-size: 0.8em; }
+
+/* --- Admonition Block --- */
+.admonition {
+  padding: var(--space-md);
+  margin: var(--space-lg) 0;
+  border-left: 4px solid;
+  border-radius: var(--border-radius-md);
+  display: flex;
+  gap: var(--space-md);
+}
+.admonition__icon { flex-shrink: 0; width: 24px; height: 24px; margin-top: 2px; }
+.admonition__content p { margin: 0; }
+.admonition--note { background-color: var(--color-note-bg); border-color: var(--color-note-border); }
+.admonition--note .admonition__icon { color: var(--color-note-icon); }
+.admonition--tip { background-color: var(--color-tip-bg); border-color: var(--color-tip-border); }
+.admonition--tip .admonition__icon { color: var(--color-tip-icon); }
+.admonition--info { background-color: var(--color-info-bg); border-color: var(--color-info-border); }
+.admonition--info .admonition__icon { color: var(--color-info-icon); }
+.admonition--warning { background-color: var(--color-warning-bg); border-color: var(--color-warning-border); }
+.admonition--warning .admonition__icon { color: var(--color-warning-icon); }
+.admonition--danger { background-color: var(--color-danger-bg); border-color: var(--color-danger-border); }
+.admonition--danger .admonition__icon { color: var(--color-danger-icon); }
+
+/* --- Code Block --- */
+.code-block {
+  background-color: var(--color-code-bg);
+  border-radius: var(--border-radius-md);
+  margin: var(--space-lg) 0;
+  overflow: hidden;
+}
+.code-block__title { background-color: var(--color-code-title-bg); color: var(--color-code-title-text); padding: var(--space-sm) var(--space-md); font-family: var(--font-family-sans); font-size: var(--font-size-sm); border-bottom: 1px solid var(--color-gray-700); }
+.code-block pre { margin: 0; padding: var(--space-md); overflow-x: auto; }
+.code-block code { font-family: var(--font-family-mono); font-size: var(--font-size-sm); color: var(--color-code-text); white-space: pre; }
+.token.keyword { color: var(--color-code-keyword); }
+.token.string { color: var(--color-code-string); }
+.token.function { color: var(--color-code-function); }
+.token.comment { color: var(--color-code-comment); font-style: italic; }
+.token.number { color: var(--color-code-number); }
+.token.punctuation { color: var(--color-code-punctuation); }
+
+/* --- Doc Paginator --- */
+.doc-paginator { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-md); margin-top: var(--space-xxl); list-style: none; padding: 0; border-top: 1px solid var(--color-gray-200); padding-top: var(--space-xl); }
+.doc-paginator__item { flex: 1 1 0; min-width: 200px; }
+.doc-paginator__item--next { text-align: right; }
+.doc-paginator__link { display: inline-block; width: 100%; height: 100%; padding: var(--space-md) var(--space-lg); border: 1px solid var(--color-gray-200); border-radius: var(--border-radius-md); text-decoration: none; color: var(--color-gray-800); transition: all 0.2s ease; }
+.doc-paginator__link:hover { border-color: var(--color-link); background-color: var(--color-gray-50); transform: translateY(-2px); }
+.doc-paginator__link:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 2px; border-color: var(--color-link); }
+.doc-paginator__label { display: block; font-size: var(--font-size-sm); color: var(--color-gray-600); margin-bottom: var(--space-xs); }
+.doc-paginator__item--prev .doc-paginator__label::before { content: '← '; }
+.doc-paginator__item--next .doc-paginator__label::after { content: ' →'; }
+.doc-paginator__title { display: block; font-weight: 600; color: var(--color-link); }
+
+/* ----- RESPONSIVE ADAPTATIONS ----- */
+@media (max-width: 1024px) {
+  .article-layout--with-toc {
+    grid-template-columns: 1fr; /* Stack to single column */
+  }
+  .article-toc {
+    display: none; /* Hide ToC on smaller screens */
+  }
+}
+
+@media (max-width: 640px) {
+  .doc-paginator { flex-direction: column; }
+  .doc-paginator__item--next { text-align: left; }
+}
+
+  </style>
+</head>
+<body>
+
+  <header class="showcase__header">
+    <h1>Organism: Article Layout</h1>
+    <p>A responsive layout for documentation pages, integrating content, a table of contents, and navigation.</p>
+  </header>
+
+  <h2 class="variant-title">Variant: With Table of Contents</h2>
+  
+  <div class="article-layout article-layout--with-toc">
+    <main class="article-content">
+      <article>
+        <h1>Creating Custom Calculation Modes</h1>
+        <p>
+          The custom calculation mode feature is a powerful tool that allows you to build personalized calculators for your specific, recurring needs. This guide will walk you through the process, from defining variables to writing formulas. For more information, see the <a href="#" class="link">full API documentation</a>.
+        </p>
+
+        <h2 id="step-1">Step 1: Defining Variables</h2>
+        <p>
+          The first step is to define your inputs and outputs. Each variable needs a unique name that starts with a letter and contains only alphanumeric characters.
+        </p>
+        <ul>
+            <li><strong>Inputs:</strong> These are the values you will provide each time you use the calculator.</li>
+            <li><strong>Outputs:</strong> These are the values the calculator will compute for you.</li>
+        </ul>
+
+        <div class="admonition admonition--tip" role="note">
+            <svg class="admonition__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v-5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11"/><path d="m9 9 2 2 4-4"/><path d="M22 13v6a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-2"/></svg>
+            <div class="admonition__content">
+              <p><strong>Tip:</strong> Use clear and descriptive variable names like `input_voltage` instead of `v1` to make your formulas more readable.</p>
+            </div>
+        </div>
+
+        <h2 id="step-2">Step 2: Writing Formulas</h2>
+        <p>
+          Once your variables are defined, you can write the formulas. The syntax is straightforward and supports standard arithmetic, along with a library of scientific functions.
+        </p>
+
+        <div class="code-block">
+          <div class="code-block__title">Ohm's Law Example</div>
+          <pre><code><span class="token.comment">// Assign the result to the 'current' output variable</span>
+<span class="token.function">current</span> <span class="token.punctuation">=</span> <span class="token.function">voltage</span> <span class="token.punctuation">/</span> <span class="token.function">resistance</span><span class="token.punctuation">;</span></code></pre>
+        </div>
+
+        <div class="admonition admonition--warning" role="alert">
+            <svg class="admonition__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <div class="admonition__content">
+              <p><strong>Warning:</strong> Formulas are executed in a secure sandbox. Functions that access the network or filesystem are not permitted and will result in an error.</p>
+            </div>
+        </div>
+        
+        <h2 id="step-3">Step 3: Sharing Your Mode</h2>
+        <p>After creating and saving your mode, you can export it as a JSON file to share with colleagues or back it up. Check out how on our <a href="https://example.com" class="link link--external" target="_blank" rel="noopener noreferrer">community page</a>.</p>
+
+        <nav aria-label="Documentation pages">
+            <ul class="doc-paginator">
+                <li class="doc-paginator__item doc-paginator__item--prev">
+                    <a href="#" class="doc-paginator__link" rel="prev">
+                        <span class="doc-paginator__label">Previous</span>
+                        <span class="doc-paginator__title">Getting Started</span>
+                    </a>
+                </li>
+                <li class="doc-paginator__item doc-paginator__item--next">
+                    <a href="#" class="doc-paginator__link" rel="next">
+                        <span class="doc-paginator__label">Next</span>
+                        <span class="doc-paginator__title">Advanced Formula Functions</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+      </article>
+    </main>
+
+    <aside class="article-toc">
+      <nav aria-label="Table of Contents">
+        <div class="toc__title">On This Page</div>
+        <ul class="toc__list">
+          <li class="toc__item"><a href="#step-1" class="toc__link is-active">Step 1: Defining Variables</a></li>
+          <li class="toc__item"><a href="#step-2" class="toc__link">Step 2: Writing Formulas</a></li>
+          <li class="toc__item"><a href="#step-3" class="toc__link">Step 3: Sharing Your Mode</a></li>
+        </ul>
+      </nav>
+    </aside>
+  </div>
+
+  <h2 class="variant-title">Variant: Without Table of Contents</h2>
+
+  <div class="article-layout article-layout--without-toc">
+    <main class="article-content">
+      <article>
+        <h1>A Simple Article</h1>
+        <p>
+          This is an example of the article layout without the right-hand table of contents. This variant is suitable for shorter articles or on screens where horizontal space is limited. The main content area behaves identically.
+        </p>
+        <div class="admonition admonition--info" role="note">
+            <svg class="admonition__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <div class="admonition__content">
+              <p><strong>Info:</strong> This layout automatically becomes the default on screens narrower than 1024px.</p>
+            </div>
+        </div>
+        <nav aria-label="Documentation pages">
+            <ul class="doc-paginator">
+                <li class="doc-paginator__item doc-paginator__item--next">
+                    <a href="#" class="doc-paginator__link" rel="next">
+                        <span class="doc-paginator__label">Next</span>
+                        <span class="doc-paginator__title">Conclusion</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+      </article>
+    </main>
+  </div>
+
+	
+	<div style="padding: 2rem;"> <h2> Component Variations</h2>
+      <div style="margin-bottom: 2rem;">
+        <h3>Variant Name : with-toc<h3>
+		<p style="color: #555; margin-bottom: 1rem;"> Displays the main content with a sticky table of contents on the right on large screens. </p>
+		<!-- vrient 1 html -->
+        <div class="article-layout article-layout--with-toc" style="border: 1px solid #ddd; padding: 1rem; background: white;">
+            <main class="article-content" style="background: #f0f0f0; padding: 1rem; text-align: center;">Main Content Area</main>
+            <aside class="article-toc" style="position: static; background: #f0f0f0; padding: 1rem; text-align: center;">Table of Contents</aside>
+        </div>
+      </div>
+	 
+      <div style="margin-bottom: 2rem;">
+        <h3>Variant Name : without-toc<h3>
+		<p style="color: #555; margin-bottom: 1rem;"> Displays only the main content area, which spans the full width of the container. </p>
+		<!-- vrient 1 html -->
+        <div class="article-layout article-layout--without-toc" style="border: 1px solid #ddd; padding: 1rem; background: white;">
+            <main class="article-content" style="background: #f0f0f0; padding: 1rem; text-align: center;">Main Content Area</main>
+        </div>
+      </div>
+	 </div>
+	
+	</body>
+</html>

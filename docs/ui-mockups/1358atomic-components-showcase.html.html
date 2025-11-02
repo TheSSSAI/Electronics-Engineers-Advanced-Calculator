@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atomic Components Showcase</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* 1. CSS Reset & Base Styles */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            /* Color Palette */
+            --color-primary-500: #2196F3;
+            --color-primary-700: #1976D2;
+            --color-neutral-100: #F1F3F5;
+            --color-neutral-300: #DEE2E6;
+            --color-neutral-500: #ADB5BD;
+            --color-neutral-700: #495057;
+            --color-neutral-900: #212529;
+            --color-white: #FFFFFF;
+            --color-success: #2E7D32;
+            --color-warning: #ED6C02;
+            --color-error: #D32F2F;
+
+            /* Typography */
+            --font-primary: 'Roboto', sans-serif;
+            --font-monospace: 'Roboto Mono', monospace;
+            --font-size-sm: 14px;
+            --font-size-md: 16px;
+            --font-size-lg: 20px;
+
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+
+            /* Borders */
+            --border-radius: 4px;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background-color: var(--color-neutral-100);
+            color: var(--color-neutral-900);
+            line-height: 1.6;
+            padding: var(--space-lg);
+        }
+
+        /* 2. Showcase Layout */
+        .showcase {
+            max-width: 960px;
+            margin: 0 auto;
+            background-color: var(--color-white);
+            padding: var(--space-xl);
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .showcase__header {
+            border-bottom: 1px solid var(--color-neutral-300);
+            padding-bottom: var(--space-md);
+            margin-bottom: var(--space-xl);
+        }
+
+        .showcase__header h1 {
+            font-size: 2rem;
+            margin-bottom: var(--space-sm);
+        }
+
+        .component-section {
+            margin-bottom: var(--space-xl);
+        }
+        
+        .component-section h2 {
+            font-size: 1.75rem;
+            margin-bottom: var(--space-md);
+            border-bottom: 1px solid var(--color-neutral-300);
+            padding-bottom: var(--space-sm);
+        }
+
+        .component-group {
+            margin-bottom: var(--space-lg);
+            padding: var(--space-md);
+            border: 1px solid var(--color-neutral-300);
+            border-radius: var(--border-radius);
+        }
+        
+        .component-group h3 {
+            font-size: 1.25rem;
+            margin-bottom: var(--space-sm);
+        }
+        
+        .component-group p {
+            font-size: var(--font-size-sm);
+            color: var(--color-neutral-700);
+            margin-bottom: var(--space-md);
+        }
+
+        .state-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-lg);
+            align-items: start;
+        }
+
+        .state-item {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+        
+        .state-item label {
+            font-weight: 500;
+            font-size: var(--font-size-sm);
+        }
+
+        /* 3. Component Styles */
+
+        /* == NumericInputWithPrefix == */
+        .numeric-input {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+        .numeric-input__field {
+            font-family: var(--font-primary);
+            font-size: var(--font-size-md);
+            padding: var(--space-sm) var(--space-md);
+            border: 1px solid var(--color-neutral-500);
+            border-radius: var(--border-radius);
+            width: 100%;
+            transition: border-color 150ms ease-in-out, box-shadow 150ms ease-in-out;
+        }
+        .numeric-input__unit {
+            position: absolute;
+            right: var(--space-md);
+            color: var(--color-neutral-700);
+            pointer-events: none;
+        }
+        .numeric-input__field:focus {
+            outline: none;
+            border-color: var(--color-primary-500);
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+        }
+        .numeric-input__field--error {
+            border-color: var(--color-error);
+        }
+        .numeric-input__field--error:focus {
+            box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.2);
+        }
+        .numeric-input__field:disabled {
+            background-color: var(--color-neutral-100);
+            color: var(--color-neutral-500);
+            cursor: not-allowed;
+        }
+        .numeric-input__field--read-only {
+            background-color: var(--color-neutral-100);
+            font-weight: 500;
+        }
+        .numeric-input__error-msg {
+            font-size: var(--font-size-sm);
+            color: var(--color-error);
+            margin-top: var(--space-xs);
+        }
+
+        /* == ColorBandSelector == */
+        .color-selector {
+            position: relative;
+            width: 150px;
+        }
+        .color-selector__button {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            width: 100%;
+            padding: var(--space-sm);
+            border: 1px solid var(--color-neutral-500);
+            border-radius: var(--border-radius);
+            background-color: var(--color-white);
+            font-family: var(--font-primary);
+            font-size: var(--font-size-md);
+            cursor: pointer;
+            text-align: left;
+        }
+        .color-selector__button:focus {
+            outline: none;
+            border-color: var(--color-primary-500);
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+        }
+        .color-selector__button:disabled {
+            background-color: var(--color-neutral-100);
+            cursor: not-allowed;
+        }
+        .color-selector__swatch {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        .color-selector__dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background-color: var(--color-white);
+            border: 1px solid var(--color-neutral-300);
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            z-index: 10;
+            list-style: none;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .color-selector__dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm);
+            cursor: pointer;
+        }
+        .color-selector__dropdown-item:hover, .color-selector__dropdown-item:focus {
+            background-color: var(--color-neutral-100);
+            outline: none;
+        }
+        .color-selector--open .color-selector__dropdown {
+            display: block;
+        }
+        /* Color Swatch Colors */
+        .swatch-black { background-color: #000; }
+        .swatch-brown { background-color: #A52A2A; }
+        .swatch-red { background-color: #FF0000; }
+        .swatch-orange { background-color: #FFA500; }
+        .swatch-yellow { background-color: #FFFF00; }
+        .swatch-gold { background-color: #FFD700; }
+        .swatch-silver { background-color: #C0C0C0; }
+
+        /* == WarningIconWithTooltip == */
+        .warning-tooltip {
+            position: relative;
+            display: inline-flex;
+            cursor: help;
+        }
+        .warning-tooltip__icon {
+            color: var(--color-warning);
+            width: 20px;
+            height: 20px;
+        }
+        .warning-tooltip__text {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-8px);
+            background-color: var(--color-neutral-900);
+            color: var(--color-white);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--border-radius);
+            font-size: var(--font-size-sm);
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 150ms, visibility 150ms;
+        }
+        .warning-tooltip:hover .warning-tooltip__text,
+        .warning-tooltip:focus-within .warning-tooltip__text {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* == FormulaEditor == */
+        .formula-editor {
+            position: relative;
+        }
+        .formula-editor__area {
+            font-family: var(--font-monospace);
+            font-size: var(--font-size-md);
+            line-height: 1.5;
+            padding: var(--space-md);
+            border: 1px solid var(--color-neutral-500);
+            border-radius: var(--border-radius);
+            background-color: #fdfdfd;
+            min-height: 100px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .formula-editor__area:focus {
+            outline: none;
+            border-color: var(--color-primary-500);
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+        }
+        .formula-editor--valid .formula-editor__area {
+            border-color: var(--color-success);
+        }
+        .formula-editor--error .formula-editor__area {
+            border-color: var(--color-error);
+        }
+        /* Syntax Highlighting Tokens */
+        .token-variable { color: #005cc5; }
+        .token-function { color: #6f42c1; }
+        .token-constant { color: #032f62; }
+        .token-operator { color: #d73a49; }
+        .token-number { color: #005cc5; }
+        .formula-editor__message {
+            font-size: var(--font-size-sm);
+            margin-top: var(--space-sm);
+        }
+        .formula-editor__message--success { color: var(--color-success); }
+        .formula-editor__message--error { color: var(--color-error); }
+
+        /* == VariableListItem == */
+        .variable-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--border-radius);
+            background-color: var(--color-neutral-100);
+        }
+        .variable-list-item:not(:last-child) {
+            margin-bottom: var(--space-sm);
+        }
+        .variable-list-item__info {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+        .variable-list-item__badge {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            color: var(--color-white);
+        }
+        .variable-list-item__badge--input { background-color: var(--color-primary-700); }
+        .variable-list-item__badge--output { background-color: var(--color-success); }
+        .variable-list-item__name {
+            font-family: var(--font-monospace);
+            font-weight: 500;
+        }
+        .variable-list-item__value {
+            color: var(--color-neutral-700);
+        }
+        .variable-list-item__actions {
+            display: flex;
+            gap: var(--space-sm);
+        }
+        .variable-list-item__action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: var(--space-xs);
+            color: var(--color-neutral-700);
+        }
+        .variable-list-item__action-btn:hover {
+            color: var(--color-neutral-900);
+        }
+        .variable-list-item__action-btn:focus {
+            outline: none;
+            border-radius: 50%;
+            box-shadow: 0 0 0 2px var(--color-primary-500);
+        }
+        .variable-list-item--editing {
+            background-color: #e3f2fd;
+        }
+        .variable-list-item__edit-input {
+            width: 80px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="showcase">
+        <header class="showcase__header">
+            <h1>Atomic Components Showcase</h1>
+            <p>A demonstration of all atomic-level components with their variants and states.</p>
+        </header>
+
+        <main>
+            <section class="component-section">
+                <h2>Form Controls</h2>
+                
+                <div class="component-group">
+                    <h3>NumericInputWithPrefix</h3>
+                    <p>An input field for numerical values, which can include a unit prefix.</p>
+                    <div class="state-grid">
+                        <div class="state-item">
+                            <label for="num-default">Default</label>
+                            <div class="numeric-input">
+                                <input id="num-default" type="text" class="numeric-input__field" placeholder="Enter value...">
+                                <span class="numeric-input__unit">Ω</span>
+                            </div>
+                        </div>
+                        <div class="state-item">
+                            <label for="num-focus">Focus</label>
+                            <div class="numeric-input">
+                                <input id="num-focus" type="text" class="numeric-input__field" placeholder="Enter value...">
+                                <span class="numeric-input__unit">V</span>
+                            </div>
+                        </div>
+                        <div class="state-item">
+                            <label for="num-error">Error</label>
+                            <div class="numeric-input">
+                                <input id="num-error" type="text" class="numeric-input__field numeric-input__field--error" value="-10" aria-describedby="num-error-msg">
+                                <span class="numeric-input__unit">kΩ</span>
+                            </div>
+                            <div id="num-error-msg" class="numeric-input__error-msg">Must be positive.</div>
+                        </div>
+                        <div class="state-item">
+                            <label for="num-disabled">Disabled</label>
+                            <div class="numeric-input">
+                                <input id="num-disabled" type="text" class="numeric-input__field" placeholder="Disabled" disabled>
+                                <span class="numeric-input__unit">A</span>
+                            </div>
+                        </div>
+                        <div class="state-item">
+                            <label for="num-readonly">Read-only</label>
+                            <div class="numeric-input">
+                                <input id="num-readonly" type="text" class="numeric-input__field numeric-input__field--read-only" value="12.345" readonly>
+                                <span class="numeric-input__unit">W</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="component-group">
+                    <h3>ColorBandSelector</h3>
+                    <p>A custom dropdown for selecting resistor color bands.</p>
+                     <div class="state-grid">
+                        <div class="state-item">
+                            <label>Default</label>
+                             <div class="color-selector">
+                                <button class="color-selector__button" aria-haspopup="listbox" aria-expanded="false">
+                                    <span class="color-selector__swatch swatch-brown"></span>
+                                    <span>Brown</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="state-item">
+                            <label>Open</label>
+                            <div class="color-selector color-selector--open">
+                                <button class="color-selector__button" aria-haspopup="listbox" aria-expanded="true">
+                                    <span class="color-selector__swatch swatch-red"></span>
+                                    <span>Red</span>
+                                </button>
+                                <ul class="color-selector__dropdown" role="listbox">
+                                    <li class="color-selector__dropdown-item" role="option" tabindex="0"><span class="color-selector__swatch swatch-black"></span> <span>Black</span></li>
+                                    <li class="color-selector__dropdown-item" role="option"><span class="color-selector__swatch swatch-brown"></span> <span>Brown</span></li>
+                                    <li class="color-selector__dropdown-item" role="option"><span class="color-selector__swatch swatch-red"></span> <span>Red</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="state-item">
+                            <label>Disabled</label>
+                             <div class="color-selector">
+                                <button class="color-selector__button" disabled>
+                                    <span class="color-selector__swatch swatch-gold"></span>
+                                    <span>Gold</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                 <div class="component-group">
+                    <h3>FormulaEditor</h3>
+                    <p>A rich input for writing mathematical formulas with syntax highlighting and validation states.</p>
+                     <div class="state-grid">
+                        <div class="state-item">
+                            <label>Default / Focus</label>
+                            <div class="formula-editor">
+                                <div class="formula-editor__area" contenteditable="true" role="textbox" aria-label="Formula editor">area = pi * radius^2</div>
+                            </div>
+                        </div>
+                        <div class="state-item">
+                            <label>Valid</label>
+                            <div class="formula-editor formula-editor--valid">
+                                <div class="formula-editor__area" contenteditable="true" role="textbox" aria-label="Formula editor" aria-describedby="formula-valid-msg">
+                                    <span class="token-variable">output</span> <span class="token-operator">=</span> <span class="token-constant">pi</span> <span class="token-operator">*</span> <span class="token-variable">radius</span><span class="token-operator">^</span><span class="token-number">2</span>
+                                </div>
+                                <div id="formula-valid-msg" class="formula-editor__message formula-editor__message--success">Formula is valid.</div>
+                            </div>
+                        </div>
+                         <div class="state-item">
+                            <label>Error</label>
+                            <div class="formula-editor formula-editor--error">
+                                <div class="formula-editor__area" contenteditable="true" role="textbox" aria-label="Formula editor" aria-describedby="formula-error-msg">
+                                    <span class="token-variable">area</span> <span class="token-operator">=</span> <span class="token-function">sin</span>(
+                                </div>
+                                <div id="formula-error-msg" class="formula-editor__message formula-editor__message--error">Syntax Error: Unmatched parenthesis.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+            
+            <section class="component-section">
+                <h2>Feedback & Display</h2>
+
+                <div class="component-group">
+                    <h3>WarningIconWithTooltip</h3>
+                    <p>An icon that reveals a tooltip on hover or focus to provide contextual warnings.</p>
+                    <div class="state-grid">
+                        <div class="state-item">
+                            <label>Visible on Hover/Focus</label>
+                            <div class="warning-tooltip" tabindex="0" role="button" aria-describedby="tooltip-1">
+                                <svg class="warning-tooltip__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+                                <span class="warning-tooltip__text" id="tooltip-1" role="tooltip">Impractical value detected.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="component-group">
+                    <h3>VariableListItem</h3>
+                    <p>An item for displaying a user-defined variable, with variants and states.</p>
+                    <div class="state-grid" style="grid-template-columns: 1fr;">
+                        <div class="state-item">
+                            <label>Read-only State (Input/Output Variants)</label>
+                            <div class="variable-list-item">
+                                <div class="variable-list-item__info">
+                                    <span class="variable-list-item__badge variable-list-item__badge--input">IN</span>
+                                    <span class="variable-list-item__name">voltage</span>
+                                    <span class="variable-list-item__value">12</span>
+                                </div>
+                                <div class="variable-list-item__actions">
+                                    <button class="variable-list-item__action-btn" aria-label="Edit voltage"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                                    <button class="variable-list-item__action-btn" aria-label="Delete voltage"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                                </div>
+                            </div>
+                             <div class="variable-list-item">
+                                <div class="variable-list-item__info">
+                                    <span class="variable-list-item__badge variable-list-item__badge--output">OUT</span>
+                                    <span class="variable-list-item__name">area</span>
+                                    <span class="variable-list-item__value">314.159</span>
+                                </div>
+                                <div class="variable-list-item__actions">
+                                    <button class="variable-list-item__action-btn" aria-label="Edit area" disabled><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                                    <button class="variable-list-item__action-btn" aria-label="Delete area"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="state-item">
+                            <label>Editing State</label>
+                            <div class="variable-list-item variable-list-item--editing">
+                                <div class="variable-list-item__info">
+                                    <span class="variable-list-item__badge variable-list-item__badge--input">IN</span>
+                                    <span class="variable-list-item__name">voltage</span>
+                                    <input class="numeric-input__field variable-list-item__edit-input" value="12">
+                                </div>
+                                <div class="variable-list-item__actions">
+                                    <button class="variable-list-item__action-btn" aria-label="Save changes"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg></button>
+                                    <button class="variable-list-item__action-btn" aria-label="Cancel edit"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </main>
+    </div>
+</body>
+</html>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Individual Component - Component Specifications</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.6;
+            color: #2d3748;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        
+        .component-type-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 8px;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 30px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .section h2 {
+            color: #1e293b;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #4f46e5;
+            display: inline-block;
+        }
+        
+        .section h3 {
+            color: #4f46e5;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 20px 0 12px 0;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .info-card {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .info-card h4 {
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+        
+        .info-card p {
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .variations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+        
+        .variation-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .variation-name {
+            font-weight: 600;
+            color: #4f46e5;
+            margin-bottom: 8px;
+        }
+        
+        .variation-code {
+            background: #f1f5f9;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+            color: #1e293b;
+            overflow-x: auto;
+            margin: 8px 0;
+            border-left: 4px solid #4f46e5;
+        }
+        
+        .variation-description {
+            font-size: 13px;
+            color: #64748b;
+            font-style: italic;
+        }
+        
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        
+        .feature-category {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .feature-category h4 {
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        
+        .feature-category ul {
+            list-style: none;
+        }
+        
+        .feature-category li {
+            padding: 6px 0;
+            color: #4b5563;
+            font-size: 14px;
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .feature-category li:before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        .tokens-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 8px;
+        }
+        
+        .token {
+            background: #f0f9ff;
+            color: #0369a1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            border: 1px solid #bae6fd;
+            text-align: center;
+        }
+        
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 16px 0;
+            line-height: 1.4;
+        }
+        
+        .stats-bar {
+            background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+        
+        .stat {
+            flex: 1;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .stats-bar {
+                flex-direction: column;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Individual Component</h1>
+            <div class="component-type-badge">Unknown Component</div>
+        </div>
+        <div class="stats-bar">
+            <div class="stat">
+                <span class="stat-number">0</span>
+                <span class="stat-label">Variations</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">0</span>
+                <span class="stat-label">Design Tokens</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">0</span>
+                <span class="stat-label">Breakpoints</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">0</span>
+                <span class="stat-label">A11y Features</span>
+            </div>
+        </div><div class="content">
+        <div class="section">
+            <h2>Implementation Notes</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>Css Architecture</h4>
+                    <p>All styles are embedded in a <style> tag using CSS custom properties for design system tokens. A BEM-like naming convention is used.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Component Organization</h4>
+                    <p>Components are grouped by type in semantic <section> tags with clear headings and descriptions for a style-guide-like format.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Responsive Design</h4>
+                    <p>A mobile-first approach is used, with media queries for larger viewports. Components are designed to be fluid.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Accessibility Compliance</h4>
+                    <p>WCAG 2.1 AA is targeted, with semantic HTML, appropriate ARIA attributes, and high-contrast focus indicators.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Browser Support</h4>
+                    <p>Designed for modern browsers (latest Chrome, Firefox, Safari, Edge).</p>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Usage Guidelines</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>File Purpose</h4><p>This file serves as a living style guide and a single source of truth for the HTML structure and CSS of atomic components.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Development Workflow</h4><p>Developers can copy the HTML markup and relevant CSS classes for direct implementation into the application's component files.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Testing Scenarios</h4><p>The page can be used for visual regression testing, cross-browser manual testing, and accessibility audits of the atomic components.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Stakeholder Review</h4><p>This file can be shared with designers and product managers for visual review and approval of component implementations.</p>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</body>
+</html>

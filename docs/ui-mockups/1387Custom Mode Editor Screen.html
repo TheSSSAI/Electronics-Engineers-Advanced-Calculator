@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom Mode Editor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* CSS Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      height: 100%;
+    }
+    body {
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      background-color: var(--color-neutrals-gray_50);
+      color: var(--color-neutrals-gray_900);
+      line-height: 1.6;
+    }
+    button, input, textarea {
+      font-family: inherit;
+      font-size: 100%;
+      border: none;
+      outline: none;
+    }
+    ul {
+      list-style: none;
+    }
+
+    /* Design System Tokens (CSS Variables) */
+    :root {
+      --font-family-primary: 'Roboto', sans-serif;
+      --font-family-monospace: 'Roboto Mono', monospace;
+
+      /* Colors */
+      --color-primary-50: #E3F2FD;
+      --color-primary-500: #2196F3;
+      --color-primary-700: #1976D2;
+      --color-primary-800: #1565C0;
+      --color-neutrals-white: #FFFFFF;
+      --color-neutrals-gray_50: #F8F9FA;
+      --color-neutrals-gray_100: #F1F3F5;
+      --color-neutrals-gray_400: #CED4DA;
+      --color-neutrals-gray_500: #ADB5BD;
+      --color-neutrals-gray_700: #495057;
+      --color-neutrals-gray_900: #212529;
+      --color-semantic-error: #D32F2F;
+      --color-semantic-success: #2E7D32;
+      --color-semantic-warning: #ED6C02;
+      --color-semantic-info: #0288D1;
+      
+      /* Spacing */
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+
+      /* Borders */
+      --border-radius-sm: 4px;
+      --border-radius-md: 8px;
+
+      /* Shadows */
+      --shadow-md: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    }
+
+    /* Screen Layout */
+    .screen-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--space-xl);
+      min-height: 100vh;
+      width: 100%;
+    }
+    
+    .screen-header {
+      width: 100%;
+      max-width: 800px;
+      margin-bottom: var(--space-lg);
+    }
+
+    .screen-header h1 {
+      font-size: 36px;
+      font-weight: 600;
+      color: var(--color-neutrals-gray_900);
+    }
+
+    /* Wizard Component */
+    .wizard-container {
+      width: 100%;
+      max-width: 800px;
+      background-color: var(--color-neutrals-white);
+      border-radius: var(--border-radius-md);
+      box-shadow: var(--shadow-md);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .wizard-steps {
+      display: flex;
+      justify-content: space-around;
+      padding: var(--space-lg);
+      border-bottom: 1px solid var(--color-neutrals-gray_100);
+    }
+    .wizard-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: var(--color-neutrals-gray_500);
+      font-weight: 500;
+    }
+    .wizard-step .step-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: var(--color-neutrals-gray_100);
+      color: var(--color-neutrals-gray_700);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--space-sm);
+      border: 2px solid var(--color-neutrals-gray_100);
+    }
+     .wizard-step.active .step-number {
+      background-color: var(--color-primary-50);
+      color: var(--color-primary-700);
+      border-color: var(--color-primary-500);
+    }
+    .wizard-step.active .step-label {
+      color: var(--color-primary-700);
+    }
+
+    .wizard-step-content {
+      padding: var(--space-xl);
+      min-height: 400px;
+    }
+    .wizard-step-content > section {
+      display: none;
+    }
+    .wizard-step-content > section.active {
+      display: block;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .wizard-step-content h2 {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: var(--space-lg);
+    }
+    
+    .wizard-nav {
+      display: flex;
+      justify-content: space-between;
+      padding: var(--space-lg);
+      border-top: 1px solid var(--color-neutrals-gray_100);
+      background-color: var(--color-neutrals-gray_50);
+      border-bottom-left-radius: var(--border-radius-md);
+      border-bottom-right-radius: var(--border-radius-md);
+    }
+
+    /* Form Components */
+    .form-group {
+      margin-bottom: var(--space-lg);
+    }
+    .form-group label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: var(--space-sm);
+      color: var(--color-neutrals-gray_700);
+    }
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--color-neutrals-gray_400);
+      border-radius: var(--border-radius-sm);
+      font-size: 16px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: var(--color-primary-500);
+      box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+    }
+    .form-group textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    .error-message {
+      color: var(--color-semantic-error);
+      font-size: 14px;
+      margin-top: var(--space-xs);
+    }
+    .form-group input.error,
+    .form-group textarea.error {
+      border-color: var(--color-semantic-error);
+    }
+    .form-group input.error:focus,
+    .form-group textarea.error:focus {
+      box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.2);
+    }
+
+
+    /* Variable List Manager */
+    .variable-manager {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-xl);
+    }
+    .variable-section h3 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: var(--space-md);
+    }
+    .variable-list {
+      border: 1px solid var(--color-neutrals-gray_100);
+      border-radius: var(--border-radius-sm);
+      min-height: 150px;
+      padding: var(--space-sm);
+    }
+    .variable-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--border-radius-sm);
+      margin-bottom: var(--space-xs);
+    }
+    .variable-item:hover {
+      background-color: var(--color-neutrals-gray_50);
+    }
+    .variable-info {
+      font-family: var(--font-family-monospace);
+    }
+    .variable-unit {
+      color: var(--color-neutrals-gray_500);
+      margin-left: var(--space-sm);
+    }
+    .variable-actions button {
+      margin-left: var(--space-sm);
+    }
+
+    /* Formula Editor */
+    .formula-editor-layout {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: var(--space-xl);
+    }
+    .formula-editor textarea {
+      font-family: var(--font-family-monospace);
+      height: 200px;
+      font-size: 14px;
+    }
+    .available-variables {
+        padding: var(--space-md);
+        border: 1px solid var(--color-neutrals-gray_100);
+        border-radius: var(--border-radius-sm);
+        background: var(--color-neutrals-gray_50);
+    }
+    .available-variables h4 {
+        margin-bottom: var(--space-md);
+        font-weight: 500;
+    }
+    .available-variables ul {
+        list-style: none;
+    }
+    .available-variables li {
+        font-family: var(--font-family-monospace);
+        padding: var(--space-xs);
+        font-size: 14px;
+    }
+    .available-variables .input-var { color: var(--color-semantic-success); }
+    .available-variables .output-var { color: var(--color-semantic-info); }
+
+    /* Button Component */
+    .btn {
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 500;
+      border-radius: var(--border-radius-sm);
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+    }
+    .btn:focus-visible {
+      outline: 2px solid var(--color-primary-700);
+      outline-offset: 2px;
+    }
+    .btn--primary {
+      background-color: var(--color-primary-700);
+      color: var(--color-neutrals-white);
+    }
+    .btn--primary:hover {
+      background-color: var(--color-primary-800);
+    }
+    .btn--primary:active {
+      transform: scale(0.98);
+    }
+    .btn--secondary {
+      background-color: transparent;
+      color: var(--color-primary-700);
+      border: 1px solid var(--color-neutrals-gray_400);
+    }
+    .btn--secondary:hover {
+      background-color: var(--color-primary-50);
+    }
+    .btn--secondary:active {
+      transform: scale(0.98);
+    }
+    .btn--icon {
+      padding: var(--space-sm);
+      background: transparent;
+      border: none;
+      color: var(--color-neutrals-gray_500);
+    }
+    .btn--icon:hover {
+        background-color: var(--color-neutrals-gray_100);
+        color: var(--color-neutrals-gray_900);
+    }
+    .btn:disabled {
+      background-color: var(--color-neutrals-gray_100);
+      color: var(--color-neutrals-gray_500);
+      cursor: not-allowed;
+    }
+    
+    .spinner {
+        border: 2px solid var(--color-neutrals-gray_100);
+        border-top: 2px solid var(--color-primary-500);
+        border-radius: 50%;
+        width: 16px;
+        height: 16px;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Screen Variations */
+    .screen-variations {
+        margin-top: var(--space-xl);
+        width: 100%;
+        max-width: 800px;
+    }
+    .variation-group {
+        border: 1px solid var(--color-neutrals-gray_400);
+        border-radius: var(--border-radius-md);
+        padding: var(--space-lg);
+        margin-top: var(--space-lg);
+    }
+    .variation-group h3 {
+        margin-bottom: var(--space-md);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .screen-container {
+        padding: var(--space-md);
+      }
+      .variable-manager, .formula-editor-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="screen-container">
+    <header class="screen-header">
+      <h1 id="wizard-title">Create Custom Mode</h1>
+    </header>
+    
+    <main class="screen-content">
+      <div class="wizard-container" role="form" aria-labelledby="wizard-title">
+        <div class="wizard-steps" role="tablist">
+          <div id="step-1-tab" class="wizard-step active" role="tab" aria-selected="true" aria-controls="step-1-panel">
+            <div class="step-number">1</div>
+            <div class="step-label">Information</div>
+          </div>
+          <div id="step-2-tab" class="wizard-step" role="tab" aria-selected="false" aria-controls="step-2-panel">
+            <div class="step-number">2</div>
+            <div class="step-label">Variables</div>
+          </div>
+          <div id="step-3-tab" class="wizard-step" role="tab" aria-selected="false" aria-controls="step-3-panel">
+            <div class="step-number">3</div>
+            <div class="step-label">Formulas</div>
+          </div>
+        </div>
+
+        <div class="wizard-step-content">
+          <section id="step-1-panel" class="active" role="tabpanel" aria-labelledby="step-1-tab">
+            <h2>Basic Information</h2>
+            <div class="form-group">
+              <label for="mode-name">Mode Name*</label>
+              <input type="text" id="mode-name" name="mode-name" required placeholder="e.g., Voltage Divider Calculator" aria-describedby="name-error">
+              <div id="name-error" class="error-message" role="alert"></div>
+            </div>
+            <div class="form-group">
+              <label for="mode-desc">Description (Optional)</label>
+              <textarea id="mode-desc" name="mode-desc" placeholder="A brief explanation of what this mode calculates."></textarea>
+            </div>
+          </section>
+
+          <section id="step-2-panel" role="tabpanel" aria-labelledby="step-2-tab">
+            <h2>Define Variables</h2>
+            <div class="variable-manager">
+              <div class="variable-section">
+                <h3>Input Variables</h3>
+                <ul class="variable-list">
+                  <li class="variable-item">
+                    <span class="variable-info">Vin <span class="variable-unit">V</span></span>
+                    <div class="variable-actions">
+                      <button class="btn btn--icon" aria-label="Edit variable Vin">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                      </button>
+                      <button class="btn btn--icon" aria-label="Delete variable Vin">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                      </button>
+                    </div>
+                  </li>
+                   <li class="variable-item">
+                    <span class="variable-info">R1 <span class="variable-unit">Ω</span></span>
+                    <div class="variable-actions">
+                      <button class="btn btn--icon" aria-label="Edit variable R1">...</button>
+                      <button class="btn btn--icon" aria-label="Delete variable R1">...</button>
+                    </div>
+                  </li>
+                   <li class="variable-item">
+                    <span class="variable-info">R2 <span class="variable-unit">Ω</span></span>
+                    <div class="variable-actions">
+                      <button class="btn btn--icon" aria-label="Edit variable R2">...</button>
+                      <button class="btn btn--icon" aria-label="Delete variable R2">...</button>
+                    </div>
+                  </li>
+                </ul>
+                <button class="btn btn--secondary" style="width: 100%; margin-top: 16px;">+ Add Input Variable</button>
+              </div>
+              <div class="variable-section">
+                <h3>Output Variables</h3>
+                <ul class="variable-list">
+                    <li class="variable-item">
+                        <span class="variable-info">Vout <span class="variable-unit">V</span></span>
+                        <div class="variable-actions">
+                           <button class="btn btn--icon" aria-label="Edit variable Vout">...</button>
+                           <button class="btn btn--icon" aria-label="Delete variable Vout">...</button>
+                        </div>
+                    </li>
+                </ul>
+                <button class="btn btn--secondary" style="width: 100%; margin-top: 16px;">+ Add Output Variable</button>
+              </div>
+            </div>
+          </section>
+
+          <section id="step-3-panel" role="tabpanel" aria-labelledby="step-3-tab">
+            <h2>Define Formulas</h2>
+            <div class="formula-editor-layout">
+                <div class="formula-editor">
+                    <label for="formula-input">Formulas</label>
+                    <textarea id="formula-input" name="formula-input" placeholder="Vout = Vin * (R2 / (R1 + R2))"></textarea>
+                    <div id="formula-error" class="error-message" role="alert"></div>
+                </div>
+                <div class="available-variables">
+                    <h4>Available Variables</h4>
+                    <ul>
+                        <li><strong class="input-var">Inputs:</strong></li>
+                        <li>Vin</li>
+                        <li>R1</li>
+                        <li>R2</li>
+                        <li><strong class="output-var">Outputs:</strong></li>
+                        <li>Vout</li>
+                    </ul>
+                </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="wizard-nav">
+          <button id="back-btn" class="btn btn--secondary" disabled>Back</button>
+          <button id="next-btn" class="btn btn--primary">Next</button>
+          <button id="save-btn" class="btn btn--primary" style="display: none;">Save</button>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <div class="screen-variations">
+    <h2>Screen Variations</h2>
+    
+    <div class="variation-group">
+      <h3>Variant: Edit Mode</h3>
+      <p>When editing an existing mode, the title changes and fields are pre-populated with data.</p>
+      <header class="screen-header">
+        <h1>Edit "Voltage Divider"</h1>
+      </header>
+      <div class="form-group">
+        <label for="mode-name-edit">Mode Name*</label>
+        <input type="text" id="mode-name-edit" value="Voltage Divider">
+      </div>
+      <div class="form-group">
+        <label for="mode-desc-edit">Description (Optional)</label>
+        <textarea id="mode-desc-edit">Calculates the output voltage of a simple resistive voltage divider.</textarea>
+      </div>
+    </div>
+    
+    <div class="variation-group">
+      <h3>State: Input with Error</h3>
+      <p>Shows how an input field looks when validation fails. The error message is displayed below the field.</p>
+      <div class="form-group">
+        <label for="mode-name-error">Mode Name*</label>
+        <input type="text" id="mode-name-error" class="error" value="Voltage Divider" aria-describedby="name-error-demo" aria-invalid="true">
+        <div id="name-error-demo" class="error-message" role="alert">A mode with this name already exists.</div>
+      </div>
+    </div>
+
+    <div class="variation-group">
+        <h3>State: Saving</h3>
+        <p>The final button shows a loading state while the data is being persisted to the server.</p>
+        <button id="save-btn-loading" class="btn btn--primary" disabled>
+            <span class="spinner"></span>
+            <span>Saving...</span>
+        </button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const steps = [
+        { id: 'step-1-panel', tabId: 'step-1-tab' },
+        { id: 'step-2-panel', tabId: 'step-2-tab' },
+        { id: 'step-3-panel', tabId: 'step-3-tab' }
+      ];
+      let currentStep = 0;
+
+      const nextBtn = document.getElementById('next-btn');
+      const backBtn = document.getElementById('back-btn');
+      const saveBtn = document.getElementById('save-btn');
+      
+      function updateWizardState() {
+        steps.forEach((step, index) => {
+          const panel = document.getElementById(step.id);
+          const tab = document.getElementById(step.tabId);
+          if (index === currentStep) {
+            panel.classList.add('active');
+            tab.classList.add('active');
+            tab.setAttribute('aria-selected', 'true');
+          } else {
+            panel.classList.remove('active');
+            tab.classList.remove('active');
+            tab.setAttribute('aria-selected', 'false');
+          }
+        });
+
+        backBtn.disabled = currentStep === 0;
+        nextBtn.style.display = currentStep === steps.length - 1 ? 'none' : 'inline-flex';
+        saveBtn.style.display = currentStep === steps.length - 1 ? 'inline-flex' : 'none';
+      }
+
+      nextBtn.addEventListener('click', () => {
+        if (currentStep < steps.length - 1) {
+          // In a real app, validation would happen here
+          const nameInput = document.getElementById('mode-name');
+          const errorDiv = document.getElementById('name-error');
+          if (currentStep === 0 && nameInput.value.trim() === '') {
+              nameInput.classList.add('error');
+              errorDiv.textContent = 'Name is a required field.';
+              return;
+          }
+          nameInput.classList.remove('error');
+          errorDiv.textContent = '';
+
+          currentStep++;
+          updateWizardState();
+        }
+      });
+
+      backBtn.addEventListener('click', () => {
+        if (currentStep > 0) {
+          currentStep--;
+          updateWizardState();
+        }
+      });
+
+      updateWizardState();
+    });
+  </script>
+
+</body>
+</html>

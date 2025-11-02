@@ -1,0 +1,41 @@
+{
+  // Configure VS Code to use Prettier for formatting.
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  // Enable format on save to automatically apply Prettier rules.
+  "editor.formatOnSave": true,
+
+  // Run ESLint's auto-fixer on save.
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+
+  // Stylelint settings for CSS-in-JS
+  "stylelint.validate": ["typescript", "typescriptreact"],
+
+  // Search exclusions
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/*.code-search": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/coverage": true
+  },
+
+  // TypeScript settings
+  "typescript.tsdk": "node_modules/typescript/lib",
+
+  // ESLint settings
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "eslint.workingDirectories": [
+    {
+      "mode": "auto"
+    }
+  ]
+}

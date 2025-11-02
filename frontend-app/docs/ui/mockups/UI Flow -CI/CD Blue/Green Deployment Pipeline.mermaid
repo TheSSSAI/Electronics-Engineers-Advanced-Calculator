@@ -1,0 +1,45 @@
+sequenceDiagram
+    actor Developer
+    participant GitHubRepository as "GitHub Repository"
+    participant GitHubActions as "GitHub Actions"
+    participant AmazonECR as "Amazon ECR"
+    participant Terraform as "Terraform"
+    participant AWSEnvironment as "AWS Environment (Blue/Green)"
+
+    Developer->>GitHubRepository: 1. Push code to main branch
+    GitHubRepository->>GitHubActions: 2. Trigger 'on push' workflow
+    activate GitHubActions
+
+    GitHubActions->>GitHubActions: 3. Run CI Stage: Lint, Test, Security Scans
+    note right of GitHubActions: Pipeline halts on failure
+
+    GitHubActions->>GitHubActions: 4. Build & Scan Docker Image
+    GitHubActions->>AmazonECR: 5. Authenticate and Push Image to ECR
+    activate AmazonECR
+    AmazonECR-->>GitHubActions: Push confirmation
+    deactivate AmazonECR
+
+    GitHubActions->>AWSEnvironment: 6. Run Database Migrations (TypeORM)
+    activate AWSEnvironment
+    AWSEnvironment-->>GitHubActions: Migration status
+
+    GitHubActions->>Terraform: 7. Run 'terraform apply' for 'Green' Environment
+    activate Terraform
+    Terraform->>AWSEnvironment: 8. Provision/Update 'Green' ECS Service
+    AWSEnvironment-->>Terraform: Resource status
+    Terraform-->>GitHubActions: Terraform apply result
+    deactivate Terraform
+
+    GitHubActions->>AWSEnvironment: 9. Perform Health Checks on 'Green' Deployment
+    AWSEnvironment-->>GitHubActions: Health status (200 OK)
+
+    GitHubActions->>AWSEnvironment: 10. Switch Production Traffic to 'Green' (e.g., update ALB/Route 53)
+    AWSEnvironment-->>GitHubActions: Traffic switch confirmation
+    deactivate AWSEnvironment
+
+    GitHubActions->>GitHubRepository: 11. Update Commit Status to 'Success'
+
+    deactivate GitHubActions
+
+    note over GitHubActions: All sensitive data (AWS credentials, DB connection strings) must be stored in GitHub Encrypted Secrets.
+    note over AWSEnvironment: The 'Green' environment health check can be a simple endpoint check or a more comprehensive suite of E2E tests.

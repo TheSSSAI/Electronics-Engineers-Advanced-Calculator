@@ -1,0 +1,43 @@
+flowchart TD
+    subgraph Developer's Code in React Component
+        direction LR
+        A[1. User action triggers event handler <br> e.g., `onSubmit()`]
+        B["2. Developer calls manager with mutation function <br> <code>await offlineManager.queueMutation( <br> &nbsp;&nbsp;() => api.updateVariable(data) <br> )</code>"]
+        C{3. Promise returned by `queueMutation`}
+        D[4a. Handle success <br> `// Update UI, show success toast`]
+        E[4b. Handle error <br> `// Show error message`]
+    end
+
+    subgraph OfflineSyncManager Service (Internal Logic)
+        direction TD
+        F{A. Check network status}
+        G["B. Online: <br> Execute provided mutation function <br> `api.updateVariable(data)`"]
+        H["C. Offline: <br> Serialize and queue mutation <br> in IndexedDB"]
+        I[D. API Call]
+        J{E. API Response}
+        K[F. Return resolved Promise]
+        L[G. Return rejected Promise]
+    end
+
+    A --> B
+    B --> F
+    F --> |Online| G
+    F --> |Offline| H
+    G --> I
+    H -.-> |Later, upon reconnection| I
+    I --> J
+    J --> |2xx Success| K
+    J --> |4xx/5xx Error| L
+    K --> C
+    L --> C
+    C --> |Resolves| D
+    C --> |Rejects| E
+
+    %% Styling
+    classDef devCode fill:#e3f2fd,stroke:#1565c0,color:#000
+    classDef managerLogic fill:#fbe9e7,stroke:#d84315,color:#000
+    classDef outcome fill:#e8f5e9,stroke:#2e7d32,color:#000
+
+    class A,B,C,D,E devCode
+    class F,G,H,I,J,K,L managerLogic
+    class D,E outcome

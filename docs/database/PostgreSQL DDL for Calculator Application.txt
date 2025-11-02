@@ -1,0 +1,102 @@
+-- Enable UUID generation
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- =============================================
+-- Trigger Function for updatedAt
+-- =============================================
+-- This function updates the 'updatedAt' column to the current timestamp on any row modification.
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+   NEW."updatedAt" = NOW();
+   RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- =============================================
+-- Table: User
+-- =============================================
+-- Represents system users, linking to their AWS Cognito identity and tracking legal policy consent.
+CREATE TABLE "User" (
+    "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    "authProviderId" VARCHAR(255) NOT NULL,
+    "email" VARCHAR(255) NOT NULL,
+    "termsAcceptedAt" TIMESTAMPTZ,
+    "privacyPolicyVersionAccepted" VARCHAR(20),
+    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "uq_user_authProviderId" UNIQUE ("authProviderId"),
+    CONSTRAINT "uq_user_email" UNIQUE ("email")
+);
+
+CREATE INDEX "ix_user_createdAt" ON "User" ("createdAt");
+
+CREATE TRIGGER update_user_updated_at
+BEFORE UPDATE ON "User"
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
+-- =============================================
+-- Table: CustomMode
+-- =============================================
+-- Stores user-defined calculation modes with their definitions as JSONB objects.
+CREATE TABLE "CustomMode" (
+    "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    "userId" UUID NOT NULL,
+    "name" VARCHAR(100) NOT NULL,
+    "description" TEXT,
+    "definition" JSONB NOT NULL,
+    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "fk_customMode_user" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE,
+    CONSTRAINT "uq_customMode_userId_name" UNIQUE ("userId", "name")
+);
+
+CREATE INDEX "ix_customMode_userId" ON "CustomMode" ("userId");
+CREATE INDEX "ix_gin_customMode_definition" ON "CustomMode" USING GIN ("definition");
+
+CREATE TRIGGER update_customMode_updated_at
+BEFORE UPDATE ON "CustomMode"
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
+-- =============================================
+-- Table: UserVariable
+-- =============================================
+-- Stores named variables created by users for use in calculations.
+CREATE TABLE "UserVariable" (
+    "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    "userId" UUID NOT NULL,
+    "name" VARCHAR(50) NOT NULL,
+    "value" VARCHAR(255) NOT NULL,
+    "valueType" VARCHAR(20) NOT NULL CHECK ("valueType" IN ('string', 'number', 'boolean')),
+    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "fk_userVariable_user" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE,
+    CONSTRAINT "uq_userVariable_userId_name" UNIQUE ("userId", "name")
+);
+
+CREATE INDEX "ix_userVariable_userId" ON "UserVariable" ("userId");
+
+CREATE TRIGGER update_userVariable_updated_at
+BEFORE UPDATE ON "UserVariable"
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
+-- =============================================
+-- Table: CalculationHistory
+-- =============================================
+-- Logs a user's calculation history, partitioned by creation date for performance.
+CREATE TABLE "CalculationHistory" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "userId" UUID NOT NULL,
+    "expression" TEXT NOT NULL,
+    "result" VARCHAR(255) NOT NULL,
+    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY ("id", "createdAt"), -- Partition key must be part of the primary key
+    CONSTRAINT "fk_calculationHistory_user" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE
+) PARTITION BY RANGE ("createdAt");
+
+CREATE INDEX "ix_calculationHistory_userId_createdAt_desc" ON "CalculationHistory" ("userId", "createdAt" DESC);
+
+COMMENT ON TABLE "CalculationHistory" IS 'This is a partitioned table. Partitions must be created manually or by an automated process. Example: CREATE TABLE "CalculationHistory_2024_01" PARTITION OF "CalculationHistory" FOR VALUES FROM (''2024-01-01 00:00:00+00'') TO (''2024-02-01 00:00:00+00'');';

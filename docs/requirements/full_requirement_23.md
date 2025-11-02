@@ -1,0 +1,200 @@
+[
+  {
+    "id": 450,
+    "section": "4.3 Software & Communication Interfaces",
+    "section_id": "REQ-API-001",
+    "section_requirement_text": "The client application shall communicate with the backend exclusively through a RESTful API.\nThe API protocol shall be REST over HTTPS.\nThe API data format shall be JSON.\nAll authenticated API endpoints shall require a JWT Bearer token in the `Authorization` header.\nThe API shall be versioned via the URL path (e.g., `/api/v1/...`).\nThe application shall integrate with an external Identity Provider (IdP) for user authentication.\nAll communication between the client and server shall use HTTPS with TLS 1.2 or higher.",
+    "requirement_type": "interface",
+    "priority": "",
+    "original_text": "",
+    "change_comments": false,
+    "enhancement_justification": ""
+  },
+  {
+    "id": 451,
+    "section": "6.0 System Architecture & Technology Stack",
+    "section_id": "REQ-ARC-001",
+    "section_requirement_text": "The system shall employ a Serverless Microservices Hybrid architecture.\nThe system shall include a React-based Single Page Application (SPA) client, an API Gateway, a containerized User & Data Service on AWS ECS, a secure AWS Lambda for the Formula Execution Service, and a managed PostgreSQL instance (Amazon RDS).\nThe frontend framework shall be React 18+ with TypeScript, using Redux Toolkit for state management and Vite as the build tool.\nThe backend language and framework shall be Node.js (LTS) with NestJS, exposing a RESTful API.\nThe formula execution platform shall be AWS Lambda with a Node.js runtime, using the `vm2` library for sandboxing.\nThe database shall be PostgreSQL 15+ via Amazon RDS.\nThe infrastructure shall use AWS, Docker, AWS ECS with Fargate, GitHub Actions for CI/CD, Terraform for IaC, and AWS Secrets Manager for secret management.",
+    "requirement_type": "technology",
+    "priority": "",
+    "original_text": "",
+    "change_comments": false,
+    "enhancement_justification": ""
+  },
+  {
+    "id": 452,
+    "section": "10.0 Business Rules",
+    "section_id": "REQ-BIZ-001",
+    "section_requirement_text": "The system shall enforce that SI prefixes (p, n, \u03bc, m, k, M, G) are case-sensitive and appended directly to a number with no space.\nThe system shall enforce that Resistance (R) in the Ohm's Law calculator is a positive number.\nThe system shall enforce that Power (P) in the Ohm's Law calculator is a non-negative number.\nThe system shall enforce that all resistor values in the Resistor Combination calculator are positive and non-zero.\nThe system shall enforce that the requested duty cycle in the 555 Timer Astable mode is greater than 50% and less than 100%.\nThe system shall warn, but not prevent, calculations that result in 555 Timer component values outside a practical range.\nThe system shall enforce that user passwords meet minimum complexity requirements (e.g., 8 characters, 1 uppercase, 1 lowercase, 1 number).",
+    "requirement_type": "business",
+    "priority": "",
+    "original_text": "",
+    "change_comments": false,
+    "enhancement_justification": ""
+  },
+  {
+    "id": 453,
+    "section": "2.5 Design and Implementation Constraints",
+    "section_id": "REQ-CON-001",
+    "section_requirement_text": "The application shall be built using a technology stack of React/TypeScript for the frontend.\nThe application shall be built using a technology stack of Node.js/NestJS/PostgreSQL for the backend.\nThe application shall be deployed on AWS.\nThe application shall leverage AWS managed services including ECS, Lambda, and RDS.\nAll user-defined formulas shall be executed within a secure, isolated sandbox using the `vm2` library on AWS Lambda.\nThe sandbox environment shall have no network access.\nThe sandbox environment shall have no filesystem access.\nThe sandbox environment shall have strict resource limits.\nThe file format for exporting and importing custom modes shall be JSON.",
+    "requirement_type": "technology",
+    "priority": "",
+    "original_text": "",
+    "change_comments": false,
+    "enhancement_justification": ""
+  },
+  {
+    "id": 454,
+    "section": "8.0 Data Architecture",
+    "section_id": "REQ-DAT-001",
+    "section_requirement_text": "The system shall have a `users` entity with fields: `id`, `auth_provider_id`, `email`, `created_at`, `updated_at`.\nThe system shall have a `custom_modes` entity with fields: `id`, `user_id`, `name`, `description`, `definition` (JSONB), `created_at`, `updated_at`.\nThe system shall have a `user_variables` entity with fields: `id`, `user_id`, `name`, `value`, `created_at`, `updated_at`, and a unique constraint on (`user_id`, `name`).\nThe system shall have a `calculation_history` entity with fields: `id`, `user_id`, `expression`, `result`, `created_at`.\nThe system shall use the `JSONB` data type in PostgreSQL for the `definition` column in the `custom_modes` table.\nThe system shall create indexes on all foreign keys and columns frequently used in `WHERE` clauses.\nThe database shall have automated daily snapshots and point-in-time recovery enabled as per NFR-SAFE-01.",
+    "requirement_type": "data",
+    "priority": "",
+    "original_text": "",
+    "change_comments": false,
+    "enhancement_justification": ""
+  },
+  {
+    "id": 449,
+    "section": "DevOps & CI/CD",
+    "section_id": "REQ-DEV-001",
+    "section_requirement_text": "{\n  \"is_enhanced\": true,\n  \"enhancement_justification\": \"Enhanced to address the ripple effect from the introduction of a new help system in REQ-FRC-001. The CI/CD pipeline specification is updated to explicitly include a stage for building and packaging the help documentation, ensuring it is consistently deployed with the application.\",\n  \"original_text\": \"The system shall implement a CI/CD pipeline using GitHub Actions, triggered on push to any branch.\\nThe pipeline shall include stages for Lint & Test, Security Scan, Build, Push to Amazon ECR, and Deploy via Terraform.\\nThe system shall use Terraform to define and manage all cloud infrastructure resources.\\nThe system shall use Terraform workspaces to maintain separate, isolated state for `dev`, `staging`, and `prod` environments.\\nAll sensitive data shall be stored in AWS Secrets Manager and retrieved by the application at runtime, not hardcoded in the repository.\",\n  \"formalized_text\": \"The system shall implement a CI/CD pipeline using GitHub Actions, triggered on push to any branch.\\nThe pipeline shall include stages for Lint & Test, Security Scan, Build, Push to Amazon ECR, and Deploy via Terraform. The Build stage shall be configured to handle both application code and documentation, ensuring that the help content defined in REQ-FRC-001 is built and included in the final deployment artifact.\\nThe system shall use Terraform to define and manage all cloud infrastructure resources.\\nThe system shall use Terraform workspaces to maintain separate, isolated state for `dev`, `staging`, and `prod` environments.\\nAll sensitive data shall be stored in AWS Secrets Manager and retrieved by the application at runtime, not hardcoded in the repository.\"\n}",
+    "requirement_type": "deployment",
+    "priority": "",
+    "original_text": "",
+    "change_comments": false,
+    "enhancement_justification": ""
+  },
+  {
+    "id": 455,
+    "section": "2.4 Operating Environment",
+    "section_id": "REQ-ENV-001",
+    "section_requirement_text": "The client application shall run on a modern, standards-compliant web browser, including the latest versions of Chrome, Firefox, Safari, and Edge.\nThe client application shall run on any desktop or mobile operating system.\nThe entire backend infrastructure shall be hosted on Amazon Web Services (AWS).\nThe client shall require an active internet connection to authenticate and synchronize data with the backend.\nCore calculator functions shall operate offline after the initial application load.\nCustom modes and data persistence shall require an active internet connection.",
+    "requirement_type": "deployment",
+    "priority": "",
+    "original_text": "",
+    "change_comments": false,
+    "enhancement_justification": ""
+  },
+  {
+    "id": 447,
+    "section": "3.1 Core Calculator Functionality",
+    "section_id": "REQ-FRC-001",
+    "section_requirement_text": "{\n  \"is_enhanced\": true,\n  \"enhancement_justification\": \"User requested modification to add a comprehensive help tool. This enhancement formalizes the feature, specifies its scope, mandates the use of an open-source component, and addresses the identified content definition gap by requiring a formal content creation and maintenance process.\",\n  \"original_text\": \"The system shall correctly perform addition (+), subtraction (-), multiplication (\u00d7), and division (\u00f7).\\nThe system shall provide trigonometric functions: sin, cos, tan.\\nThe system shall provide inverse trigonometric functions: asin, acos, atan.\\nThe system shall provide the logarithm function (log).\\nThe system shall provide the natural log function (ln).\\nThe system shall provide the exponential function (exp).\\nThe system shall provide the power function (x^y).\\nThe system shall provide the square root function (\u221a).\\nThe system shall provide the factorial function (!).\\nThe calculator shall support calculations in Degrees, Radians, and Gradians. <<$Addition>> Justification: Essential for correctness in trigonometric calculations, a standard feature in all scientific calculators.\\nA UI control shall be present to switch between DEG, RAD, and GRAD modes. <<$Addition>> Justification: Essential for correctness in trigonometric calculations, a standard feature in all scientific calculators.\\nThe currently active angle mode shall be clearly visible on the display at all times. <<$Addition>> Justification: Essential for correctness in trigonometric calculations, a standard feature in all scientific calculators.\\nThe output of all trigonometric functions shall correctly reflect the selected angle mode. <<$Addition>> Justification: Essential for correctness in trigonometric calculations, a standard feature in all scientific calculators.\\nThe UI shall provide dedicated buttons or a menu to insert the value of Pi (\u03c0). <<$Addition>> Justification: Improves efficiency and reduces error for common physics and electronics formulas.\\nThe UI shall provide dedicated buttons or a menu to insert the value of Euler's number (e). <<$Addition>> Justification: Improves efficiency and reduces error for common physics and electronics formulas.\\nThe UI shall provide dedicated buttons or a menu to insert the value of the Boltzmann constant (k). <<$Addition>> Justification: Improves efficiency and reduces error for common physics and electronics formulas.\\nThe UI shall provide dedicated buttons or a menu to insert the value of elementary charge (e). <<$Addition>> Justification: Improves efficiency and reduces error for common physics and electronics formulas.\\nThe calculator shall support undoing changes to the current input expression. <<$Addition>> Justification: A fundamental user experience feature for correcting input errors.\\nThe calculator shall support redoing changes to the current input expression. <<$Addition>> Justification: A fundamental user experience feature for correcting input errors.\\nPressing a dedicated \\\"Undo\\\" button or keyboard shortcut (Ctrl+Z) shall revert the last change to the input expression. <<$Addition>> Justification: A fundamental user experience feature for correcting input errors.\\nPressing a dedicated \\\"Redo\\\" button or keyboard shortcut (Ctrl+Y) shall restore the last undone change. <<$Addition>> Justification: A fundamental user experience feature for correcting input errors.\\nThe primary display shall show the user's current input expression and the calculated result.\\nA scrollable history panel shall list all previous calculations, including both expression and result.\\nClicking on an item in the history panel shall load its expression back into the primary display for editing or re-execution. <<$Addition>> Justification: This provides an intuitive workflow for reusing past results, a common need in multi-step calculations.\\nThe system shall correctly parse inputs containing standard SI prefixes (p, n, \u03bc, m, k, M, G) as their corresponding numerical values. <<$Change>> Justification: Direct support for SI prefixes in input streamlines the workflow for engineers, who think and work in these terms.\\nA configuration setting shall allow the user to enable or disable automatic formatting of results into engineering notation.\\nWhen engineering notation is enabled, the user shall be able to configure a default unit to be appended to the result.\\nThe calculator shall provide M+ (Add to Memory), M- (Subtract from Memory), MR (Memory Recall), and MC (Memory Clear) functions.\\nUsers shall be able to assign values to variables using the syntax `variableName = expression`.\\nThe system shall allow assigned variables to be used in subsequent calculations by referencing their name.\\nA dedicated UI view shall list all user-defined variables and their current values. <<$Addition>> Justification: As the number of variables grows, users need a way to manage them effectively. Persistence is critical for a professional tool to ensure work is not lost between sessions.\\nFrom the variable management view, users shall be able to delete individual variables or clear all variables. <<$Addition>> Justification: As the number of variables grows, users need a way to manage them effectively. Persistence is critical for a professional tool to ensure work is not lost between sessions.\\nAll memory values and user-defined variables shall be persisted and reloaded when the user closes and reopens the application. <<$Addition>> Justification: As the number of variables grows, users need a way to manage them effectively. Persistence is critical for a professional tool to ensure work is not lost between sessions.\\nFor invalid mathematical operations, the system shall display a clear, descriptive error message. <<$Addition>> Justification: Provides a user-friendly way to handle inevitable errors without losing the user's work.\\nFor syntax errors in an expression, the system shall display an error message. <<$Addition>> Justification: Provides a user-friendly way to handle inevitable errors without losing the user's work.\\nIn all error cases, the user's original input expression shall be preserved in the input field. <<$Addition>> Justification: Provides a user-friendly way to handle inevitable errors without losing the user's work.\",\n  \"formalized_text\": \"The system shall correctly perform addition (+), subtraction (-), multiplication (\u00d7), and division (\u00f7).\\nThe system shall provide trigonometric functions: sin, cos, tan.\\nThe system shall provide inverse trigonometric functions: asin, acos, atan.\\nThe system shall provide the logarithm function (log), natural log function (ln), exponential function (exp), power function (x^y), square root function (\u221a), and factorial function (!).\\nThe calculator shall support calculations in Degrees, Radians, and Gradians, with a UI control to switch between modes and a clear display of the active mode.\\nThe output of all trigonometric functions shall correctly reflect the selected angle mode.\\nThe UI shall provide dedicated access to constants Pi (\u03c0), Euler's number (e), Boltzmann constant (k), and elementary charge (e).\\nThe calculator shall support undo (Ctrl+Z) and redo (Ctrl+Y) for the input expression.\\nThe primary display shall show the current input and result, with a scrollable history panel for previous calculations. Clicking a history item shall load it for re-use.\\nThe system shall correctly parse inputs with SI prefixes (p, n, \u03bc, m, k, M, G).\\nThe system shall provide configurable engineering notation for results, including a default unit.\\nThe calculator shall provide memory functions (M+, M-, MR, MC).\\nUsers shall be able to assign, use, view, and manage variables (`variableName = expression`).\\nAll memory values and user-defined variables shall be persisted across sessions.\\nThe system shall provide clear, non-destructive error messages for invalid operations or syntax errors, preserving the user's original input.\\nThe system shall include a comprehensive, searchable in-app help system accessible from a global UI element as defined in REQ-UI-001. This system shall provide clear documentation on all application features, including: (a) Core calculator functions and constants, (b) Specialized electronics modes, (c) The custom mode creation process, and (d) User account management. The implementation shall leverage a suitable open-source library for help content authoring and presentation (e.g., MkDocs, Docusaurus). A formal process for creating, reviewing, and maintaining help content shall be established, with ownership assigned to the product team to ensure accuracy and completeness.\"\n}",
+    "requirement_type": "functional",
+    "priority": "",
+    "original_text": "",
+    "change_comments": false,
+    "enhancement_justification": ""
+  },
+  {
+    "id": 456,
+    "section": "3.2 Advanced Electronics Features",
+    "section_id": "REQ-FRE-001",
+    "section_requirement_text": "The UI shall present four input fields for Ohm's Law and Power mode: V, I, R, and P.\nWhen the user enters valid numerical data into any two of the Ohm's Law fields, the other two fields shall be automatically calculated and populated in real-time.\nOhm's Law calculations shall be correct based on the formulas V=IR and P=VI.\nOhm's Law input fields shall only accept valid numerical data. <<$Addition>> Justification: Prevents calculation errors and guides the user toward correct usage of the tool.\nThe system shall display a message prompting for more information if an Ohm's Law calculation is attempted with fewer than two inputs. <<$Addition>> Justification: Prevents calculation errors and guides the user toward correct usage of the tool.\nThe system shall flag negative values entered for Resistance (R) or Power (P) with a validation error. <<$Addition>> Justification: Prevents calculation errors and guides the user toward correct usage of the tool.\nThe Resistor Combinations UI shall allow a user to create and manage a dynamic list of resistor values.\nThe user shall be able to add, edit, and remove values from the resistor list.\nA \"Calculate Series\" button shall calculate the sum of all resistor values in the list.\nA \"Calculate Parallel\" button shall calculate the equivalent resistance using the formula `1 / (1/R1 + 1/R2 + ... + 1/Rn)`.\nThe Resistor Combinations list shall only accept positive, non-zero resistance values. <<$Addition>> Justification: Ensures physically meaningful calculations.\nIn the Resistor Color Code mode, the user shall first select the resistor type to be converted: 3, 4, 5, or 6-band. <<$Change>> Justification: The original requirement was ambiguous; specifying band counts makes it implementable. Suggesting E-series values adds practical value by guiding users to commercially available components.\nFor Value-to-Color conversion, the user shall enter a resistance value and select a tolerance from a dropdown of standard values.\nFor Value-to-Color conversion, the system shall display the correct sequence of color bands for the specified resistor type.\nIf a non-standard resistance value is entered, the tool shall suggest the nearest standard E-series value. <<$Addition>> Justification: The original requirement was ambiguous; specifying band counts makes it implementable. Suggesting E-series values adds practical value by guiding users to commercially available components.\nFor Color-to-Value conversion, the UI shall display a color palette for each of the selected number of bands.\nAs the user selects colors, the system shall display the corresponding resistance value, tolerance, and (for 6-band resistors) the temperature coefficient.\nFor 555 Timer Astable Mode, the UI shall require three inputs: desired Frequency, desired Duty Cycle, and the value of ONE known component (RA, RB, or C). <<$Change>> Justification: The change to inputs resolves a mathematical impossibility (CONT-001). The business rules and practicality checks add a layer of expert guidance, making the tool more useful for real-world circuit design.\nFor 555 Timer Astable Mode, the system shall calculate and display the values for the remaining two components.\nFor 555 Timer Astable Mode, the system shall validate that the desired duty cycle is greater than 50% and display an informative error if it is not. <<$Addition>> Justification: The change to inputs resolves a mathematical impossibility (CONT-001). The business rules and practicality checks add a layer of expert guidance, making the tool more useful for real-world circuit design.\nFor 555 Timer Monostable Mode, the UI shall require two inputs: desired Pulse Width and the value of ONE known component (R or C). <<$Change>> Justification: The change to inputs resolves a mathematical impossibility (CONT-001). The business rules and practicality checks add a layer of expert guidance, making the tool more useful for real-world circuit design.\nFor 555 Timer Monostable Mode, the system shall calculate and display the value for the remaining component.\nFor both 555 Timer modes, if a calculated component value falls outside a typical practical range, the system shall display a non-blocking warning message. <<$Addition>> Justification: The change to inputs resolves a mathematical impossibility (CONT-001). The business rules and practicality checks add a layer of expert guidance, making the tool more useful for real-world circuit design.",
+    "requirement_type": "functional",
+    "priority": "",
+    "original_text": "",
+    "change_comments": false,
+    "enhancement_justification": ""
+  },
+  {
+    "id": 457,
+    "section": "3.4 User Management & Persistence",
+    "section_id": "REQ-FRU-001",
+    "section_requirement_text": "The system shall provide a user registration flow requiring a valid email and a secure password.\nThe system shall provide a login flow for existing users.\nAll communication during registration and login shall be encrypted.\nUpon successful login, the user's calculation history, defined variables, and created custom modes shall be loaded from the backend. <<$Addition>> Justification: Addresses GAP-001, ensuring the core utility of the application by retaining user work between sessions.\nAny changes to user data (new calculations, variables, modes) shall be saved to the backend.\nUser data shall be securely associated with the logged-in user and not be accessible by any other user.",
+    "requirement_type": "functional",
+    "priority": "",
+    "original_text": "",
+    "change_comments": false,
+    "enhancement_justification": ""
+  },
+  {
+    "id": 458,
+    "section": "3.3 User-Extensible Functionality",
+    "section_id": "REQ-FRX-001",
+    "section_requirement_text": "The custom mode creation process shall be a multi-step wizard.\nThe user shall provide a unique Name and an optional Description for the mode.\nThe user shall define one or more Input Variables and one or more Output Variables.\nFor each variable, the user shall specify a name and may specify a unit.\nThe user shall enter one or more formulas using standard algebraic syntax, with support for standard math functions and the constant `pi`.\nThe formula editor shall provide real-time syntax validation and highlight user-defined variables.\nThe user shall be able to customize display labels and choose the input control type (e.g., text field, slider).\nUpon successful creation, the new mode shall be available for use immediately.\nA dedicated section in the UI shall list all available custom modes.\nClicking on a custom mode shall open its dedicated interface, displaying the defined input and output fields.\nAs the user enters valid numerical values into the input fields, the output fields shall be calculated and updated in real-time.\nA dedicated management screen shall list all user-created modes.\nFrom the management screen, a user shall be able to Launch, Edit, Delete, and View the details of a mode. <<$Addition>> Justification: This addresses GAP-006 by providing the essential lifecycle management features for user-generated content.\nDeleting a mode shall trigger a confirmation prompt before deletion.\nEditing a mode shall re-open the creation wizard populated with that mode's data.\nThe Custom Mode Management screen shall provide an \"Export\" option for each mode. <<$Change>> Justification: This defines a clear and feasible mechanism for sharing (GAP-007), avoiding the ambiguity of a more complex online repository.\nExporting a mode shall generate and prompt the user to download a structured JSON file containing the complete mode definition.\nThe application shall provide an \"Import\" function that allows a user to upload a valid mode definition JSON file.\nUpon successful import, the new mode shall be added to the user's list of custom modes and be immediately available for use.",
+    "requirement_type": "functional",
+    "priority": "",
+    "original_text": "",
+    "change_comments": false,
+    "enhancement_justification": ""
+  },
+  {
+    "id": 459,
+    "section": "7.0 Monitoring & Observability",
+    "section_id": "REQ-MON-001",
+    "section_requirement_text": "The system shall use Amazon CloudWatch Metrics to collect performance and utilization metrics from all AWS resources.\nAll application and system logs shall be centralized in Amazon CloudWatch Logs in a structured JSON format.\nThe system shall integrate AWS X-Ray for distributed tracing of requests.\nCloudWatch Alarms shall be configured to automatically notify the development team for critical events.\nAn alarm shall be triggered if the API Gateway 5xx error rate exceeds 1% over a 5-minute period.\nAn alarm shall be triggered if the P99 API latency exceeds 1 second.\nAn alarm shall be triggered if an ECS service CPU or Memory utilization exceeds 80%.\nAn alarm shall be triggered for Lambda function execution errors or timeouts.",
+    "requirement_type": "reports_alerts",
+    "priority": "",
+    "original_text": "",
+    "change_comments": false,
+    "enhancement_justification": ""
+  },
+  {
+    "id": 460,
+    "section": "5.1 Performance Requirements",
+    "section_id": "REQ-NFP-001",
+    "section_requirement_text": "All client-side calculations and UI updates shall complete in under 50ms.\nAll API calls for data retrieval shall have a 95th percentile (P95) response time of less than 200ms.\nThe execution of a user-defined custom formula via the backend service shall have a P95 response time of less than 500ms.",
+    "requirement_type": "non_functional",
+    "priority": "",
+    "original_text": "",
+    "change_comments": false,
+    "enhancement_justification": ""
+  },
+  {
+    "id": 461,
+    "section": "5.4 Software Quality Attributes",
+    "section_id": "REQ-NFQ-001",
+    "section_requirement_text": "The backend services shall have a target uptime of 99.9%, excluding planned maintenance.\nPlanned maintenance windows shall be scheduled during periods of low user activity and communicated to users in advance.\nThe system architecture shall support horizontal scaling to handle an increasing number of concurrent users without performance degradation.\nThe frontend shall be served via a global Content Delivery Network (CDN) to ensure low-latency access for users worldwide.\nThe backend services shall be configured for automatic scaling based on demand.\nThe entire cloud infrastructure shall be defined as code using Terraform.\nThe backend shall be developed using a modular architecture (NestJS).\nBoth frontend and backend codebases shall use TypeScript to enforce static typing.",
+    "requirement_type": "non_functional",
+    "priority": "",
+    "original_text": "",
+    "change_comments": false,
+    "enhancement_justification": ""
+  },
+  {
+    "id": 462,
+    "section": "5.2 Safety and Reliability Requirements",
+    "section_id": "REQ-NFR-001",
+    "section_requirement_text": "The primary database shall be configured for automated daily snapshots with a 14-day retention period.\nPoint-in-time recovery shall be enabled for the database, allowing restoration to any second within the backup retention window.\nIn the event of a backend connection failure, the client application shall remain functional for standard, client-side calculations and display a clear, non-disruptive message indicating that cloud features are temporarily unavailable.",
+    "requirement_type": "non_functional",
+    "priority": "",
+    "original_text": "",
+    "change_comments": false,
+    "enhancement_justification": ""
+  },
+  {
+    "id": 463,
+    "section": "5.3 Security Requirements",
+    "section_id": "REQ-NFS-001",
+    "section_requirement_text": "User authentication shall be managed by a dedicated Identity Provider (e.g., AWS Cognito, Auth0) that handles secure password storage and supports multi-factor authentication (MFA).\nA Role-Based Access Control (RBAC) model shall be enforced, ensuring users can only access and modify their own data.\nAll data transmitted between the client and server shall be encrypted using TLS 1.2 or higher.\nAll user data stored in the PostgreSQL database shall be encrypted at rest using AWS Key Management Service (KMS).\nUser-defined formulas shall be executed in a highly secure sandbox (`vm2` on AWS Lambda) with strict timeouts, memory limits, and no access to the network or filesystem.\nThe CI/CD pipeline shall include automated security scanning: Static Application Security Testing (SAST), Software Composition Analysis (SCA), and container vulnerability scanning.",
+    "requirement_type": "non_functional",
+    "priority": "",
+    "original_text": "",
+    "change_comments": false,
+    "enhancement_justification": ""
+  },
+  {
+    "id": 464,
+    "section": "1.2 Project Scope",
+    "section_id": "REQ-SCP-001",
+    "section_requirement_text": "The system shall provide a fully functional scientific calculator with standard arithmetic, trigonometric, and scientific operations.\nThe system shall provide specialized modes for Ohm's Law & Power, Resistor Combinations (Series/Parallel), Resistor Color Code Conversion, and 555 Timer design.\nThe system shall provide a user-extensible framework for users to create, save, manage, and share their own custom calculation modes using a guided interface.\nThe system shall provide a user account system for persisting variables, calculation history, and custom modes.\nThe system shall be implemented as a responsive web application, accessible on modern desktop and mobile browsers.\nThe system shall not be a native mobile application (iOS/Android).\nThe system shall not provide a centralized, public repository or \"marketplace\" for sharing custom modes.\nThe system shall limit sharing to file-based export and import.\nThe system shall not provide real-time collaboration features between users.\nThe system shall not provide circuit simulation or schematic drawing capabilities.",
+    "requirement_type": "functional",
+    "priority": "",
+    "original_text": "",
+    "change_comments": false,
+    "enhancement_justification": ""
+  },
+  {
+    "id": 448,
+    "section": "4.1 User Interfaces",
+    "section_id": "REQ-UI-001",
+    "section_requirement_text": "{\n  \"is_enhanced\": true,\n  \"enhancement_justification\": \"Enhanced to formalize subjective user requests for 'cool colors' and 'advance interactivity' into actionable specifications for a professional color palette and performant micro-interactions. Also incorporates the ripple effect from REQ-FRC-001 by adding the requirement for a globally accessible entry point to the new help system.\",\n  \"original_text\": \"The UI shall be clean, modern, and intuitive.\\nThe application layout shall be fully responsive, providing an optimal user experience on devices from small mobile screens to large desktop monitors.\\nThe UI shall adhere to Web Content Accessibility Guidelines (WCAG) 2.1 Level AA standards.\\nThis shall include proper color contrast, full keyboard navigability, and screen reader support.\\nThe system shall provide a Main Calculator View, Mode-Specific Views, a Custom Mode Wizard, a Custom Mode Management view, and Login/Registration screens.\",\n  \"formalized_text\": \"The UI shall be clean, modern, and intuitive.\\nThe application layout shall be fully responsive, providing an optimal user experience on devices from small mobile screens to large desktop monitors.\\nThe UI shall adhere to Web Content Accessibility Guidelines (WCAG) 2.1 Level AA standards, including proper color contrast, full keyboard navigability, and screen reader support.\\nThe system shall provide a Main Calculator View, Mode-Specific Views, a Custom Mode Wizard, a Custom Mode Management view, and Login/Registration screens.\\nThe UI shall utilize a modern, professional color palette, defined in a formal style guide to ensure consistency and mitigate design subjectivity. This palette must enhance usability, reduce eye strain, and align with the application's branding.\\nThe UI shall incorporate subtle, performant micro-interactions (e.g., for button presses, state changes, input validation feedback) to provide clear visual cues without disrupting the user workflow.\\nA globally accessible UI element (e.g., a persistent icon in the main navigation bar) shall serve as the entry point to the in-app help system defined in REQ-FRC-001.\"\n}",
+    "requirement_type": "interface",
+    "priority": "",
+    "original_text": "",
+    "change_comments": false,
+    "enhancement_justification": ""
+  }
+]

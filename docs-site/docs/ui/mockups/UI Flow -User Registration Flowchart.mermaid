@@ -1,0 +1,35 @@
+flowchart TD
+    subgraph User Journey
+        A(Start) --> B[User clicks 'Register' link]
+    end
+
+    subgraph Registration Process
+        B --> C[Display Registration Form]
+        C --> D{User fills form & clicks 'Create Account'}
+        D --> E{Client-Side Validation}
+        E -- "Invalid (e.g., mismatched passwords, invalid email format)" --> F[Show inline validation errors]
+        F --> C
+        E -- "Valid" --> G[Submit registration data to AWS Cognito]
+        G --> H{Cognito Server-Side Validation}
+        H -- "Error (e.g., email exists, weak password)" --> I[Display server-side error message on form]
+        I --> C
+        H -- "Success" --> J[Create user record in Cognito User Pool]
+        J --> K[Establish authenticated session (Auto-login)]
+        K --> L[Redirect to Main Calculator View]
+        L --> M[Display 'Welcome!' success notification]
+    end
+
+    subgraph Final State
+        M --> Z(End: User is authenticated on main view)
+    end
+
+    %% Styling
+    classDef errorNode fill:#fdecea,stroke:#f44336,color:#333
+    classDef successNode fill:#e8f5e9,stroke:#4caf50,color:#333
+    classDef processNode fill:#e3f2fd,stroke:#2196f3,color:#333
+    classDef decisionNode fill:#fff8e1,stroke:#ffb300,color:#333
+
+    class F,I errorNode
+    class J,K,L,M,Z successNode
+    class C,D,G processNode
+    class E,H decisionNode

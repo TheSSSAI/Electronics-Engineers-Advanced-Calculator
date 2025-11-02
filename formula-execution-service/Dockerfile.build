@@ -1,0 +1,43 @@
+# Use Amazon Linux 2, the same environment as AWS Lambda for Node.js
+FROM amazonlinux:2
+
+# Install build tools, Node.js, and Python
+RUN yum update -y && \
+    yum install -y \
+    # Build tools for native modules (like isolated-vm)
+    gcc-c++ \
+    make \
+    python3 \
+    # For fetching Node.js
+    tar \
+    gzip \
+    # Install Node Version Manager (nvm)
+    && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+
+# Set up the environment for nvm
+ENV NVM_DIR="/root/.nvm/"
+SHELL ["/bin/bash", "-c"]
+
+# Install the correct Node.js version (using LTS Iron as an example) and set it as default
+RUN source $NVM_DIR/nvm.sh && \
+    nvm install lts/iron && \
+    nvm alias default lts/iron && \
+    nvm use default
+
+# Add Node to the path
+ENV PATH="/root/.nvm/versions/node/$(ls /root/.nvm/versions/node)/bin:${PATH}"
+
+# Set the working directory
+WORKDIR /usr/app
+
+# Copy package.json and package-lock.json to leverage Docker layer caching
+COPY package*.json ./
+
+# Install dependencies. This will compile native modules against the Amazon Linux 2 environment.
+RUN npm ci
+
+# Copy the rest of the application source code
+COPY . .
+
+# Set the entrypoint for the container
+CMD ["npm", "run", "build"]

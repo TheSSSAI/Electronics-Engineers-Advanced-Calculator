@@ -1,0 +1,750 @@
+# 1 Overview
+
+## 1.1 Diagram Id
+
+SEQ-AUTH-002
+
+## 1.2 Name
+
+User Login and Session Initialization
+
+## 1.3 Description
+
+A registered user logs in using their credentials. AWS Cognito authenticates the user via the OAuth 2.0 Authorization Code flow with PKCE and issues JWTs. The client application uses these JWTs to make authenticated API calls to fetch the user's persisted data (history, variables, custom modes).
+
+## 1.4 Type
+
+🔹 AuthenticationFlow
+
+## 1.5 Purpose
+
+To securely authenticate a user and load their personalized application state, enabling access to protected features and data.
+
+## 1.6 Complexity
+
+Medium
+
+## 1.7 Priority
+
+🚨 Critical
+
+## 1.8 Frequency
+
+OnDemand
+
+## 1.9 Participants
+
+- REPO-SPA-CLIENT
+- REPO-IAM-COGNITO
+- REPO-API-GATEWAY
+- REPO-APP-USER-DATA
+- REPO-DB-POSTGRES
+
+## 1.10 Key Interactions
+
+- Client SPA initiates OAuth 2.0 Authorization Code flow with PKCE with AWS Cognito.
+- User provides credentials to Cognito's hosted UI.
+- Cognito validates credentials and returns JWTs (Access, ID, Refresh tokens) to the client.
+- Client stores tokens securely and makes an API call to the User & Data Service with the Access Token in the Authorization header.
+- API Gateway validates the JWT with Cognito.
+- User & Data Service fetches the user's data (variables, history, modes) from the PostgreSQL database and returns it to the client.
+
+## 1.11 Triggers
+
+- User submits the login form.
+
+## 1.12 Outcomes
+
+- User is successfully authenticated.
+- Client application receives and stores session tokens.
+- User's personalized data is loaded into the client-side state.
+
+## 1.13 Business Rules
+
+- Only valid, unexpired JWTs are accepted by the API Gateway.
+- Users can only access their own data.
+
+## 1.14 Error Scenarios
+
+- Invalid credentials provided.
+- User account is disabled or not confirmed.
+- JWT is expired or invalid.
+- Backend API is unavailable to fetch user data.
+
+## 1.15 Integration Points
+
+- AWS Cognito
+
+# 2.0 Details
+
+## 2.1 Diagram Id
+
+SEQ-AUTH-002
+
+## 2.2 Name
+
+User Login and Session Initialization with OAuth 2.0 PKCE
+
+## 2.3 Description
+
+A comprehensive sequence detailing a registered user's login process using the industry-standard OAuth 2.0 Authorization Code flow with PKCE. The sequence covers the interaction with AWS Cognito for identity verification, secure JWT issuance, and the subsequent authenticated API call to fetch and initialize the user's application state.
+
+## 2.4 Participants
+
+### 2.4.1 Frontend Application
+
+#### 2.4.1.1 Repository Id
+
+REPO-SPA-CLIENT
+
+#### 2.4.1.2 Display Name
+
+Client: React SPA
+
+#### 2.4.1.3 Type
+
+🔹 Frontend Application
+
+#### 2.4.1.4 Technology
+
+React 18+, TypeScript, Redux Toolkit
+
+#### 2.4.1.5 Order
+
+1
+
+#### 2.4.1.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #4285F4 |
+| Stereotype | Client |
+
+### 2.4.2.0 Identity Provider
+
+#### 2.4.2.1 Repository Id
+
+REPO-IAM-COGNITO
+
+#### 2.4.2.2 Display Name
+
+IdP: AWS Cognito
+
+#### 2.4.2.3 Type
+
+🔹 Identity Provider
+
+#### 2.4.2.4 Technology
+
+AWS Cognito User Pools
+
+#### 2.4.2.5 Order
+
+2
+
+#### 2.4.2.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #FF9900 |
+| Stereotype | Authentication Service |
+
+### 2.4.3.0 API Gateway
+
+#### 2.4.3.1 Repository Id
+
+REPO-API-GATEWAY
+
+#### 2.4.3.2 Display Name
+
+Gateway: API Gateway
+
+#### 2.4.3.3 Type
+
+🔹 API Gateway
+
+#### 2.4.3.4 Technology
+
+Amazon API Gateway
+
+#### 2.4.3.5 Order
+
+3
+
+#### 2.4.3.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | boundary |
+| Color | #D81B60 |
+| Stereotype | Gateway |
+
+### 2.4.4.0 Microservice
+
+#### 2.4.4.1 Repository Id
+
+REPO-APP-USER-DATA
+
+#### 2.4.4.2 Display Name
+
+Service: User & Data
+
+#### 2.4.4.3 Type
+
+🔹 Microservice
+
+#### 2.4.4.4 Technology
+
+NestJS, Node.js, TypeORM
+
+#### 2.4.4.5 Order
+
+4
+
+#### 2.4.4.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #1E88E5 |
+| Stereotype | Backend Service |
+
+### 2.4.5.0 Database
+
+#### 2.4.5.1 Repository Id
+
+REPO-DB-POSTGRES
+
+#### 2.4.5.2 Display Name
+
+DB: PostgreSQL
+
+#### 2.4.5.3 Type
+
+🔹 Database
+
+#### 2.4.5.4 Technology
+
+Amazon RDS for PostgreSQL
+
+#### 2.4.5.5 Order
+
+5
+
+#### 2.4.5.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | database |
+| Color | #336791 |
+| Stereotype | Persistence |
+
+## 2.5.0.0 Interactions
+
+### 2.5.1.0 Authentication Request
+
+#### 2.5.1.1 Source Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.1.2 Target Id
+
+REPO-IAM-COGNITO
+
+#### 2.5.1.3 Message
+
+1. Initiate OAuth 2.0 Auth Code Flow w/ PKCE (Redirect)
+
+#### 2.5.1.4 Sequence Number
+
+1
+
+#### 2.5.1.5 Type
+
+🔹 Authentication Request
+
+#### 2.5.1.6 Is Synchronous
+
+❌ No
+
+#### 2.5.1.7 Return Message
+
+2. Redirect user agent to Cognito Hosted UI for login
+
+#### 2.5.1.8 Has Return
+
+✅ Yes
+
+#### 2.5.1.9 Is Activation
+
+❌ No
+
+#### 2.5.1.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTPS Redirect |
+| Method | GET /oauth2/authorize |
+| Parameters | response_type=code, client_id, redirect_uri, scope... |
+| Authentication | N/A (Public OAuth endpoint) |
+| Error Handling | Cognito server-side validation of client_id and re... |
+| Performance | Sub-100ms redirect time from client. |
+
+### 2.5.2.0 User Interaction
+
+#### 2.5.2.1 Source Id
+
+REPO-IAM-COGNITO
+
+#### 2.5.2.2 Target Id
+
+REPO-IAM-COGNITO
+
+#### 2.5.2.3 Message
+
+3. User submits credentials & MFA on Hosted UI
+
+#### 2.5.2.4 Sequence Number
+
+2
+
+#### 2.5.2.5 Type
+
+🔹 User Interaction
+
+#### 2.5.2.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.2.7 Return Message
+
+4. Validate credentials against User Pool
+
+#### 2.5.2.8 Has Return
+
+✅ Yes
+
+#### 2.5.2.9 Is Activation
+
+✅ Yes
+
+#### 2.5.2.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTPS |
+| Method | POST (internal) |
+| Parameters | username, password, mfa_code (if applicable) |
+| Authentication | N/A |
+| Error Handling | Returns UI errors for invalid credentials, unconfi... |
+| Performance | P95 latency < 500ms. |
+
+### 2.5.3.0 Authentication Response
+
+#### 2.5.3.1 Source Id
+
+REPO-IAM-COGNITO
+
+#### 2.5.3.2 Target Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.3.3 Message
+
+5. Redirect back to client with Authorization Code
+
+#### 2.5.3.4 Sequence Number
+
+3
+
+#### 2.5.3.5 Type
+
+🔹 Authentication Response
+
+#### 2.5.3.6 Is Synchronous
+
+❌ No
+
+#### 2.5.3.7 Return Message
+
+
+
+#### 2.5.3.8 Has Return
+
+❌ No
+
+#### 2.5.3.9 Is Activation
+
+❌ No
+
+#### 2.5.3.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTPS Redirect |
+| Method | GET {redirect_uri} |
+| Parameters | code={authorization_code}, state={state_value} |
+| Authentication | N/A |
+| Error Handling | Client must validate the 'state' parameter to prev... |
+| Performance | N/A |
+
+### 2.5.4.0 Token Request
+
+#### 2.5.4.1 Source Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.4.2 Target Id
+
+REPO-IAM-COGNITO
+
+#### 2.5.4.3 Message
+
+6. Exchange Authorization Code for JWTs
+
+#### 2.5.4.4 Sequence Number
+
+4
+
+#### 2.5.4.5 Type
+
+🔹 Token Request
+
+#### 2.5.4.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.4.7 Return Message
+
+7. Return JWTs (ID, Access, Refresh Tokens)
+
+#### 2.5.4.8 Has Return
+
+✅ Yes
+
+#### 2.5.4.9 Is Activation
+
+❌ No
+
+#### 2.5.4.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTPS |
+| Method | POST /oauth2/token |
+| Parameters | grant_type=authorization_code, client_id, code, re... |
+| Authentication | N/A for public SPA client. Body parameters prove p... |
+| Error Handling | Cognito returns 4xx error for invalid code, mismat... |
+| Performance | P95 latency < 300ms. |
+
+### 2.5.5.0 State Management
+
+#### 2.5.5.1 Source Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.5.2 Target Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.5.3 Message
+
+8. Securely store tokens and initialize session
+
+#### 2.5.5.4 Sequence Number
+
+5
+
+#### 2.5.5.5 Type
+
+🔹 State Management
+
+#### 2.5.5.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.5.7 Return Message
+
+
+
+#### 2.5.5.8 Has Return
+
+❌ No
+
+#### 2.5.5.9 Is Activation
+
+✅ Yes
+
+#### 2.5.5.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | Client-side Logic |
+| Method | Redux Toolkit dispatch |
+| Parameters | ID Token, Access Token, Refresh Token |
+| Authentication | N/A |
+| Error Handling | Handle potential storage errors (e.g., localStorag... |
+| Performance | < 10ms |
+
+### 2.5.6.0 API Request
+
+#### 2.5.6.1 Source Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.6.2 Target Id
+
+REPO-API-GATEWAY
+
+#### 2.5.6.3 Message
+
+9. GET /api/v1/user/profile
+
+#### 2.5.6.4 Sequence Number
+
+6
+
+#### 2.5.6.5 Type
+
+🔹 API Request
+
+#### 2.5.6.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.6.7 Return Message
+
+16. Return 200 OK with User Data JSON
+
+#### 2.5.6.8 Has Return
+
+✅ Yes
+
+#### 2.5.6.9 Is Activation
+
+❌ No
+
+#### 2.5.6.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTPS/REST |
+| Method | GET |
+| Parameters | Header: Authorization: Bearer {access_token} |
+| Authentication | JWT Bearer Token (Access Token) |
+| Error Handling | Client handles 401/403 (token refresh required or ... |
+| Performance | Overall P95 < 200ms as per REQ-1-042. |
+
+### 2.5.7.0 Token Validation
+
+#### 2.5.7.1 Source Id
+
+REPO-API-GATEWAY
+
+#### 2.5.7.2 Target Id
+
+REPO-IAM-COGNITO
+
+#### 2.5.7.3 Message
+
+10. [Security Checkpoint] Validate JWT
+
+#### 2.5.7.4 Sequence Number
+
+7
+
+#### 2.5.7.5 Type
+
+🔹 Token Validation
+
+#### 2.5.7.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.7.7 Return Message
+
+11. [If valid] Return IAM policy to allow request
+
+#### 2.5.7.8 Has Return
+
+✅ Yes
+
+#### 2.5.7.9 Is Activation
+
+✅ Yes
+
+#### 2.5.7.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | Internal AWS Integration |
+| Method | Cognito User Pool Authorizer |
+| Parameters | Access Token from Authorization header |
+| Authentication | IAM role for API Gateway |
+| Error Handling | If invalid (expired, wrong signature, etc.), API G... |
+| Performance | Critical path. P95 < 50ms due to cached JWKS keys. |
+
+### 2.5.8.0 Proxy Request
+
+#### 2.5.8.1 Source Id
+
+REPO-API-GATEWAY
+
+#### 2.5.8.2 Target Id
+
+REPO-APP-USER-DATA
+
+#### 2.5.8.3 Message
+
+12. Forward authorized request
+
+#### 2.5.8.4 Sequence Number
+
+8
+
+#### 2.5.8.5 Type
+
+🔹 Proxy Request
+
+#### 2.5.8.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.8.7 Return Message
+
+15. Return 200 OK with User Data DTO
+
+#### 2.5.8.8 Has Return
+
+✅ Yes
+
+#### 2.5.8.9 Is Activation
+
+✅ Yes
+
+#### 2.5.8.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTPS (VPC Link integration) |
+| Method | GET /user/profile |
+| Parameters | Headers including user claims (e.g., cognito:usern... |
+| Authentication | Network-level security via VPC/Security Groups. |
+| Error Handling | API Gateway handles timeouts or connection errors ... |
+| Performance | P95 network latency < 10ms. |
+
+### 2.5.9.0 Database Query
+
+#### 2.5.9.1 Source Id
+
+REPO-APP-USER-DATA
+
+#### 2.5.9.2 Target Id
+
+REPO-DB-POSTGRES
+
+#### 2.5.9.3 Message
+
+13. SELECT ... WHERE user.auth_provider_id = {jwt.sub}
+
+#### 2.5.9.4 Sequence Number
+
+9
+
+#### 2.5.9.5 Type
+
+🔹 Database Query
+
+#### 2.5.9.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.9.7 Return Message
+
+14. Return user data records
+
+#### 2.5.9.8 Has Return
+
+✅ Yes
+
+#### 2.5.9.9 Is Activation
+
+✅ Yes
+
+#### 2.5.9.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | PostgreSQL Wire Protocol |
+| Method | SQL Query via TypeORM |
+| Parameters | auth_provider_id from JWT 'sub' claim. |
+| Authentication | Database credentials retrieved from AWS Secrets Ma... |
+| Error Handling | Service handles DB connection errors or query fail... |
+| Performance | P95 query time < 50ms. Use indexes on foreign keys... |
+
+### 2.5.10.0 State Management
+
+#### 2.5.10.1 Source Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.10.2 Target Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.10.3 Message
+
+17. Hydrate application state with user data
+
+#### 2.5.10.4 Sequence Number
+
+10
+
+#### 2.5.10.5 Type
+
+🔹 State Management
+
+#### 2.5.10.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.10.7 Return Message
+
+
+
+#### 2.5.10.8 Has Return
+
+❌ No
+
+#### 2.5.10.9 Is Activation
+
+❌ No
+
+#### 2.5.10.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | Client-side Logic |
+| Method | dispatch(userSlice.actions.setUserData) |
+| Parameters | User Data JSON from API response |
+| Authentication | N/A |
+| Error Handling | Update UI to show a logged-in state. |
+| Performance | < 10ms |
+
+## 2.6.0.0 Notes
+
+- {'content': "The user's interaction with the Cognito Hosted UI (Step 3) involves multiple potential round-trips for password entry, MFA, and new password challenges. This is abstracted into a single interaction for clarity.", 'position': 'top', 'participantId': 'REPO-IAM-COGNITO', 'sequenceNumber': 2}
+
+## 2.7.0.0 Implementation Guidance
+
+| Property | Value |
+|----------|-------|
+| Security Requirements | The client application MUST use the Proof Key for ... |
+| Performance Targets | Total user-perceived login time (from submit to da... |
+| Error Handling Strategy | The client must gracefully handle OAuth errors fro... |
+| Testing Considerations | E2E tests must use a real Cognito test user pool t... |
+| Monitoring Requirements | Monitor Cognito for sign-in success/failure rates.... |
+| Deployment Considerations | Cognito User Pool configuration (password policies... |
+

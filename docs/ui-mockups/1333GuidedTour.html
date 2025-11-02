@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organism: GuidedTour</title>
+    <style>
+        /* --- DESIGN SYSTEM TOKENS --- */
+        :root {
+            /* Colors */
+            --color-primary-500: #2196F3;
+            --color-primary-700: #1976D2;
+            --color-neutral-white: #FFFFFF;
+            --color-neutral-gray-50: #F8F9FA;
+            --color-neutral-gray-100: #F1F3F5;
+            --color-neutral-gray-200: #E9ECEF;
+            --color-neutral-gray-700: #495057;
+            --color-neutral-gray-900: #212529;
+            --color-overlay: rgba(33, 37, 41, 0.7);
+            /* Typography */
+            --font-family-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --font-size-body: 16px;
+            --font-size-small: 14px;
+            --font-size-large: 18px;
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            /* Borders & Shadows */
+            --border-radius: 8px;
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            /* Transitions */
+            --transition-duration: 0.3s;
+        }
+        /* --- MOCKUP & SHOWCASE STYLES --- */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: var(--font-family-primary);
+            background-color: var(--color-neutral-gray-50);
+            color: var(--color-neutral-gray-900);
+            line-height: 1.6;
+        }
+        .mock-app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .mock-header {
+            background-color: var(--color-neutral-white);
+            border-bottom: 1px solid var(--color-neutral-gray-200);
+            padding: var(--space-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .mock-main {
+            flex-grow: 1;
+            padding: var(--space-lg);
+            display: grid;
+            place-content: center;
+            text-align: center;
+        }
+        .mock-calc-display {
+            background-color: var(--color-neutral-gray-900);
+            color: var(--color-neutral-white);
+            padding: var(--space-lg);
+            border-radius: var(--border-radius);
+            font-size: 2.5rem;
+            font-family: monospace;
+            margin-bottom: var(--space-lg);
+        }
+        .mock-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: var(--color-neutral-gray-200);
+            border: 1px solid var(--color-neutral-gray-200);
+            border-radius: 4px;
+        }
+
+        /* --- GUIDED TOUR COMPONENT --- */
+        .guided-tour {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            pointer-events: none;
+        }
+        .guided-tour__highlight {
+            position: absolute;
+            border-radius: var(--border-radius);
+            box-shadow: 0 0 0 9999px var(--color-overlay);
+            pointer-events: auto;
+            transition: top var(--transition-duration) ease-in-out, 
+                        left var(--transition-duration) ease-in-out, 
+                        width var(--transition-duration) ease-in-out, 
+                        height var(--transition-duration) ease-in-out;
+        }
+        .guided-tour__popover {
+            position: absolute;
+            background-color: var(--color-neutral-white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            width: 320px;
+            max-width: calc(100vw - 32px);
+            z-index: 1001;
+            pointer-events: auto;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .guided-tour__popover::after { /* Arrow */
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border: 8px solid transparent;
+        }
+        /* Arrow placement classes */
+        .guided-tour__popover--bottom::after {
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-bottom-color: var(--color-neutral-white);
+        }
+        .guided-tour__popover--top::after {
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-top-color: var(--color-neutral-white);
+        }
+        .guided-tour__popover-content {
+            padding: var(--space-lg);
+        }
+        .guided-tour__popover h3 {
+            font-size: var(--font-size-large);
+            color: var(--color-neutral-gray-900);
+            margin: 0 0 var(--space-sm) 0;
+        }
+        .guided-tour__popover p {
+            font-size: var(--font-size-body);
+            color: var(--color-neutral-gray-700);
+            margin: 0;
+            line-height: 1.6;
+        }
+        .guided-tour__popover-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-md) var(--space-lg);
+            border-top: 1px solid var(--color-neutral-gray-100);
+            background-color: var(--color-neutral-gray-50);
+        }
+        .guided-tour__step-counter {
+            font-size: var(--font-size-small);
+            font-weight: 500;
+            color: var(--color-neutral-gray-700);
+        }
+        .guided-tour__nav {
+            display: flex;
+            gap: var(--space-sm);
+        }
+        /* --- ATOMIC DEPENDENCIES --- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: var(--border-radius);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: var(--font-size-small);
+        }
+        .btn:focus-visible {
+            outline: 2px solid var(--color-primary-700);
+            outline-offset: 2px;
+        }
+        .btn--primary {
+            background-color: var(--color-primary-500);
+            color: var(--color-neutral-white);
+        }
+        .btn--primary:hover { background-color: var(--color-primary-700); }
+        .btn--secondary {
+            background-color: transparent;
+            color: var(--color-neutral-gray-700);
+        }
+        .btn--secondary:hover { background-color: var(--color-neutral-gray-100); }
+
+        @media (prefers-reduced-motion: reduce) {
+            .guided-tour, .guided-tour__highlight, .guided-tour__popover {
+                transition: none;
+                animation: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="mock-app">
+        <header class="mock-header">
+            <span id="tour-target-2">Mode Switcher</span>
+            <span id="tour-target-3">Help Icon</span>
+        </header>
+        <main class="mock-main">
+            <div>
+                <div id="tour-target-1" class="mock-calc-display">3.14159</div>
+                <button id="tour-target-4" class="mock-button">Add Variable</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- The GuidedTour Organism -->
+    <div class="guided-tour" role="dialog" aria-modal="true" aria-labelledby="tour-title-1" aria-describedby="tour-desc-1">
+        
+        <!-- Step 1: First Time User - Highlighting the Display -->
+        <!-- In a real app, only one of these would be active at a time -->
+        <div class="guided-tour__step--active">
+            <div class="guided-tour__highlight" style="top: 337px; left: 457px; width: 326px; height: 95px;"></div>
+            <div class="guided-tour__popover guided-tour__popover--bottom" style="top: 442px; left: 459.5px;" >
+                <div class="guided-tour__popover-content">
+                    <h3 id="tour-title-1">Welcome to the Calculator!</h3>
+                    <p id="tour-desc-1">This is the main display. Your calculations and results will appear here.</p>
+                </div>
+                <footer class="guided-tour__popover-footer">
+                    <span class="guided-tour__step-counter">1 of 3</span>
+                    <div class="guided-tour__nav">
+                        <button class="btn btn--secondary">Skip</button>
+                        <button class="btn btn--primary">Next</button>
+                    </div>
+                </footer>
+            </div>
+        </div>
+
+        <!-- Step 2: First Time User - Highlighting the Mode Switcher (Hidden for demo) -->
+        <!-- 
+        <div class="guided-tour__step--inactive">
+            <div class="guided-tour__highlight" style="top: 17px; left: 16px; width: 120px; height: 34px;"></div>
+            <div class="guided-tour__popover guided-tour__popover--top" style="top: 61px; left: 16px;">
+                <div class="guided-tour__popover-content">
+                    <h3>Switch Modes</h3>
+                    <p>Use this to switch between the Scientific calculator and specialized electronics modes.</p>
+                </div>
+                <footer class="guided-tour__popover-footer">
+                    <span class="guided-tour__step-counter">2 of 3</span>
+                    <div class="guided-tour__nav">
+                        <button class="btn btn--secondary">Back</button>
+                        <button class="btn btn--primary">Next</button>
+                    </div>
+                </footer>
+            </div>
+        </div>
+        -->
+    </div>
+    
+	
+	<div> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : "first_time_user"<h3>
+		<!--description--><normal> A tour for new users highlighting the main features of the application. </normal>
+		<!-- vrient 1 html -->
+        <div class="guided-tour" role="dialog" aria-modal="true" aria-labelledby="tour-title-ftu" aria-describedby="tour-desc-ftu">
+            <div class="guided-tour__highlight" style="position: relative; top: 50px; left: 50px; width: 200px; height: 50px;"></div>
+            <div class="guided-tour__popover guided-tour__popover--bottom" style="position: relative; top: 110px; left: 15px;">
+                <div class="guided-tour__popover-content">
+                    <h3 id="tour-title-ftu">First Time User Tour</h3>
+                    <p id="tour-desc-ftu">This is a step in the first-time user onboarding process.</p>
+                </div>
+                <footer class="guided-tour__popover-footer">
+                    <span class="guided-tour__step-counter">1 of 3</span>
+                    <div class="guided-tour__nav">
+                        <button class="btn btn--secondary">Skip</button>
+                        <button class="btn btn--primary">Next</button>
+                    </div>
+                </footer>
+            </div>
+        </div>     
+		
+      <div>
+	 </div>
+      <div>
+        <h3>Variant Name : "custom_mode_creation"<h3>
+		<!--description--><normal> A more focused tour that guides users through the specific steps of creating a custom calculation mode. </normal>
+		<!-- vrient 1 html -->
+        <div class="guided-tour" role="dialog" aria-modal="true" aria-labelledby="tour-title-cmc" aria-describedby="tour-desc-cmc">
+             <div class="guided-tour__highlight" style="position: relative; top: 50px; left: 50px; width: 250px; height: 50px;"></div>
+            <div class="guided-tour__popover guided-tour__popover--bottom" style="position: relative; top: 110px; left: 30px;">
+                <div class="guided-tour__popover-content">
+                    <h3 id="tour-title-cmc">Custom Mode Creation</h3>
+                    <p id="tour-desc-cmc">First, give your new calculation mode a unique name.</p>
+                </div>
+                <footer class="guided-tour__popover-footer">
+                    <span class="guided-tour__step-counter">1 of 4</span>
+                    <div class="guided-tour__nav">
+                         <button class="btn btn--secondary">Skip</button>
+                        <button class="btn btn--primary">Next</button>
+                    </div>
+                </footer>
+            </div>
+        </div>     
+		
+      <div>
+	 </div>    
+	
+	</body>
+</html>

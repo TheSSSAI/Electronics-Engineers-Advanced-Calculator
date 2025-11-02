@@ -1,0 +1,339 @@
+# 1 Overview
+
+## 1.1 Diagram Id
+
+SEQ-SEC-002
+
+## 1.2 Name
+
+API Rate Limiting Enforcement
+
+## 1.3 Description
+
+A user or automated client makes an excessive number of API requests in a short period, exceeding the configured rate limit on the API Gateway. The API Gateway rejects the request before it reaches the backend services to protect them from overload.
+
+## 1.4 Type
+
+🔹 SecurityFlow
+
+## 1.5 Purpose
+
+To protect backend services from denial-of-service attacks and client-side bugs by enforcing API usage policies, ensuring system stability and availability for all users.
+
+## 1.6 Complexity
+
+Low
+
+## 1.7 Priority
+
+🔴 High
+
+## 1.8 Frequency
+
+OnDemand
+
+## 1.9 Participants
+
+- REPO-SPA-CLIENT
+- REPO-API-GATEWAY
+
+## 1.10 Key Interactions
+
+- API Gateway is configured with a usage plan that defines a rate limit (e.g., 100 requests/minute) and a burst limit.
+- A client's requests exceed this limit.
+- API Gateway intercepts the offending request and immediately returns an HTTP `429 Too Many Requests` response without forwarding it to the backend.
+- The Client SPA's API client receives the 429 response.
+- The client handles the error gracefully, perhaps by displaying a notification and implementing a backoff strategy for subsequent requests.
+
+## 1.11 Triggers
+
+- A client exceeds the defined API request rate limit.
+
+## 1.12 Outcomes
+
+- The backend services are protected from excessive traffic.
+- The client is notified of the throttling and can adjust its behavior.
+
+## 1.13 Business Rules
+
+- Rate limits are defined and enforced at the API Gateway level.
+
+## 1.14 Error Scenarios
+
+*No items available*
+
+## 1.15 Integration Points
+
+*No items available*
+
+# 2.0 Details
+
+## 2.1 Diagram Id
+
+SEQ-SEC-002
+
+## 2.2 Name
+
+API Gateway Rate Limiting Policy Enforcement
+
+## 2.3 Description
+
+A comprehensive technical sequence demonstrating the enforcement of a rate limiting policy at the API Gateway level. This sequence implements a 'Defense in Depth' security pattern to protect backend services from Denial-of-Service (DoS) attacks or misbehaving clients. The Amazon API Gateway Usage Plan acts as the primary security checkpoint, evaluating incoming request rates against a predefined policy before any further processing, such as authentication or routing.
+
+## 2.4 Participants
+
+### 2.4.1 Client Application
+
+#### 2.4.1.1 Repository Id
+
+REPO-SPA-CLIENT
+
+#### 2.4.1.2 Display Name
+
+Client SPA
+
+#### 2.4.1.3 Type
+
+🔹 Client Application
+
+#### 2.4.1.4 Technology
+
+React 18+, TypeScript, Axios/Fetch
+
+#### 2.4.1.5 Order
+
+1
+
+#### 2.4.1.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #1E90FF |
+| Stereotype | <<Client>> |
+
+### 2.4.2.0 Managed API Gateway
+
+#### 2.4.2.1 Repository Id
+
+REPO-API-GATEWAY
+
+#### 2.4.2.2 Display Name
+
+API Gateway
+
+#### 2.4.2.3 Type
+
+🔹 Managed API Gateway
+
+#### 2.4.2.4 Technology
+
+Amazon API Gateway
+
+#### 2.4.2.5 Order
+
+2
+
+#### 2.4.2.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | rectangle |
+| Color | #FF8C00 |
+| Stereotype | <<Security Checkpoint>> |
+
+## 2.5.0.0 Interactions
+
+### 2.5.1.0 Request
+
+#### 2.5.1.1 Source Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.1.2 Target Id
+
+REPO-API-GATEWAY
+
+#### 2.5.1.3 Message
+
+Makes Nth+1 API Request, exceeding the configured rate limit
+
+#### 2.5.1.4 Sequence Number
+
+1
+
+#### 2.5.1.5 Type
+
+🔹 Request
+
+#### 2.5.1.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.1.7 Return Message
+
+HTTP/1.1 429 Too Many Requests
+
+#### 2.5.1.8 Has Return
+
+✅ Yes
+
+#### 2.5.1.9 Is Activation
+
+✅ Yes
+
+#### 2.5.1.10 Technical Details
+
+##### 2.5.1.10.1 Protocol
+
+HTTPS/REST
+
+##### 2.5.1.10.2 Method
+
+GET /api/v1/resource
+
+##### 2.5.1.10.3 Parameters
+
+HTTP Headers including 'Authorization: Bearer <jwt>' and potentially an 'x-api-key' header linked to the usage plan.
+
+##### 2.5.1.10.4 Authentication
+
+JWT validation by a Cognito Authorizer is configured but the rate limit check is performed by the API Gateway *before* the authorizer is invoked to minimize processing for throttled requests.
+
+##### 2.5.1.10.5 Error Handling
+
+The client's ApiServiceClient must be implemented to specifically catch the 429 status code and trigger a backoff mechanism rather than treating it as a generic server error.
+
+##### 2.5.1.10.6 Performance
+
+###### 2.5.1.10.6.1 Latency
+
+N/A
+
+###### 2.5.1.10.6.2 Throughput
+
+The request rate exceeds the defined policy (e.g., > 100 requests/minute).
+
+#### 2.5.1.11.0.0 Nested Interactions
+
+- {'sourceId': 'REPO-API-GATEWAY', 'targetId': 'REPO-API-GATEWAY', 'message': 'Evaluate Request against Usage Plan', 'sequenceNumber': 2, 'type': 'InternalProcessing', 'isSynchronous': True, 'returnMessage': 'Decision: Rate Limit Exceeded', 'hasReturn': True, 'isActivation': False, 'technicalDetails': {'protocol': 'Internal', 'method': 'RateLimitPolicy.evaluate()', 'parameters': 'Source IP or API Key, Current Token Bucket Count', 'authentication': 'N/A', 'errorHandling': 'N/A', 'performance': {'latency': '< 5ms. This check must be extremely fast to be effective.', 'throughput': 'N/A'}}}
+
+### 2.5.2.0.0.0 InternalProcessing
+
+#### 2.5.2.1.0.0 Source Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.2.2.0.0 Target Id
+
+REPO-SPA-CLIENT
+
+#### 2.5.2.3.0.0 Message
+
+Handle 429 Error and Initiate Backoff
+
+#### 2.5.2.4.0.0 Sequence Number
+
+3
+
+#### 2.5.2.5.0.0 Type
+
+🔹 InternalProcessing
+
+#### 2.5.2.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.2.7.0.0 Return Message
+
+
+
+#### 2.5.2.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.2.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.2.10.0.0 Technical Details
+
+##### 2.5.2.10.1.0 Protocol
+
+Internal
+
+##### 2.5.2.10.2.0 Method
+
+ApiServiceClient.handleThrottlingError()
+
+##### 2.5.2.10.3.0 Parameters
+
+HttpResponse({status: 429, headers: {'Retry-After': '10'}})
+
+##### 2.5.2.10.4.0 Authentication
+
+N/A
+
+##### 2.5.2.10.5.0 Error Handling
+
+The client should display a non-intrusive notification to the user (e.g., 'The application is busy, please try again in a moment.') and pause subsequent outgoing API calls for the duration specified by the 'Retry-After' header, or use an exponential backoff-with-jitter algorithm if the header is not present.
+
+##### 2.5.2.10.6.0 Performance
+
+###### 2.5.2.10.6.1 Latency
+
+N/A
+
+###### 2.5.2.10.6.2 Throughput
+
+N/A
+
+## 2.6.0.0.0.0 Notes
+
+### 2.6.1.0.0.0 Content
+
+#### 2.6.1.1.0.0 Content
+
+Security Policy: The API Gateway must have a 'Usage Plan' configured with a specific rate limit (e.g., 100 requests/minute) and burst limit (e.g., 200 requests). This plan is then associated with the API stage and potentially tied to API keys distributed to clients.
+
+#### 2.6.1.2.0.0 Position
+
+top-right
+
+#### 2.6.1.3.0.0 Participant Id
+
+REPO-API-GATEWAY
+
+#### 2.6.1.4.0.0 Sequence Number
+
+2
+
+### 2.6.2.0.0.0 Content
+
+#### 2.6.2.1.0.0 Content
+
+Client Resilience: The client's responsibility is to respect the 429 response. A naive client that immediately retries upon failure will worsen the situation. Implementing an exponential backoff with jitter is a critical part of a resilient client-side design.
+
+#### 2.6.2.2.0.0 Position
+
+bottom-left
+
+#### 2.6.2.3.0.0 Participant Id
+
+REPO-SPA-CLIENT
+
+#### 2.6.2.4.0.0 Sequence Number
+
+3
+
+## 2.7.0.0.0.0 Implementation Guidance
+
+| Property | Value |
+|----------|-------|
+| Security Requirements | The primary security control is the API Gateway Us... |
+| Performance Targets | The API Gateway's response time for a throttled 42... |
+| Error Handling Strategy | Server-Side: The strategy is immediate rejection w... |
+| Testing Considerations | A dedicated load test scenario must be created (us... |
+| Monitoring Requirements | A critical CloudWatch Alarm must be configured on ... |
+| Deployment Considerations | Usage Plan configurations should be versioned in s... |
+

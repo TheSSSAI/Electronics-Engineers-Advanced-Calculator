@@ -1,0 +1,5 @@
+"component_name","business_criticality","technical_complexity","change_frequency","test_types_required","unit_test_coverage","integration_test_coverage","e2e_test_coverage","automation_percentage","manual_test_effort","automated_test_effort","total_test_cases","risk_mitigation_score","quality_confidence","maintenance_overhead","tool_compatibility","team_skill_alignment"
+"User Authentication Module","Critical","High","Low","[""Unit"",""Integration"",""End-to-End"",""Security"",""Accessibility""]","95","98","90","95","8","60","45","0.98","High","Low","Excellent","Good"
+"Custom Mode Execution Sandbox","Critical","High","Medium","[""Unit"",""Integration"",""Security"",""Performance""]","98","95","85","90","16","80","60","0.95","High","Medium","Excellent","High"
+"Offline Synchronization Module","High","High","Low","[""Unit"",""Integration"",""End-to-End""]","90","85","95","90","10","50","35","0.92","Medium","High","Good","Medium"
+"Core Calculation Engine","High","Medium","Low","[""Unit""]","99","","","100","","40","150","0.99","High","Low","Excellent","Good"

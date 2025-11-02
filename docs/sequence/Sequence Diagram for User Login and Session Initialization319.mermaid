@@ -1,0 +1,35 @@
+sequenceDiagram
+    actor "Client: React SPA" as ClientReactSPA
+    participant "IdP: AWS Cognito" as IdPAWSCognito
+    participant "Gateway: API Gateway" as GatewayAPIGateway
+    actor "Service: User & Data" as ServiceUserData
+    participant "DB: PostgreSQL" as DBPostgreSQL
+
+    ClientReactSPA->>IdPAWSCognito: 1. 1. Initiate OAuth 2.0 Auth Code Flow w/ PKCE (Redirect)
+    IdPAWSCognito-->>ClientReactSPA: 2. Redirect user agent to Cognito Hosted UI for login
+    activate IdPAWSCognito
+    IdPAWSCognito->>IdPAWSCognito: 2. 3. User submits credentials & MFA on Hosted UI
+    IdPAWSCognito-->>IdPAWSCognito: 4. Validate credentials against User Pool
+    IdPAWSCognito->>ClientReactSPA: 3. 5. Redirect back to client with Authorization Code
+    ClientReactSPA->>IdPAWSCognito: 4. 6. Exchange Authorization Code for JWTs
+    IdPAWSCognito-->>ClientReactSPA: 7. Return JWTs (ID, Access, Refresh Tokens)
+    activate ClientReactSPA
+    ClientReactSPA->>ClientReactSPA: 5. 8. Securely store tokens and initialize session
+    ClientReactSPA->>GatewayAPIGateway: 6. 9. GET /api/v1/user/profile
+    GatewayAPIGateway-->>ClientReactSPA: 16. Return 200 OK with User Data JSON
+    GatewayAPIGateway->>IdPAWSCognito: 7. 10. [Security Checkpoint] Validate JWT
+    IdPAWSCognito-->>GatewayAPIGateway: 11. [If valid] Return IAM policy to allow request
+    activate ServiceUserData
+    GatewayAPIGateway->>ServiceUserData: 8. 12. Forward authorized request
+    ServiceUserData-->>GatewayAPIGateway: 15. Return 200 OK with User Data DTO
+    activate DBPostgreSQL
+    ServiceUserData->>DBPostgreSQL: 9. 13. SELECT ... WHERE user.auth_provider_id = {jwt.sub}
+    DBPostgreSQL-->>ServiceUserData: 14. Return user data records
+    ClientReactSPA->>ClientReactSPA: 10. 17. Hydrate application state with user data
+
+    note over IdPAWSCognito: The user's interaction with the Cognito Hosted UI (Step 3) involves multiple potential round-trip...
+
+    deactivate DBPostgreSQL
+    deactivate ServiceUserData
+    deactivate ClientReactSPA
+    deactivate IdPAWSCognito

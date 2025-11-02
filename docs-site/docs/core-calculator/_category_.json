@@ -1,0 +1,8 @@
+{
+  "label": "Core Calculator",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "description": "Learn about the core features of the scientific calculator, from basic operations to advanced memory functions and user-defined variables."
+  }
+}

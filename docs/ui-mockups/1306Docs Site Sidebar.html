@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docs Site Sidebar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Reset */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Design System Tokens */
+        :root {
+            --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            
+            --color-background: #0D1117;
+            --color-surface-1: #161B22;
+            --color-surface-2: #21262D;
+            --color-border: #30363D;
+            --color-text-primary: #E6EDF3;
+            --color-text-secondary: #7D8590;
+            --color-text-tertiary: #586069;
+            --color-accent-primary: #58A6FF;
+            --color-accent-hover: #79C0FF;
+            --color-accent-active: #388BFD;
+
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+
+            --border-radius: 6px;
+            --sidebar-width: 280px;
+            --header-height: 60px;
+            --transition-speed: 0.3s;
+        }
+
+        /* Base Styles */
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: var(--font-family-sans);
+            background-color: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        h1, h2, h3 {
+            font-weight: 600;
+            line-height: 1.3;
+            color: var(--color-text-primary);
+        }
+        
+        p {
+          color: var(--color-text-secondary);
+        }
+
+        a {
+            color: var(--color-accent-primary);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Screen Layout - Mobile First */
+        .screen-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .screen-header {
+            display: flex;
+            align-items: center;
+            height: var(--header-height);
+            background-color: var(--color-surface-1);
+            border-bottom: 1px solid var(--color-border);
+            padding: 0 var(--spacing-md);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .main-content-wrapper {
+            flex-grow: 1;
+            position: relative;
+        }
+
+        .screen-content {
+            padding: var(--spacing-lg);
+        }
+
+        /* Mobile Drawer Toggle (Checkbox Hack) */
+        .drawer-toggle {
+            display: none;
+        }
+
+        .hamburger-label {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            z-index: 200;
+        }
+
+        .hamburger-label .line {
+            width: 100%;
+            height: 2px;
+            background-color: var(--color-text-primary);
+            border-radius: 2px;
+            transition: all var(--transition-speed) ease-in-out;
+        }
+
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity var(--transition-speed) ease, visibility 0s var(--transition-speed);
+            z-index: 150;
+        }
+
+        /* Docs Sidebar - Mobile Drawer Style */
+        .docs-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: var(--sidebar-width);
+            background-color: var(--color-surface-1);
+            border-right: 1px solid var(--color-border);
+            transform: translateX(-100%);
+            transition: transform var(--transition-speed) ease-in-out;
+            z-index: 200;
+            overflow-y: auto;
+            padding-top: var(--header-height);
+        }
+
+        .drawer-toggle:checked ~ .main-content-wrapper .docs-sidebar {
+            transform: translateX(0);
+        }
+
+        .drawer-toggle:checked ~ .main-content-wrapper .drawer-overlay {
+            opacity: 1;
+            visibility: visible;
+            transition-delay: 0s;
+        }
+
+        .drawer-toggle:checked + .screen-header .hamburger-label .line1 {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .drawer-toggle:checked + .screen-header .hamburger-label .line2 {
+            opacity: 0;
+        }
+
+        .drawer-toggle:checked + .screen-header .hamburger-label .line3 {
+            transform: rotate(-45deg) translate(5px, -5px);
+        }
+
+        /* Sidebar Navigation Items */
+        .sidebar-nav {
+            padding: var(--spacing-md);
+        }
+        
+        .sidebar-nav .nav-list {
+            list-style: none;
+        }
+
+        .sidebar-nav .nav-list ul {
+            list-style: none;
+            padding-left: var(--spacing-md);
+            margin-top: var(--spacing-sm);
+        }
+
+        .sidebar-nav .nav-item {
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .sidebar-nav .nav-link {
+            display: block;
+            padding: var(--spacing-sm) var(--spacing-md);
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+            font-weight: 500;
+            border-radius: var(--border-radius);
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        
+        .sidebar-nav .nav-link:hover {
+            background-color: var(--color-surface-2);
+            color: var(--color-text-primary);
+            text-decoration: none;
+        }
+        
+        .sidebar-nav .nav-link:focus-visible {
+            outline: 2px solid var(--color-accent-primary);
+            outline-offset: 2px;
+        }
+
+        .sidebar-nav .nav-link.is-active {
+            background-color: var(--color-accent-active);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .sidebar-nav .nav-section-title {
+            padding: var(--spacing-sm) var(--spacing-md);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--color-text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: var(--spacing-lg);
+        }
+
+        .sidebar-nav .nav-section-title:first-child {
+            margin-top: 0;
+        }
+
+
+        /* Desktop Layout - Persistent Sidebar */
+        @media (min-width: 1024px) {
+            .screen-container {
+                display: grid;
+                grid-template-columns: var(--sidebar-width) 1fr;
+                grid-template-rows: 1fr;
+                grid-template-areas: "sidebar main";
+            }
+            
+            .screen-header, .drawer-toggle, .hamburger-label, .drawer-overlay {
+                display: none; /* Hide mobile-specific header and controls */
+            }
+
+            .main-content-wrapper {
+                grid-area: main;
+                height: 100vh;
+                overflow-y: auto;
+            }
+
+            .docs-sidebar {
+                grid-area: sidebar;
+                position: sticky;
+                top: 0;
+                height: 100vh;
+                transform: translateX(0);
+                padding-top: var(--spacing-lg);
+            }
+        }
+        
+        /* Variations Section for Demo */
+        .screen-variations {
+            background-color: #f0f0f0;
+            padding: var(--spacing-xl);
+            color: #333;
+            margin-top: var(--spacing-xl);
+        }
+        .variation-group {
+            margin-top: var(--spacing-lg);
+            padding: var(--spacing-lg);
+            border: 1px solid #ccc;
+            border-radius: var(--border-radius);
+        }
+        .variation-group h3 { color: #111; }
+        .variation-group .description { margin-top: var(--spacing-sm); color: #555; }
+        
+        .mobile-demo-container {
+            position: relative;
+            width: 375px;
+            height: 667px;
+            border: 8px solid #333;
+            border-radius: 30px;
+            overflow: hidden;
+            background: var(--color-background);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin: var(--spacing-md) auto;
+        }
+        
+        .mobile-demo-header {
+            display: flex;
+            align-items: center;
+            height: var(--header-height);
+            background-color: var(--color-surface-1);
+            border-bottom: 1px solid var(--color-border);
+            padding: 0 var(--spacing-md);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .mobile-demo-content {
+             padding: var(--spacing-lg);
+        }
+
+    </style>
+</head>
+<body>
+
+    <input type="checkbox" id="drawer-toggle" class="drawer-toggle" />
+    <header class="screen-header">
+        <label for="drawer-toggle" class="hamburger-label" aria-label="Open navigation menu">
+            <div class="line line1"></div>
+            <div class="line line2"></div>
+            <div class="line line3"></div>
+        </label>
+        <span class="header-title" style="margin-left: 16px;">Documentation</span>
+    </header>
+
+    <div class="main-content-wrapper">
+        <label for="drawer-toggle" class="drawer-overlay"></label>
+        <aside class="docs-sidebar">
+            <nav class="sidebar-nav">
+                <h3 class="nav-section-title">Getting Started</h3>
+                <ul class="nav-list">
+                    <li class="nav-item"><a href="#" class="nav-link">Introduction</a></li>
+                    <li class="nav-item"><a href="#" class="nav-link">Core Concepts</a></li>
+                </ul>
+
+                <h3 class="nav-section-title">Features</h3>
+                <ul class="nav-list">
+                    <li class="nav-item"><a href="#" class="nav-link">Scientific Calculator</a></li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link is-active">Electronics Tools</a>
+                        <ul class="nav-list">
+                           <li class="nav-item"><a href="#" class="nav-link">Ohm's Law</a></li>
+                           <li class="nav-item"><a href="#" class="nav-link">555 Timer</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item"><a href="#" class="nav-link">Custom Modes</a></li>
+                    <li class="nav-item"><a href="#" class="nav-link">User Accounts</a></li>
+                </ul>
+
+                <h3 class="nav-section-title">API Reference</h3>
+                <ul class="nav-list">
+                    <li class="nav-item"><a href="#" class="nav-link">Authentication</a></li>
+                    <li class="nav-item"><a href="#" class="nav-link">Data Endpoints</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="screen-content">
+            <h1>Electronics Tools</h1>
+            <p>Welcome to the electronics tools section. Use the sidebar to navigate to the specific tool you need.</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor. Cras elementum ultrices diam. Maecenas ligula massa, varius a, semper congue, euismod non, mi.</p>
+            <h2>Available Tools</h2>
+            <p>Proin porttitor, orci nec nonummy molestie, enim est eleifend mi, non fermentum diam nisl sit amet erat. Duis semper. Duis arcu massa, scelerisque vitae, consequat in, pretium a, enim. Pellentesque congue. Ut in risus volutpat libero pharetra tempor. Cras vestibulum bibendum augue. Praesent egestas leo in pede. Praesent blandit odio eu enim. Pellentesque sed dui ut augue blandit sodales. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Aliquam nibh.</p>
+        </main>
+    </div>
+
+    <!-- Screen Variations Section -->
+    <div class="screen-variations">
+        <h2>Screen Variations</h2>
+
+        <div class="variation-group">
+            <h3>Variant Name: "Desktop Persistent"</h3>
+            <p class="description">On screens wider than 1024px, the sidebar is permanently visible on the left, and the main content area takes up the remaining space. This is the default view you see on a large screen.</p>
+        </div>
+
+        <div class="variation-group">
+            <h3>Variant Name: "Mobile Drawer"</h3>
+            <p class="description">On screens narrower than 1024px, the sidebar is hidden by default. A hamburger menu icon in the header is used to toggle the sidebar, which slides in from the left as a drawer. The main mockup above is interactive; if your screen is narrow, click the hamburger icon to see this in action.</p>
+            <div class="mobile-demo-container">
+                <div class="mobile-demo-header">
+                    <label class="hamburger-label" aria-label="Open navigation menu">
+                      <div class="line line1"></div>
+                      <div class="line line2"></div>
+                      <div class="line line3"></div>
+                    </label>
+                    <span class="header-title" style="margin-left: 16px;">Documentation</span>
+                </div>
+                 <div class="mobile-demo-content">
+                    <h1>Electronics Tools</h1>
+                    <p>Welcome to the electronics tools section...</p>
+                 </div>
+            </div>
+             <p class="description" style="text-align: center; margin-top: 16px;">Above: A static visual of the "Mobile Drawer (Closed)" state.</p>
+        </div>
+    </div>
+</body>
+</html>

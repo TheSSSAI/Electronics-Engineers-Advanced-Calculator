@@ -1,0 +1,49 @@
+flowchart TD
+    subgraph Client-Side
+        A[User navigates to Registration Page] --> B[Fills out form\n(email, password)]
+        B --> C[Checks 'Accept Terms & Policy' checkbox]
+        C --> D[Clicks 'Register' button]
+        D --> E{All fields valid & Terms accepted?}
+        E -->|No| F[Display inline validation errors]
+        F --> B
+        E -->|Yes| G[Submit registration data to API]
+    end
+
+    subgraph Server-Side
+        G --> H[API Endpoint Receives Request]
+        H --> I{Validate data (e.g., email format, password policy)}
+        I -->|Invalid| J[Return 400 Bad Request]
+        I -->|Valid| K{User email already exists in IdP?}
+        K -->|Yes| L[Return 409 Conflict]
+        K -->|No| M[Create user in Identity Provider (Cognito)]
+        M --> N{User creation successful?}
+        N -->|No| O[Return 5xx Server Error]
+        N -->|Yes| P[Create user record in application DB\n(with termsAcceptedAt timestamp)]
+        P --> Q[Generate & return session tokens (JWTs)]
+    end
+
+    subgraph Client-Side Post-Registration
+        J --> R[Display specific validation error]
+        L --> S[Display 'Email already in use' error]
+        O --> T[Display generic 'Registration failed' error]
+        R --> B
+        S --> B
+        T --> B
+        Q --> U[Store tokens & set authenticated state]
+        U --> V[Redirect to Main Application]
+        V --> W{First-time login?}
+        W -->|Yes| X[Start 'First-Time User Guided Tour']
+        W -->|No| Y[Load user data and proceed to normal use]
+        X --> Y
+    end
+
+    %% Styling
+    classDef errorNode fill:#fdecea,stroke:#e53935,color:#000
+    classDef successNode fill:#e8f5e9,stroke:#43a047,color:#000
+    classDef processNode fill:#e3f2fd,stroke:#1e88e5,color:#000
+    classDef decisionNode fill:#fff8e1,stroke:#f9a825,color:#000
+
+    class F,J,L,O,R,S,T errorNode
+    class P,Q,U,V,X,Y successNode
+    class B,C,D,G,H,M processNode
+    class E,I,K,N,W decisionNode

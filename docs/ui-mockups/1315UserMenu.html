@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UserMenu Component</title>
+  <style>
+    /* --- DESIGN SYSTEM FOUNDATION (Tokens) --- */
+    :root {
+      /* Color Palette */
+      --color-primary-100: #BBDEFB;
+      --color-primary-200: #90CAF9;
+      --color-primary-500: #2196F3;
+      --color-primary-700: #1976D2;
+      --color-neutral-white: #FFFFFF;
+      --color-neutral-gray-50: #F8F9FA;
+      --color-neutral-gray-100: #F1F3F5;
+      --color-neutral-gray-200: #E9ECEF;
+      --color-neutral-gray-400: #CED4DA;
+      --color-neutral-gray-700: #495057;
+      --color-neutral-gray-900: #212529;
+      --color-danger-500: #D32F2F;
+
+      /* Typography */
+      --font-family-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      --font-size-body: 16px;
+      --font-size-small: 14px;
+
+      /* Spacing */
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+
+      /* Borders & Radius */
+      --border-radius: 6px;
+    }
+
+    /* --- BASE & LAYOUT STYLES --- */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: var(--font-family-primary);
+      background-color: var(--color-neutral-gray-50);
+      color: var(--color-neutral-gray-900);
+      line-height: 1.6;
+      padding: var(--space-xl);
+    }
+    .showcase-header {
+        background-color: var(--color-neutral-white);
+        padding: var(--space-md) var(--space-lg);
+        border: 1px solid var(--color-neutral-gray-200);
+        border-radius: var(--border-radius);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--space-xl);
+    }
+    .showcase-header h2 {
+        font-size: 1.2rem;
+        color: var(--color-neutral-gray-700);
+    }
+    .showcase-section {
+        margin-bottom: var(--space-xl);
+    }
+    .showcase-section h3 {
+        margin-bottom: var(--space-md);
+        border-bottom: 1px solid var(--color-neutral-gray-200);
+        padding-bottom: var(--space-sm);
+    }
+    .showcase-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-xl);
+        padding: var(--space-lg);
+        background-color: #fdfdff;
+        border: 1px dashed var(--color-neutral-gray-200);
+        border-radius: var(--border-radius);
+    }
+
+    /* --- ATOMIC DEPENDENCIES (Simplified) --- */
+    .icon {
+      display: inline-block;
+      width: 1.25em;
+      height: 1.25em;
+      stroke-width: 0;
+      stroke: currentColor;
+      fill: currentColor;
+      vertical-align: middle;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      font-weight: 600;
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--border-radius);
+      border: 1px solid transparent;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease-in-out;
+      min-height: 44px;
+    }
+    .btn--secondary {
+      background-color: var(--color-neutral-white);
+      color: var(--color-primary-700);
+      border-color: var(--color-neutral-gray-400);
+    }
+    .btn--secondary:hover {
+      border-color: var(--color-primary-700);
+      background-color: var(--color-neutral-gray-50);
+    }
+    .btn:focus-visible {
+      outline: 2px solid var(--color-primary-700);
+      outline-offset: 2px;
+    }
+
+    /* --- MOLECULAR COMPONENT: UserMenu --- */
+
+    /* Component Base */
+    .user-menu {
+      position: relative;
+      display: inline-block;
+    }
+
+    /* Trigger Button (Avatar) */
+    .user-menu__trigger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background-color: var(--color-primary-100);
+      color: var(--color-primary-700);
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .user-menu__trigger .icon {
+      width: 24px;
+      height: 24px;
+    }
+
+    .user-menu__trigger:focus-visible {
+      outline: 2px solid var(--color-primary-700);
+      outline-offset: 2px;
+    }
+
+    .user-menu__trigger:hover {
+      background-color: var(--color-primary-200);
+    }
+
+    /* Dropdown Panel */
+    .user-menu__dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      min-width: 240px;
+      background-color: var(--color-neutral-white);
+      border-radius: var(--border-radius);
+      border: 1px solid var(--color-neutral-gray-200);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      z-index: 100;
+      list-style: none;
+      padding: var(--space-sm) 0;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+    }
+
+    /* Open State */
+    .user-menu.is-open .user-menu__dropdown,
+    /* Interactive Demo with :focus-within */
+    .user-menu--interactive:focus-within .user-menu__dropdown {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    .user-menu--interactive .user-menu__trigger:focus-visible {
+      background-color: var(--color-primary-200);
+    }
+
+
+    /* Dropdown Header (User Info) */
+    .user-menu__header {
+      padding: var(--space-sm) var(--space-md);
+      border-bottom: 1px solid var(--color-neutral-gray-200);
+      margin-bottom: var(--space-sm);
+    }
+
+    .user-menu__header-name {
+      font-weight: 600;
+      color: var(--color-neutral-gray-900);
+      line-height: 1.3;
+    }
+
+    .user-menu__header-email {
+      font-size: var(--font-size-small);
+      color: var(--color-neutral-gray-700);
+      word-break: break-all;
+    }
+
+    /* Dropdown Items */
+    .user-menu__item a,
+    .user-menu__item button {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      width: 100%;
+      text-align: left;
+      padding: 10px var(--space-md);
+      font-size: var(--font-size-body);
+      color: var(--color-neutral-gray-900);
+      text-decoration: none;
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+    }
+
+    .user-menu__item a .icon,
+    .user-menu__item button .icon {
+      color: var(--color-neutral-gray-700);
+    }
+
+    .user-menu__item a:hover,
+    .user-menu__item button:hover,
+    .user-menu__item a:focus-visible,
+    .user-menu__item button:focus-visible {
+      background-color: var(--color-neutral-gray-100);
+      outline: none;
+    }
+
+    /* Divider */
+    .user-menu__divider {
+      height: 1px;
+      background-color: var(--color-neutral-gray-200);
+      margin: var(--space-sm) 0;
+    }
+
+    /* Item - Danger Zone */
+    .user-menu__item--danger button {
+      color: var(--color-danger-500);
+    }
+    .user-menu__item--danger button .icon {
+      color: var(--color-danger-500);
+    }
+    .user-menu__item--danger button:hover,
+    .user-menu__item--danger button:focus-visible {
+      background-color: rgba(211, 47, 47, 0.1);
+    }
+
+  </style>
+</head>
+<body>
+
+  <h1>UserMenu Component</h1>
+
+  <header class="showcase-header">
+    <h2>Organism Context: AppHeader</h2>
+    <div class="user-menu--interactive">
+        <button 
+          class="user-menu__trigger" 
+          type="button" 
+          aria-haspopup="true" 
+          aria-expanded="false" 
+          aria-controls="user-menu-dropdown-interactive"
+          aria-label="User menu"
+        >
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
+        </button>
+        <ul class="user-menu__dropdown" id="user-menu-dropdown-interactive" role="menu">
+            <li class="user-menu__header" role="presentation">
+              <div class="user-menu__header-name">Test User</div>
+              <div class="user-menu__header-email">test.user@example.com</div>
+            </li>
+            <li class="user-menu__item" role="menuitem">
+              <a href="#">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12-.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"></path></svg>
+                <span>Manage Profile</span>
+              </a>
+            </li>
+            <li class="user-menu__divider" role="separator"></li>
+            <li class="user-menu__item user-menu__item--danger" role="menuitem">
+                <button type="button">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m17 7-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"></path></svg>
+                    <span>Log Out</span>
+                </button>
+            </li>
+        </ul>
+    </div>
+  </header>
+
+  <main>
+    <section class="showcase-section">
+      <h3>Variants & States</h3>
+      <div class="showcase-grid">
+
+        <!-- Logged Out Variant -->
+        <div>
+          <h4>Logged Out</h4>
+          <button class="btn btn--secondary" type="button">Log In / Register</button>
+        </div>
+
+        <!-- Logged In: Closed State -->
+        <div>
+          <h4>Logged In (Closed State)</h4>
+          <div class="user-menu">
+            <button class="user-menu__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-label="User menu">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
+            </button>
+            <ul class="user-menu__dropdown">
+              <!-- Content hidden by default -->
+            </ul>
+          </div>
+        </div>
+
+        <!-- Logged In: Open State -->
+        <div>
+            <h4>Logged In (Open State)</h4>
+            <div class="user-menu is-open">
+                <button class="user-menu__trigger" type="button" aria-haspopup="true" aria-expanded="true" aria-controls="user-menu-dropdown-open" aria-label="User menu">
+                  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
+                </button>
+                <ul class="user-menu__dropdown" id="user-menu-dropdown-open" role="menu">
+                    <li class="user-menu__header" role="presentation">
+                      <div class="user-menu__header-name">Test User</div>
+                      <div class="user-menu__header-email">test.user@example.com</div>
+                    </li>
+                    <li class="user-menu__item" role="menuitem">
+                      <a href="#">
+                        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61-.25-1.17-.59-1.69-.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"></path></svg>
+                        <span>Manage Profile</span>
+                      </a>
+                    </li>
+                    <li class="user-menu__divider" role="separator"></li>
+                    <li class="user-menu__item user-menu__item--danger" role="menuitem">
+                        <button type="button">
+                            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m17 7-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"></path></svg>
+                            <span>Log Out</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+	
+	<div> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : "logged_in"<h3>
+		<normal> Dropdown menu for an authenticated user. </normal>
+		
+        <div class="user-menu is-open">
+            <button class="user-menu__trigger" type="button" aria-haspopup="true" aria-expanded="true" aria-label="User menu">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
+            </button>
+            <ul class="user-menu__dropdown" role="menu">
+                <li class="user-menu__header" role="presentation">
+                  <div class="user-menu__header-name">Example User</div>
+                  <div class="user-menu__header-email">user@example.com</div>
+                </li>
+                <li class="user-menu__item" role="menuitem"><a href="#">Manage Profile</a></li>
+                <li class="user-menu__divider" role="separator"></li>
+                <li class="user-menu__item user-menu__item--danger" role="menuitem"><button type="button">Log Out</button></li>
+            </ul>
+        </div>
+      </div>
+      <div>
+        <h3>Variant Name : "logged_out"<h3>
+		<normal> Simple button for unauthenticated users. </normal>
+		
+        <button class="btn btn--secondary" type="button">Log In / Register</button>
+      </div>
+	 </div>
+    
+	
+	</body>
+</html>

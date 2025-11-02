@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organism Component: OhmsLawCalculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* 1. DESIGN SYSTEM & BASE STYLES */
+        :root {
+            /* Colors */
+            --color-primary-500: #2196F3;
+            --color-neutral-100: #F1F3F5;
+            --color-neutral-300: #DEE2E6;
+            --color-neutral-500: #ADB5BD;
+            --color-neutral-700: #495057;
+            --color-neutral-900: #212529;
+            --color-white: #FFFFFF;
+            --color-warning: #ED6C02;
+            --color-error: #D32F2F;
+            /* Typography */
+            --font-primary: 'Roboto', sans-serif;
+            --font-monospace: 'Roboto Mono', monospace;
+            --font-size-sm: 14px;
+            --font-size-md: 16px;
+            /* Spacing */
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            /* Borders */
+            --border-radius: 4px;
+            --border-radius-lg: 8px;
+        }
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: var(--font-primary);
+            background-color: var(--color-neutral-100);
+            color: var(--color-neutral-900);
+            padding: var(--space-lg);
+        }
+        /* Showcase Layout */
+        .showcase-container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .showcase-header {
+            text-align: center;
+            margin-bottom: var(--space-xl);
+        }
+        .showcase-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: var(--space-sm);
+        }
+        .showcase-section {
+            margin-bottom: var(--space-xl);
+        }
+        .showcase-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: var(--space-md);
+            padding-bottom: var(--space-sm);
+            border-bottom: 1px solid var(--color-neutral-300);
+        }
+
+        /* 2. COMPONENT CSS */
+        /* Base Component Styles */
+        .ohms-law-calculator {
+            background-color: var(--color-white);
+            padding: var(--space-lg);
+            border: 1px solid var(--color-neutral-300);
+            border-radius: var(--border-radius-lg);
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .ohms-law-calculator__grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-lg);
+        }
+        .ohms-law-calculator__input-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .ohms-law-calculator__label {
+            display: flex;
+            align-items: center;
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            color: var(--color-neutral-700);
+            margin-bottom: var(--space-sm);
+        }
+        .ohms-law-calculator__status-message {
+            text-align: center;
+            padding: var(--space-md);
+            margin-top: var(--space-lg);
+            background-color: var(--color-neutral-100);
+            color: var(--color-neutral-700);
+            border-radius: var(--border-radius);
+            font-size: var(--font-size-sm);
+            transition: opacity 150ms ease-in-out, visibility 150ms ease-in-out;
+            border: 1px dashed var(--color-neutral-500);
+        }
+        
+        /* Dependency: NumericInputWithPrefix */
+        .numeric-input {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .numeric-input__field {
+            font-family: var(--font-primary);
+            font-size: var(--font-size-md);
+            padding: var(--space-sm) var(--space-md);
+            border: 1px solid var(--color-neutral-500);
+            border-radius: var(--border-radius);
+            width: 100%;
+            transition: border-color 150ms ease, box-shadow 150ms ease;
+            min-height: 44px; /* Touch target */
+        }
+        .numeric-input__unit {
+            position: absolute;
+            right: var(--space-md);
+            color: var(--color-neutral-700);
+            pointer-events: none;
+            font-weight: 500;
+        }
+
+        /* Dependency: WarningIconWithTooltip */
+        .warning-tooltip {
+            position: relative;
+            display: inline-flex;
+            cursor: help;
+        }
+        .warning-tooltip__icon {
+            color: var(--color-warning);
+            width: 20px;
+            height: 20px;
+            margin-left: var(--space-sm);
+        }
+        .warning-tooltip__text {
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--color-neutral-900);
+            color: var(--color-white);
+            padding: var(--space-sm);
+            border-radius: var(--border-radius);
+            font-size: var(--font-size-sm);
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 150ms, visibility 150ms;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .warning-tooltip:hover .warning-tooltip__text,
+        .warning-tooltip:focus-within .warning-tooltip__text {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Component States */
+        .numeric-input__field:focus-visible {
+            outline: none;
+            border-color: var(--color-primary-500);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+        }
+        .numeric-input__field[readonly] {
+            background-color: var(--color-neutral-100);
+            font-weight: 700;
+            color: var(--color-neutral-900);
+            border-color: var(--color-neutral-300);
+            cursor: default;
+        }
+        .ohms-law-calculator__input-group.has-error .numeric-input__field {
+            border-color: var(--color-error);
+        }
+        .ohms-law-calculator__input-group.has-error .numeric-input__field:focus-visible {
+             box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.2);
+        }
+        .ohms-law-calculator__error-msg {
+            font-size: var(--font-size-sm);
+            color: var(--color-error);
+            margin-top: var(--space-sm);
+            display: none; /* Hidden by default */
+        }
+        .ohms-law-calculator__input-group.has-error .ohms-law-calculator__error-msg {
+            display: block; /* Shown when error class is present */
+        }
+
+        .is-calculating .ohms-law-calculator__input-group[data-calculated="true"] .numeric-input__field {
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+        @keyframes pulse {
+            0%, 100% { background-color: var(--color-neutral-100); }
+            50% { background-color: #e0e6eb; }
+        }
+
+        /* Hide status message when not needed */
+        .is-calculated .ohms-law-calculator__status-message,
+        .has-error .ohms-law-calculator__status-message {
+            display: none;
+        }
+
+        /* Responsive Adaptations */
+        @media (max-width: 768px) {
+            .ohms-law-calculator__grid {
+                grid-template-columns: 1fr;
+                gap: var(--space-md);
+            }
+            .ohms-law-calculator {
+                padding: var(--space-md);
+            }
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+            overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="showcase-container">
+    <header class="showcase-header">
+        <h1>Ohm's Law & Power Calculator</h1>
+        <p>An organism component for electronics calculations.</p>
+    </header>
+
+    <section class="showcase-section">
+        <h2>State: Insufficient Input</h2>
+        <p>The initial state where fewer than two values are provided. A guidance message is shown.</p>
+        <div class="ohms-law-calculator">
+            <div class="ohms-law-calculator__grid">
+                <!-- Voltage -->
+                <div class="ohms-law-calculator__input-group">
+                    <label for="v-1" class="ohms-law-calculator__label">Voltage</label>
+                    <div class="numeric-input">
+                        <input type="text" id="v-1" class="numeric-input__field" placeholder="Enter Voltage">
+                        <span class="numeric-input__unit">V</span>
+                    </div>
+                </div>
+                <!-- Current -->
+                <div class="ohms-law-calculator__input-group">
+                    <label for="i-1" class="ohms-law-calculator__label">Current</label>
+                    <div class="numeric-input">
+                        <input type="text" id="i-1" class="numeric-input__field" placeholder="Enter Current">
+                        <span class="numeric-input__unit">A</span>
+                    </div>
+                </div>
+                <!-- Resistance -->
+                <div class="ohms-law-calculator__input-group">
+                    <label for="r-1" class="ohms-law-calculator__label">Resistance</label>
+                    <div class="numeric-input">
+                        <input type="text" id="r-1" class="numeric-input__field" placeholder="Enter Resistance">
+                        <span class="numeric-input__unit">Ω</span>
+                    </div>
+                </div>
+                <!-- Power -->
+                <div class="ohms-law-calculator__input-group">
+                    <label for="p-1" class="ohms-law-calculator__label">Power</label>
+                    <div class="numeric-input">
+                        <input type="text" id="p-1" class="numeric-input__field" placeholder="Enter Power">
+                        <span class="numeric-input__unit">W</span>
+                    </div>
+                </div>
+            </div>
+            <div class="ohms-law-calculator__status-message" role="status">
+                Please enter values in any two fields to calculate the others.
+            </div>
+        </div>
+    </section>
+
+    <section class="showcase-section">
+        <h2>State: Calculated</h2>
+        <p>Two values are user-provided, and two are calculated (read-only).</p>
+        <div class="ohms-law-calculator is-calculated">
+            <div class="ohms-law-calculator__grid">
+                <!-- Voltage -->
+                <div class="ohms-law-calculator__input-group">
+                    <label for="v-2" class="ohms-law-calculator__label">Voltage</label>
+                    <div class="numeric-input">
+                        <input type="text" id="v-2" class="numeric-input__field" value="12">
+                        <span class="numeric-input__unit">V</span>
+                    </div>
+                </div>
+                <!-- Current (calculated) -->
+                <div class="ohms-law-calculator__input-group" data-calculated="true">
+                    <label for="i-2" class="ohms-law-calculator__label">Current</label>
+                    <div class="numeric-input">
+                        <input type="text" id="i-2" class="numeric-input__field" value="120m" readonly>
+                        <span class="numeric-input__unit">A</span>
+                    </div>
+                </div>
+                <!-- Resistance -->
+                <div class="ohms-law-calculator__input-group">
+                    <label for="r-2" class="ohms-law-calculator__label">Resistance</label>
+                    <div class="numeric-input">
+                        <input type="text" id="r-2" class="numeric-input__field" value="100">
+                        <span class="numeric-input__unit">Ω</span>
+                    </div>
+                </div>
+                <!-- Power (calculated) -->
+                <div class="ohms-law-calculator__input-group" data-calculated="true">
+                    <label for="p-2" class="ohms-law-calculator__label">Power</label>
+                    <div class="numeric-input">
+                        <input type="text" id="p-2" class="numeric-input__field" value="1.44" readonly>
+                        <span class="numeric-input__unit">W</span>
+                    </div>
+                </div>
+            </div>
+            <div class="ohms-law-calculator__status-message">
+                Please enter values in any two fields to calculate the others.
+            </div>
+        </div>
+    </section>
+
+    <section class="showcase-section">
+        <h2>State: Error</h2>
+        <p>User enters an invalid value (e.g., negative resistance). No calculation occurs.</p>
+        <div class="ohms-law-calculator has-error">
+            <div class="ohms-law-calculator__grid">
+                <!-- Voltage -->
+                <div class="ohms-law-calculator__input-group">
+                    <label for="v-3" class="ohms-law-calculator__label">Voltage</label>
+                    <div class="numeric-input">
+                        <input type="text" id="v-3" class="numeric-input__field" value="12">
+                        <span class="numeric-input__unit">V</span>
+                    </div>
+                </div>
+                <!-- Current -->
+                <div class="ohms-law-calculator__input-group">
+                    <label for="i-3" class="ohms-law-calculator__label">Current</label>
+                    <div class="numeric-input">
+                        <input type="text" id="i-3" class="numeric-input__field" placeholder="Enter Current">
+                        <span class="numeric-input__unit">A</span>
+                    </div>
+                </div>
+                <!-- Resistance (with error) -->
+                <div class="ohms-law-calculator__input-group has-error">
+                    <label for="r-3" class="ohms-law-calculator__label">Resistance</label>
+                    <div class="numeric-input">
+                        <input type="text" id="r-3" class="numeric-input__field" value="-100" aria-invalid="true" aria-describedby="r-3-error">
+                        <span class="numeric-input__unit">Ω</span>
+                    </div>
+                    <div id="r-3-error" class="ohms-law-calculator__error-msg">Resistance must be a positive value.</div>
+                </div>
+                <!-- Power -->
+                <div class="ohms-law-calculator__input-group">
+                    <label for="p-3" class="ohms-law-calculator__label">Power</label>
+                    <div class="numeric-input">
+                        <input type="text" id="p-3" class="numeric-input__field" placeholder="Enter Power">
+                        <span class="numeric-input__unit">W</span>
+                    </div>
+                </div>
+            </div>
+            <div class="ohms-law-calculator__status-message">
+                Please enter values in any two fields to calculate the others.
+            </div>
+        </div>
+    </section>
+
+    <section class="showcase-section">
+        <h2>State: Calculating</h2>
+        <p>A subtle animation indicates which fields are being calculated.</p>
+        <div class="ohms-law-calculator is-calculated is-calculating">
+            <div class="ohms-law-calculator__grid">
+                <!-- Voltage -->
+                <div class="ohms-law-calculator__input-group">
+                    <label for="v-4" class="ohms-law-calculator__label">Voltage</label>
+                    <div class="numeric-input">
+                        <input type="text" id="v-4" class="numeric-input__field" value="5">
+                        <span class="numeric-input__unit">V</span>
+                    </div>
+                </div>
+                <!-- Current (calculating) -->
+                <div class="ohms-law-calculator__input-group" data-calculated="true">
+                    <label for="i-4" class="ohms-law-calculator__label">Current</label>
+                    <div class="numeric-input">
+                        <input type="text" id="i-4" class="numeric-input__field" readonly>
+                        <span class="numeric-input__unit">A</span>
+                    </div>
+                </div>
+                <!-- Resistance -->
+                <div class="ohms-law-calculator__input-group">
+                    <label for="r-4" class="ohms-law-calculator__label">Resistance</label>
+                    <div class="numeric-input">
+                        <input type="text" id="r-4" class="numeric-input__field" value="2.2k">
+                        <span class="numeric-input__unit">Ω</span>
+                    </div>
+                </div>
+                <!-- Power (calculating) -->
+                <div class="ohms-law-calculator__input-group" data-calculated="true">
+                    <label for="p-4" class="ohms-law-calculator__label">Power</label>
+                    <div class="numeric-input">
+                        <input type="text" id="p-4" class="numeric-input__field" readonly>
+                        <span class="numeric-input__unit">W</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="showcase-section">
+        <h2>State: With Warning</h2>
+        <p>A warning icon and tooltip are displayed for context.</p>
+        <div class="ohms-law-calculator is-calculated">
+            <div class="ohms-law-calculator__grid">
+                <div class="ohms-law-calculator__input-group">
+                    <label for="v-5" class="ohms-law-calculator__label">Voltage</label>
+                    <div class="numeric-input">
+                        <input type="text" id="v-5" class="numeric-input__field" value="200m">
+                        <span class="numeric-input__unit">V</span>
+                    </div>
+                </div>
+                <div class="ohms-law-calculator__input-group" data-calculated="true">
+                    <label for="i-5" class="ohms-law-calculator__label">Current</label>
+                    <div class="numeric-input">
+                        <input type="text" id="i-5" class="numeric-input__field" value="200μ" readonly>
+                        <span class="numeric-input__unit">A</span>
+                    </div>
+                </div>
+                <div class="ohms-law-calculator__input-group">
+                    <label for="r-5" class="ohms-law-calculator__label">Resistance</label>
+                    <div class="numeric-input">
+                        <input type="text" id="r-5" class="numeric-input__field" value="1k">
+                        <span class="numeric-input__unit">Ω</span>
+                    </div>
+                </div>
+                <div class="ohms-law-calculator__input-group" data-calculated="true">
+                    <label for="p-5" class="ohms-law-calculator__label">
+                        Power
+                        <span class="warning-tooltip" tabindex="0" aria-label="Warning">
+                            <svg class="warning-tooltip__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+                            <span class="warning-tooltip__text" role="tooltip">Low power dissipation.</span>
+                        </span>
+                    </label>
+                    <div class="numeric-input">
+                        <input type="text" id="p-5" class="numeric-input__field" value="40μ" readonly>
+                        <span class="numeric-input__unit">W</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+	
+	<div> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : "default"<h3>
+		<!--description--><normal> The standard implementation of the Ohm's Law calculator, which includes all states and responsive behaviors. </normal>
+		<!-- vrient 1 html -->
+        <div class="ohms-law-calculator">
+            <div class="ohms-law-calculator__grid">
+                <!-- Voltage -->
+                <div class="ohms-law-calculator__input-group">
+                    <label for="v-1" class="ohms-law-calculator__label">Voltage</label>
+                    <div class="numeric-input">
+                        <input type="text" id="v-1" class="numeric-input__field" placeholder="Enter Voltage">
+                        <span class="numeric-input__unit">V</span>
+                    </div>
+                </div>
+                <!-- Current -->
+                <div class="ohms-law-calculator__input-group">
+                    <label for="i-1" class="ohms-law-calculator__label">Current</label>
+                    <div class="numeric-input">
+                        <input type="text" id="i-1" class="numeric-input__field" placeholder="Enter Current">
+                        <span class="numeric-input__unit">A</span>
+                    </div>
+                </div>
+                <!-- Resistance -->
+                <div class="ohms-law-calculator__input-group">
+                    <label for="r-1" class="ohms-law-calculator__label">Resistance</label>
+                    <div class="numeric-input">
+                        <input type="text" id="r-1" class="numeric-input__field" placeholder="Enter Resistance">
+                        <span class="numeric-input__unit">Ω</span>
+                    </div>
+                </div>
+                <!-- Power -->
+                <div class="ohms-law-calculator__input-group">
+                    <label for="p-1" class="ohms-law-calculator__label">Power</label>
+                    <div class="numeric-input">
+                        <input type="text" id="p-1" class="numeric-input__field" placeholder="Enter Power">
+                        <span class="numeric-input__unit">W</span>
+                    </div>
+                </div>
+            </div>
+            <div class="ohms-law-calculator__status-message" role="status">
+                Please enter values in any two fields to calculate the others.
+            </div>
+        </div>"     
+		
+      <div>
+	 </div>
+	</body>
+</html>

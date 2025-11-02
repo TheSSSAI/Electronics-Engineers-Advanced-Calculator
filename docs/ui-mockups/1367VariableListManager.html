@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Molecular Component: VariableListManager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* 1. DESIGN SYSTEM TOKENS AND BASE STYLES */
+    :root {
+      /* Color Palette */
+      --color-primary-500: #2196F3;
+      --color-primary-600: #1E88E5;
+      --color-primary-700: #1976D2;
+      --color-primary-800: #1565C0;
+      --color-neutral-100: #F1F3F5;
+      --color-neutral-200: #E0E0E0;
+      --color-neutral-300: #DEE2E6;
+      --color-neutral-500: #ADB5BD;
+      --color-neutral-700: #495057;
+      --color-neutral-900: #212529;
+      --color-white: #FFFFFF;
+      --color-success: #2E7D32;
+      --color-warning: #ED6C02;
+      --color-error: #D32F2F;
+
+      /* Typography */
+      --font-primary: 'Roboto', sans-serif;
+      --font-monospace: 'Roboto Mono', monospace;
+      --font-size-sm: 14px;
+      --font-size-md: 16px;
+      --font-size-lg: 1.125rem; /* 18px */
+
+      /* Spacing */
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+
+      /* Borders */
+      --border-radius: 4px;
+      --border-radius-lg: 8px;
+      --border-radius-pill: 9999px;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-primary);
+      background-color: var(--color-neutral-100);
+      color: var(--color-neutral-900);
+      line-height: 1.6;
+      padding: var(--space-lg);
+    }
+
+    /* 2. SHOWCASE LAYOUT STYLES */
+    .showcase-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .showcase-header {
+      margin-bottom: var(--space-xl);
+      text-align: center;
+    }
+
+    .showcase-header h1 {
+      font-size: 2.5rem;
+      margin-bottom: var(--space-sm);
+    }
+
+    .showcase-header p {
+      color: var(--color-neutral-700);
+    }
+
+    .showcase-section {
+      background-color: var(--color-white);
+      border-radius: var(--border-radius-lg);
+      padding: var(--space-xl);
+      margin-bottom: var(--space-xl);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .showcase-section h2 {
+      font-size: 1.5rem;
+      margin-bottom: var(--space-lg);
+      border-bottom: 1px solid var(--color-neutral-300);
+      padding-bottom: var(--space-md);
+    }
+
+    /* 3. DEPENDENT COMPONENT STYLES (ATOMIC) */
+
+    /* Button Component */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      padding: 10px 18px;
+      border: 0;
+      border-radius: var(--border-radius);
+      font-family: var(--font-primary);
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background-color 150ms ease-in-out, transform 150ms ease-in-out;
+      min-height: 44px; /* Touch-friendly */
+    }
+
+    .btn--primary {
+      background-color: var(--color-primary-700);
+      color: var(--color-white);
+    }
+
+    .btn--primary:hover {
+      background-color: var(--color-primary-800);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn:focus-visible {
+      outline: 2px solid var(--color-primary-700);
+      outline-offset: 2px;
+    }
+
+    .btn:disabled {
+      background-color: var(--color-neutral-200);
+      color: var(--color-neutral-500);
+      cursor: not-allowed;
+    }
+
+    /* VariableListItem Component */
+    .variable-list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--border-radius);
+      background-color: var(--color-neutral-100);
+      transition: background-color 150ms ease-in-out;
+    }
+
+    .variable-list-item__info {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    .variable-list-item__badge {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: var(--border-radius-pill);
+      color: var(--color-white);
+    }
+
+    .variable-list-item__badge--input {
+      background-color: var(--color-primary-700);
+    }
+
+    .variable-list-item__badge--output {
+      background-color: var(--color-success);
+    }
+
+    .variable-list-item__name {
+      font-family: var(--font-monospace);
+      font-weight: 500;
+    }
+    
+    .variable-list-item__unit {
+        color: var(--color-neutral-700);
+        font-size: var(--font-size-sm);
+    }
+
+    .variable-list-item__actions {
+      display: flex;
+      gap: var(--space-sm);
+    }
+
+    .variable-list-item__action-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: var(--space-xs);
+      color: var(--color-neutral-700);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .variable-list-item__action-btn:hover {
+      color: var(--color-neutral-900);
+      background-color: rgba(0,0,0,0.05);
+    }
+    
+    .variable-list-item__action-btn:focus-visible {
+        outline: 2px solid var(--color-primary-700);
+        outline-offset: 1px;
+    }
+
+    .variable-list-item--editing {
+      background-color: #e3f2fd;
+      outline: 1px solid var(--color-primary-500);
+    }
+
+    .variable-list-item__edit-group {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .variable-list-item__edit-input {
+      font-family: var(--font-monospace);
+      padding: var(--space-xs) var(--space-sm);
+      border: 1px solid var(--color-neutral-500);
+      border-radius: var(--border-radius);
+      width: 120px;
+    }
+
+    .variable-list-item__edit-input:focus-visible {
+      outline: 2px solid var(--color-primary-700);
+      outline-offset: 1px;
+    }
+
+
+    /* 4. MOLECULAR COMPONENT: VariableListManager */
+
+    .variable-list-manager {
+      background-color: var(--color-white);
+      border: 1px solid var(--color-neutral-300);
+      border-radius: var(--border-radius-lg);
+      padding: var(--space-lg);
+    }
+
+    .variable-list-manager__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-md);
+      border-bottom: 1px solid var(--color-neutral-300);
+    }
+
+    .variable-list-manager__title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--color-neutral-900);
+    }
+
+    .variable-list-manager__list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    
+    .variable-list-manager__footer {
+        margin-top: var(--space-md);
+    }
+
+    .variable-list-manager__error-message {
+        color: var(--color-error);
+        font-size: var(--font-size-sm);
+        margin-top: var(--space-xs);
+    }
+
+    .variable-list-manager__empty-state {
+      padding: var(--space-xl);
+      text-align: center;
+      color: var(--color-neutral-700);
+      background-color: var(--color-neutral-100);
+      border-radius: var(--border-radius);
+      border: 1px dashed var(--color-neutral-300);
+    }
+    
+    /* 5. RESPONSIVE ADAPTATIONS */
+    @media (max-width: 768px) {
+      body {
+        padding: var(--space-md);
+      }
+      .variable-list-manager {
+        padding: var(--space-md);
+      }
+      .variable-list-item__info {
+        gap: var(--space-sm);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="showcase-container">
+    <header class="showcase-header">
+      <h1>VariableListManager</h1>
+      <p>Manages a list of user-defined variables for custom calculation modes.</p>
+    </header>
+
+    <div class="showcase-section">
+      <h2>Variants & States</h2>
+
+      <div>
+        <h3>Variant: Inputs</h3>
+        <p>Manages the list of input variables for a custom mode.</p>
+        
+        <h4>State: Default / Populated</h4>
+        <div class="variable-list-manager" style="margin-bottom: 1rem;">
+          <div class="variable-list-manager__header">
+            <h3 class="variable-list-manager__title">Input Variables</h3>
+            <button class="btn btn--primary" type="button">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px;"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></svg>
+              Add Input
+            </button>
+          </div>
+          <ul class="variable-list-manager__list">
+            <li class="variable-list-item">
+              <div class="variable-list-item__info">
+                <span class="variable-list-item__badge variable-list-item__badge--input">IN</span>
+                <span class="variable-list-item__name">voltage</span>
+                <span class="variable-list-item__unit">(V)</span>
+              </div>
+              <div class="variable-list-item__actions">
+                <button class="variable-list-item__action-btn" aria-label="Edit voltage">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                </button>
+                <button class="variable-list-item__action-btn" aria-label="Delete voltage">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                </button>
+              </div>
+            </li>
+            <li class="variable-list-item">
+              <div class="variable-list-item__info">
+                <span class="variable-list-item__badge variable-list-item__badge--input">IN</span>
+                <span class="variable-list-item__name">resistance</span>
+                <span class="variable-list-item__unit">(Ω)</span>
+              </div>
+              <div class="variable-list-item__actions">
+                <button class="variable-list-item__action-btn" aria-label="Edit resistance">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                </button>
+                <button class="variable-list-item__action-btn" aria-label="Delete resistance">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                </button>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <h4>State: Editing</h4>
+        <div class="variable-list-manager" style="margin-bottom: 1rem;">
+          <div class="variable-list-manager__header">
+            <h3 class="variable-list-manager__title">Input Variables</h3>
+            <button class="btn btn--primary" type="button" disabled>Add Input</button>
+          </div>
+          <ul class="variable-list-manager__list">
+            <li class="variable-list-item variable-list-item--editing">
+              <div class="variable-list-item__info">
+                <span class="variable-list-item__badge variable-list-item__badge--input">IN</span>
+                <div class="variable-list-item__edit-group">
+                  <input class="variable-list-item__edit-input" value="voltage" aria-label="Variable name">
+                  <input class="variable-list-item__edit-input" value="V" aria-label="Variable unit" placeholder="(optional)">
+                </div>
+              </div>
+              <div class="variable-list-item__actions">
+                <button class="variable-list-item__action-btn" aria-label="Save changes">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </button>
+                <button class="variable-list-item__action-btn" aria-label="Cancel edit">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+              </div>
+            </li>
+            <li class="variable-list-item">
+              <!-- other items would be here, likely in a read-only state -->
+            </li>
+          </ul>
+        </div>
+        
+        <h4>State: Empty</h4>
+        <div class="variable-list-manager" style="margin-bottom: 1rem;">
+          <div class="variable-list-manager__header">
+            <h3 class="variable-list-manager__title">Input Variables</h3>
+            <button class="btn btn--primary" type="button">
+              Add Input
+            </button>
+          </div>
+          <div class="variable-list-manager__empty-state">
+            <p>No input variables defined. Click 'Add Input' to begin.</p>
+          </div>
+        </div>
+
+        <h4>State: Error</h4>
+        <div class="variable-list-manager" style="margin-bottom: 1rem;">
+          <div class="variable-list-manager__header">
+            <h3 class="variable-list-manager__title">Input Variables</h3>
+            <button class="btn btn--primary" type="button">
+              Add Input
+            </button>
+          </div>
+          <ul class="variable-list-manager__list">
+             <!-- List items would be here -->
+          </ul>
+          <div class="variable-list-manager__footer">
+              <div class="variable-list-manager__error-message">Error: Variable names must be unique.</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 2rem;">
+        <h3>Variant: Outputs</h3>
+        <p>Manages the list of output variables. Functionally identical, but with different labels and badge colors.</p>
+        <div class="variable-list-manager">
+          <div class="variable-list-manager__header">
+            <h3 class="variable-list-manager__title">Output Variables</h3>
+            <button class="btn btn--primary" type="button">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px;"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></svg>
+              Add Output
+            </button>
+          </div>
+          <ul class="variable-list-manager__list">
+            <li class="variable-list-item">
+              <div class="variable-list-item__info">
+                <span class="variable-list-item__badge variable-list-item__badge--output">OUT</span>
+                <span class="variable-list-item__name">current</span>
+                 <span class="variable-list-item__unit">(A)</span>
+              </div>
+              <div class="variable-list-item__actions">
+                <button class="variable-list-item__action-btn" aria-label="Edit current">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                </button>
+                <button class="variable-list-item__action-btn" aria-label="Delete current">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                </button>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

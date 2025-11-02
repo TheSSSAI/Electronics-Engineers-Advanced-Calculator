@@ -1,0 +1,33 @@
+sequenceDiagram
+    participant ClientReactSPA as "Client: React SPA (App.tsx)"
+    participant ApiClient as "Dependency: ApiClient"
+    participant LocalDBWrapper as "Dependency: LocalDBWrapper"
+    participant OfflineSyncManager as "Service: OfflineSyncManager"
+    participant Browser as "Browser Events"
+
+    activate ClientReactSPA
+    ClientReactSPA->>ClientReactSPA: 1. Application Mounts (useEffect hook)
+    
+    ClientReactSPA->>ApiClient: 2. new ApiClient()
+    ApiClient-->>ClientReactSPA: Returns apiClient instance
+
+    ClientReactSPA->>LocalDBWrapper: 3. new LocalDBWrapper()
+    LocalDBWrapper-->>ClientReactSPA: Returns localDB instance
+    
+    ClientReactSPA->>OfflineSyncManager: 4. new OfflineSyncManager(apiClient, localDB)
+    note right of ClientReactSPA: Dependency Injection: The manager is given the tools it needs to communicate with the API and local database.
+    OfflineSyncManager-->>ClientReactSPA: Returns syncManager instance
+    
+    ClientReactSPA->>OfflineSyncManager: 5. syncManager.start()
+    activate OfflineSyncManager
+    
+    OfflineSyncManager->>Browser: 6. addEventListener('online', ...)
+    OfflineSyncManager->>Browser: 7. addEventListener('offline', ...)
+    note over OfflineSyncManager, Browser: The manager now listens for network status changes to trigger syncs or update UI state.
+    
+    OfflineSyncManager->>OfflineSyncManager: 8. processQueue()
+    note left of OfflineSyncManager: An initial check is performed on startup to sync any changes that were queued from a previous session that was closed before a sync could complete.
+    
+    OfflineSyncManager-->>ClientReactSPA: Initialization complete
+    deactivate OfflineSyncManager
+    deactivate ClientReactSPA

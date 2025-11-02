@@ -1,0 +1,31 @@
+flowchart TD
+    A[User in Main Application UI] -->|Clicks persistent Help Icon| B(Help System Modal Opens);
+    
+    subgraph "Help System Interaction"
+        B --> C[User Views Table of Contents & Search Bar];
+        
+        C -->|Types query| D[User Submits Search];
+        C -->|Clicks a topic link| E[Displays Help Article];
+        
+        D --> F{Results Found?};
+        F -->|Yes| G[Displays Search Results List];
+        F -->|No| H[Displays 'No Results Found' Message];
+        
+        G -->|Clicks a result| E;
+        
+        H --> C; %% User can try another search or browse
+        E --> C; %% User can return to main help page
+    end
+
+    B -- User Clicks 'Close' or presses 'Esc' --> Z[Returns to Main Application UI];
+
+    %% Styling
+    classDef userAction fill:#cce5ff,stroke:#007bff,color:#000;
+    classDef systemState fill:#e3f2fd,stroke:#2196f3,color:#000;
+    classDef decision fill:#fff3e0,stroke:#ff9800,color:#000;
+    classDef entryExit fill:#e8f5e9,stroke:#4caf50,color:#000;
+
+    class A,Z entryExit;
+    class B,D,E,G userAction;
+    class C,H systemState;
+    class F decision;

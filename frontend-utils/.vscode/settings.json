@@ -1,0 +1,27 @@
+{
+  // Configure VS Code to use Prettier as the default formatter
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  // Enable format on save for automatic code formatting
+  "editor.formatOnSave": true,
+  // Enable ESLint to validate TypeScript files
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  // Use the project's local TypeScript version
+  "typescript.tsdk": "node_modules/typescript/lib",
+  // Search node_modules for files
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/*.code-search": true
+  },
+  // Silence the generic file watcher and use the one with rich capabilities
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true
+  }
+}
